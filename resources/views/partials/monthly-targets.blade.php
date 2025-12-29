@@ -1,11 +1,18 @@
 <div class="mt-8">
     <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Monthly Targets</h2>
-        <button onclick="openModal('create-target-modal')" 
-                class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
-            <i class="fas fa-plus mr-2"></i>
-            Create Monthly Target
-        </button>
+        <div class="flex items-center space-x-2">
+            <button onclick="openModal('history-modal')" 
+                    class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
+                <i class="fas fa-history mr-2"></i>
+                View History
+            </button>
+            <button onclick="openModal('create-target-modal')" 
+                    class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
+                <i class="fas fa-plus mr-2"></i>
+                Create Monthly Target
+            </button>
+        </div>
     </div>
     
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -42,8 +49,15 @@
                         ];
                     @endphp
                     
-                    @if(count($targets) > 0)
-                        @foreach($targets as $target)
+                    @php
+                        // Filter active targets for the main list
+                        $activeTargets = $targets->filter(function($target) {
+                            return !in_array($target->status, ['completed', 'archived']);
+                        });
+                    @endphp
+                    
+                    @if($activeTargets->count() > 0)
+                        @foreach($activeTargets as $target)
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                                     {{ \Carbon\Carbon::parse($target->month)->format('M Y') }}
@@ -63,12 +77,19 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right space-x-2">
+                                    @php
+                                        // Attach actuals for JS validation
+                                        $target->actual_posts = $target->getActualPosts();
+                                        $target->actual_reels = $target->getActualReels();
+                                    @endphp
                                     <button onclick='openViewTargetModal(@json($target))' class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button onclick='openEditTargetModal(@json($target))' class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
+                                    @if($target->status !== 'completed' && $target->status !== 'archived')
+                                        <button onclick='openEditTargetModal(@json($target))' class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach
@@ -259,7 +280,7 @@
     </div>
 </div>
 
-<!-- View Target Modal (New) -->
+<!-- View Target Modal -->
 <div id="view-target-modal" class="modal hidden fixed inset-0 z-50 overflow-y-auto">
     <div class="modal-overlay absolute inset-0 bg-black opacity-50"></div>
     <div class="relative min-h-screen flex items-center justify-center p-4">
@@ -332,6 +353,102 @@
     </div>
 </div>
 
+<!-- History Modal -->
+<div id="history-modal" class="modal hidden fixed inset-0 z-50 overflow-y-auto">
+    <div class="modal-overlay absolute inset-0 bg-black opacity-50"></div>
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full mx-auto">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Target History</h3>
+                    <button onclick="closeModal('history-modal')" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="px-6 py-4">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700/50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Month</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Target (Posts/Reels)</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actual (Posts/Reels)</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Completion Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            @php
+                                $historyTargets = $targets->filter(function($target) {
+                                    return in_array($target->status, ['completed', 'archived']);
+                                });
+                            @endphp
+                            
+                            @if($historyTargets->count() > 0)
+                                @foreach($historyTargets as $target)
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                            {{ \Carbon\Carbon::parse($target->month)->format('M Y') }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                            {{ $target->target_posts }} / {{ $target->target_reels }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                            {{ $target->getActualPosts() }} / {{ $target->getActualReels() }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusColors[$target->status] }}">
+                                                {{ ucfirst($target->status) }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                            {{ $target->updated_at->format('M d, Y') }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            @if($target->status === 'archived')
+                                                <form action="{{ route('monthly-targets.update', $target->id) }}" method="POST" class="inline-block">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <input type="hidden" name="month" value="{{ date('Y-m', strtotime($target->month)) }}">
+                                                    <input type="hidden" name="target_posts" value="{{ $target->target_posts }}">
+                                                    <input type="hidden" name="target_reels" value="{{ $target->target_reels }}">
+                                                    <input type="hidden" name="status" value="active">
+                                                    <button type="submit" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" title="Restore to Active">
+                                                        <i class="fas fa-undo-alt mr-1"></i> Restore
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="6" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                                        No completed or archived targets found.
+                                    </td>
+                                </tr>
+                            @endif
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                <button type="button" onclick="closeModal('history-modal')"
+                        class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     function openEditTargetModal(target) {
         document.getElementById('edit-target-month').value = target.month.substring(0, 7); // Format 2024-03-01 to 2024-03
@@ -339,6 +456,18 @@
         document.getElementById('edit-target-reels').value = target.target_reels;
         document.getElementById('edit-target-status').value = target.status;
         document.getElementById('edit-target-notes').value = target.notes || '';
+        
+        // Disable 'Completed' option if targets not met
+        const statusSelect = document.getElementById('edit-target-status');
+        const completedOption = statusSelect.querySelector('option[value="completed"]');
+        
+        if (target.actual_posts < target.target_posts || target.actual_reels < target.target_reels) {
+            completedOption.disabled = true;
+            completedOption.textContent = "Completed (Targets not met)";
+        } else {
+            completedOption.disabled = false;
+            completedOption.textContent = "Completed";
+        }
         
         // Update form action
         document.getElementById('edit-target-form').action = `/monthly-targets/${target.id}`;

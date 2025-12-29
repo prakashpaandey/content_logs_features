@@ -41,6 +41,21 @@ class ContentController extends Controller
 
         auth()->user()->contents()->create($validated);
 
+        // Check Monthly Target for completion
+        try {
+            $date = \Carbon\Carbon::parse($validated['date']);
+            $target = \App\Models\MonthlyTarget::where('client_id', $validated['client_id'])
+                ->whereYear('month', $date->year)
+                ->whereMonth('month', $date->month)
+                ->first();
+
+            if ($target) {
+                $target->checkCompletionStatus();
+            }
+        } catch (\Exception $e) {
+            // silent fail
+        }
+
         return redirect()->back()->with('success', 'Content added successfully.');
     }
 
@@ -76,6 +91,21 @@ class ContentController extends Controller
 
         $content->update($validated);
 
+        // Check Monthly Target for completion
+        try {
+            $date = \Carbon\Carbon::parse($validated['date']);
+            $target = \App\Models\MonthlyTarget::where('client_id', $content->client_id)
+                ->whereYear('month', $date->year)
+                ->whereMonth('month', $date->month)
+                ->first();
+
+            if ($target) {
+                $target->checkCompletionStatus();
+            }
+        } catch (\Exception $e) {
+            // silent fail
+        }
+
         return redirect()->back()->with('success', 'Content updated successfully.');
     }
 
@@ -84,7 +114,25 @@ class ContentController extends Controller
      */
     public function destroy(Content $content)
     {
+        $clientId = $content->client_id;
+        $date = \Carbon\Carbon::parse($content->date);
+
         $content->delete();
+
+        // Check Monthly Target for completion (revert if needed)
+        try {
+            $target = \App\Models\MonthlyTarget::where('client_id', $clientId)
+                ->whereYear('month', $date->year)
+                ->whereMonth('month', $date->month)
+                ->first();
+
+            if ($target) {
+                $target->checkCompletionStatus();
+            }
+        } catch (\Exception $e) {
+            // silent fail
+        }
+
         return redirect()->back()->with('success', 'Content deleted successfully.');
     }
 }

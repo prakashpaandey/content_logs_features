@@ -76,7 +76,32 @@ class MonthlyTargetController extends Controller
 
         $validated['month'] = $validated['month'] . '-01';
 
+        // Prevent setting status to 'completed' if targets are not met
+        if ($request->input('status') === 'completed') {
+            $actualPosts = $monthlyTarget->client->contents()
+                ->whereYear('date', \Carbon\Carbon::parse($validated['month'])->year)
+                ->whereMonth('date', \Carbon\Carbon::parse($validated['month'])->month)
+                ->where('type', 'Post')
+                ->count();
+
+            $actualReels = $monthlyTarget->client->contents()
+                ->whereYear('date', \Carbon\Carbon::parse($validated['month'])->year)
+                ->whereMonth('date', \Carbon\Carbon::parse($validated['month'])->month)
+                ->where('type', 'Reel')
+                ->count();
+                
+            $newTargetPosts = $validated['target_posts'];
+            $newTargetReels = $validated['target_reels'];
+
+            if ($actualPosts < $newTargetPosts || $actualReels < $newTargetReels) {
+                return redirect()->back()->withErrors(['status' => 'Cannot mark as completed. Actual content counts must meet the targets.']);
+            }
+        }
+
         $monthlyTarget->update($validated);
+        
+        // Re-check completion status in case targets were LOWERED to meet actuals
+        $monthlyTarget->checkCompletionStatus();
 
         return redirect()->back()->with('success', 'Target updated successfully.');
     }

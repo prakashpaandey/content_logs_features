@@ -75,6 +75,28 @@ class DashboardController extends Controller
                 $metrics['variance'] = $totalActual - $totalTarget; // Simple variance count
             }
 
+            // Previous Month Metrics for Growth Comp (Target & Variance)
+            $lastTarget = $selectedClient->monthlyTargets()
+                ->whereYear('month', $lastMonth->year)
+                ->whereMonth('month', $lastMonth->month)
+                ->first();
+
+            if ($lastTarget) {
+                $lastTotalTarget = $lastTarget->target_posts + $lastTarget->target_reels;
+                $lastTotalActual = $lastPosts + $lastReels;
+                
+                $lastCompletion = $lastTotalTarget > 0 ? round(($lastTotalActual / $lastTotalTarget) * 100) : 0;
+                $lastVariance = $lastTotalActual - $lastTotalTarget;
+
+                // Calculate Growth
+                $metrics['target_growth'] = $lastCompletion > 0 ? round((($metrics['target_completion'] - $lastCompletion) / $lastCompletion) * 100) : 0;
+                
+                // For variance, since it can be negative, standard percentage growth might be misleading or tricky (e.g. -5 to -2 is improvement).
+                // Let's settle for simple difference percentage if last variance wasn't 0, or just absolute difference?
+                // Standard growth formula: ((New - Old) / |Old|) * 100
+                $metrics['variance_growth'] = $lastVariance != 0 ? round((($metrics['variance'] - $lastVariance) / abs($lastVariance)) * 100) : 0;
+            }
+
             // Tables Data
             $contentData = $selectedClient->contents()->latest()->paginate(10);
             $targets = $selectedClient->monthlyTargets()->orderBy('month', 'desc')->get();
