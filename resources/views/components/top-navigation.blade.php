@@ -17,14 +17,6 @@
                     <i id="theme-icon" class="fas fa-moon text-gray-700 dark:text-gray-300"></i>
                 </button>
                 
-                <!-- Notifications -->
-                <div class="relative">
-                    <button class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors relative">
-                        <i class="fas fa-bell text-gray-700 dark:text-gray-300"></i>
-                        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                    </button>
-                </div>
-                
                 <!-- User Menu -->
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
