@@ -74,7 +74,7 @@
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Overall Completion</span>
-                            <span class="text-lg font-bold text-primary-600 dark:text-primary-400">78%</span>
+                            <span class="text-lg font-bold text-primary-600">78%</span>
                         </div>
                         <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                             <div class="bg-gradient-to-r from-primary-500 to-purple-500 h-3 rounded-full" style="width: 78%"></div>

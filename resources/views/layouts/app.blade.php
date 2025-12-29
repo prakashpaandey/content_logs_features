@@ -159,6 +159,9 @@
         const themeToggle = document.getElementById('theme-toggle');
         const themeIcon = document.getElementById('theme-icon');
         
+        // Chart instances
+        let lineChart, barChart, pieChart;
+        
         if (localStorage.getItem('dark-mode') === 'true' || 
             (!('dark-mode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
@@ -174,6 +177,9 @@
             themeIcon.className = document.documentElement.classList.contains('dark') 
                 ? 'fas fa-sun' 
                 : 'fas fa-moon';
+                
+            // Re-initialize charts with new theme colors
+            initializeCharts();
         });
         
         // Client Selection
@@ -253,6 +259,10 @@
         
         // Initialize Charts
         function initializeCharts() {
+            // Destroy existing charts if they exist
+            if (lineChart) lineChart.destroy();
+            if (barChart) barChart.destroy();
+            if (pieChart) pieChart.destroy();
             // Line Chart - Monthly Progression
             const lineChartOptions = {
                 series: [{
@@ -327,7 +337,7 @@
                 }
             };
             
-            const lineChart = new ApexCharts(document.querySelector("#line-chart"), lineChartOptions);
+            lineChart = new ApexCharts(document.querySelector("#line-chart"), lineChartOptions);
             lineChart.render();
             
             // Bar Chart - Target vs Actual
@@ -417,7 +427,7 @@
                 }
             };
             
-            const barChart = new ApexCharts(document.querySelector("#bar-chart"), barChartOptions);
+            barChart = new ApexCharts(document.querySelector("#bar-chart"), barChartOptions);
             barChart.render();
             
             // Pie Chart - Content Distribution
@@ -469,7 +479,7 @@
                 }]
             };
             
-            const pieChart = new ApexCharts(document.querySelector("#pie-chart"), pieChartOptions);
+            pieChart = new ApexCharts(document.querySelector("#pie-chart"), pieChartOptions);
             pieChart.render();
         }
         

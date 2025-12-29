@@ -5,15 +5,15 @@
                 JS
             </div>
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">John Smith</h1>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Prakash Pandey</h1>
                 <div class="flex items-center mt-1">
                     <p class="text-gray-600 dark:text-gray-400">TechCorp Inc.</p>
-                    <span class="mx-3 text-gray-300 dark:text-gray-600">•</span>
-                    <span class="px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-xs font-medium rounded-full">
+                    <span class="mx-3 text-gray-300">•</span>
+                    <span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
                         <i class="fas fa-circle text-xs mr-1"></i>
                         Active
                     </span>
-                    <span class="ml-3 text-gray-600 dark:text-gray-400 text-sm">
+                    <span class="ml-3 text-gray-600 text-sm">
                         <i class="fas fa-calendar-alt mr-1"></i>
                         Joined March 2023
                     </span>
@@ -40,20 +40,20 @@
     <!-- Quick Stats -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
         <div class="text-center">
-            <div class="text-2xl font-bold text-primary-600 dark:text-primary-400">12</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Active Campaigns</div>
+            <div class="text-2xl font-bold text-primary-600">12</div>
+            <div class="text-sm text-gray-500">Active Campaigns</div>
         </div>
         <div class="text-center">
-            <div class="text-2xl font-bold text-green-600 dark:text-green-400">85%</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Satisfaction Score</div>
+            <div class="text-2xl font-bold text-green-600">85%</div>
+            <div class="text-sm text-gray-500">Satisfaction Score</div>
         </div>
         <div class="text-center">
-            <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">7</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Upcoming Tasks</div>
+            <div class="text-2xl font-bold text-yellow-600">7</div>
+            <div class="text-sm text-gray-500">Upcoming Tasks</div>
         </div>
         <div class="text-center">
-            <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">24</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Total Platforms</div>
+            <div class="text-2xl font-bold text-purple-600">24</div>
+            <div class="text-sm text-gray-500">Total Platforms</div>
         </div>
     </div>
 </div>

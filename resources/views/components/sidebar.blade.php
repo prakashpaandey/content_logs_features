@@ -29,19 +29,19 @@
             <!-- Loading State -->
             <div id="loading-state" class="hidden px-4 py-3">
                 <div class="animate-pulse space-y-3">
-                    <div class="h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-                    <div class="h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-                    <div class="h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                    <div class="h-12 bg-gray-200 rounded-lg"></div>
+                    <div class="h-12 bg-gray-200 rounded-lg"></div>
+                    <div class="h-12 bg-gray-200 rounded-lg"></div>
                 </div>
             </div>
             
             <!-- Empty State -->
             <div id="empty-state" class="hidden px-4 py-8 text-center">
-                <div class="mx-auto w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4">
+                <div class="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
                     <i class="fas fa-users text-gray-400 text-xl"></i>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No clients yet</h3>
-                <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Add your first client to get started</p>
+                <h3 class="text-lg font-medium text-gray-900 mb-1">No clients yet</h3>
+                <p class="text-gray-500 text-sm mb-4">Add your first client to get started</p>
                 <button onclick="openModal('create-client-modal')" 
                         class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
                     Add Client
@@ -64,7 +64,7 @@
                 @endphp
                 
                 @foreach($clients as $client)
-                    <div class="client-item cursor-pointer p-3 rounded-lg border border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 {{ $client['id'] == 1 ? 'bg-primary-50 dark:bg-primary-900 border-primary-500' : '' }}"
+                    <div class="client-item cursor-pointer p-3 rounded-lg border border-transparent hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 {{ $client['id'] == 1 ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-500' : '' }}"
                          data-client-id="{{ $client['id'] }}"
                          onclick="selectClient({{ $client['id'] }})">
                         <div class="flex items-center">
@@ -82,7 +82,7 @@
                                 </p>
                             </div>
                             <div class="ml-2">
-                                <span class="px-2 py-1 text-xs font-medium rounded-full {{ $client['status'] == 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' }}">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full {{ $client['status'] == 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
                                     {{ ucfirst($client['status']) }}
                                 </span>
                             </div>
@@ -93,12 +93,12 @@
         </div>
         
         <!-- Sidebar Footer -->
-        <div class="border-t border-gray-200 dark:border-gray-700 p-4">
+        <div class="border-t border-gray-200 p-4">
             <div class="flex items-center justify-between">
-                <div class="text-sm text-gray-500 dark:text-gray-400">
+                <div class="text-sm text-gray-500">
                     <p>{{ count($clients) }} clients</p>
                 </div>
-                <button class="text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium">
+                <button class="text-primary-600 hover:text-primary-800 text-sm font-medium">
                     <i class="fas fa-cog mr-1"></i>
                     Settings
                 </button>
@@ -111,12 +111,12 @@
 <div id="create-client-modal" class="modal hidden fixed inset-0 z-50 overflow-y-auto">
     <div class="modal-overlay absolute inset-0 bg-black opacity-50"></div>
     <div class="relative min-h-screen flex items-center justify-center p-4">
-        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-auto">
+        <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-auto">
             <!-- Modal Header -->
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="px-6 py-4 border-b border-gray-200">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Add New Client</h3>
-                    <button onclick="closeModal('create-client-modal')" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                    <h3 class="text-lg font-semibold text-gray-900">Add New Client</h3>
+                    <button onclick="closeModal('create-client-modal')" class="text-gray-400 hover:text-gray-500">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -127,62 +127,62 @@
                 <form id="create-client-form">
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
                                 Client Name *
                             </label>
                             <input type="text" required
-                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
                                 Business Name *
                             </label>
                             <input type="text" required
-                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
                                 Email Address
                             </label>
                             <input type="email"
-                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
                                 Phone Number
                             </label>
                             <input type="tel"
-                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
                                 Status
                             </label>
-                            <select class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                                 <option value="active">Active</option>
                                 <option value="inactive">Inactive</option>
                             </select>
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
                                 Notes
                             </label>
                             <textarea rows="3"
-                                      class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"></textarea>
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"></textarea>
                         </div>
                     </div>
                 </form>
             </div>
             
             <!-- Modal Footer -->
-            <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
                 <button onclick="closeModal('create-client-modal')"
-                        class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
                     Cancel
                 </button>
                 <button type="submit" form="create-client-form"

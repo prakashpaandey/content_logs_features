@@ -11,7 +11,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="bg-gray-50 dark:bg-gray-900">
+                <thead class="bg-gray-50 dark:bg-gray-700/50">
                     <tr>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                             Month
@@ -44,14 +44,14 @@
                         ];
                         
                         $statusColors = [
-                            'active' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-                            'completed' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-                            'archived' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
+                            'active' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+                            'completed' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+                            'archived' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
                         ];
                     @endphp
                     
                     @foreach($targets as $target)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                                 {{ $target['month'] }}
                             </td>
@@ -88,11 +88,11 @@
         
         <!-- Empty State -->
         <div id="empty-targets-state" class="hidden p-8 text-center">
-            <div class="mx-auto w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4">
+            <div class="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
                 <i class="fas fa-bullseye text-gray-400 text-xl"></i>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No monthly targets yet</h3>
-            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Create your first monthly target to track progress</p>
+            <h3 class="text-lg font-medium text-gray-900 mb-1">No monthly targets yet</h3>
+            <p class="text-gray-500 text-sm mb-4">Create your first monthly target to track progress</p>
             <button onclick="openModal('create-target-modal')" 
                     class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
                 <i class="fas fa-plus mr-2"></i>
@@ -106,12 +106,12 @@
 <div id="create-target-modal" class="modal hidden fixed inset-0 z-50 overflow-y-auto">
     <div class="modal-overlay absolute inset-0 bg-black opacity-50"></div>
     <div class="relative min-h-screen flex items-center justify-center p-4">
-        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full mx-auto">
+    <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full mx-auto">
             <!-- Modal Header -->
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Create Monthly Target</h3>
-                    <button onclick="closeModal('create-target-modal')" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                    <button onclick="closeModal('create-target-modal')" class="text-gray-400 hover:text-gray-500">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -160,9 +160,9 @@
                                       placeholder="Add any additional notes or goals..."></textarea>
                         </div>
                         
-                        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+                        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900/50 rounded-lg p-3">
                             <div class="flex items-center">
-                                <i class="fas fa-info-circle text-yellow-500 mr-2"></i>
+                                <i class="fas fa-info-circle text-yellow-500 dark:text-yellow-400 mr-2"></i>
                                 <p class="text-sm text-yellow-700 dark:text-yellow-300">
                                     Targets can be edited later. Historical changes will be tracked in the target history.
                                 </p>

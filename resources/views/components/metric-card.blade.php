@@ -9,12 +9,12 @@
 
 @php
     $colorClasses = [
-        'primary' => 'bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400',
-        'green' => 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400',
-        'yellow' => 'bg-yellow-100 dark:bg-yellow-900 text-yellow-600 dark:text-yellow-400',
-        'red' => 'bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400',
-        'purple' => 'bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400',
-        'blue' => 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400',
+        'primary' => 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400',
+        'green' => 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400',
+        'yellow' => 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400',
+        'red' => 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400',
+        'purple' => 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400',
+        'blue' => 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
     ];
 @endphp
 
@@ -31,17 +31,17 @@
             @if($change !== null && !$loading)
                 <div class="flex items-center">
                     @if($change >= 0)
-                        <span class="text-green-600 dark:text-green-400 text-sm font-medium flex items-center">
+                        <span class="text-green-600 text-sm font-medium flex items-center">
                             <i class="fas fa-arrow-up mr-1 text-xs"></i>
                             {{ $change }}%
                         </span>
                     @else
-                        <span class="text-red-600 dark:text-red-400 text-sm font-medium flex items-center">
+                        <span class="text-red-600 text-sm font-medium flex items-center">
                             <i class="fas fa-arrow-down mr-1 text-xs"></i>
                             {{ abs($change) }}%
                         </span>
                     @endif
-                    <span class="text-gray-500 dark:text-gray-400 text-sm ml-2">from last month</span>
+                    <span class="text-gray-500 text-sm ml-2">from last month</span>
                 </div>
             @endif
         </div>

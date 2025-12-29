@@ -67,16 +67,16 @@
     ];
     
     $platformColors = [
-        'Instagram' => 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200',
-        'Facebook' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-        'TikTok' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
-        'LinkedIn' => 'bg-blue-50 text-blue-700 dark:bg-blue-800 dark:text-blue-100',
-        'Twitter' => 'bg-sky-100 text-sky-800 dark:bg-sky-900 dark:text-sky-200',
+        'Instagram' => 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300',
+        'Facebook' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+        'TikTok' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+        'LinkedIn' => 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300',
+        'Twitter' => 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300',
     ];
     
     $typeColors = [
-        'post' => 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-        'reel' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+        'post' => 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+        'reel' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
     ];
 @endphp
 
@@ -84,7 +84,7 @@
     <!-- Table -->
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-gray-900">
+            <thead class="bg-gray-50 dark:bg-gray-700/50">
                 <tr>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Date
@@ -111,7 +111,7 @@
             </thead>
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 @foreach($contentData as $content)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                             {{ \Carbon\Carbon::parse($content['date'])->format('M d, Y') }}
                         </td>
@@ -121,7 +121,7 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 py-1 text-xs font-medium rounded-full {{ $platformColors[$content['platform']] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' }}">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full {{ $platformColors[$content['platform']] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' }}">
                                 {{ $content['platform'] }}
                             </span>
                         </td>
@@ -154,11 +154,11 @@
     
     <!-- Empty State -->
     <div id="empty-table-state" class="hidden p-8 text-center">
-        <div class="mx-auto w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4">
+        <div class="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
             <i class="fas fa-file-alt text-gray-400 text-xl"></i>
         </div>
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No content yet</h3>
-        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Add your first social media content</p>
+        <h3 class="text-lg font-medium text-gray-900 mb-1">No content yet</h3>
+        <p class="text-gray-500 text-sm mb-4">Add your first social media content</p>
         <button class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
             <i class="fas fa-plus mr-2"></i>
             Add Content

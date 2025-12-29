@@ -5,15 +5,15 @@
     'loading' => false,
 ])
 
-<div class="chart-container bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+<div class="chart-container bg-white rounded-xl border border-gray-200 p-5">
     @if($title)
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
+            <h3 class="text-lg font-semibold text-gray-900">{{ $title }}</h3>
             <div class="flex space-x-2">
-                <button class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                <button class="p-2 text-gray-500 hover:text-gray-700">
                     <i class="fas fa-download"></i>
                 </button>
-                <button class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                <button class="p-2 text-gray-500 hover:text-gray-700">
                     <i class="fas fa-ellipsis-v"></i>
                 </button>
             </div>
@@ -32,12 +32,12 @@
     
     <!-- Chart Legend -->
     @if(isset($legend) && $legend)
-        <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+        <div class="mt-4 pt-4 border-t border-gray-100">
             <div class="flex flex-wrap items-center justify-center space-x-4">
                 @foreach($legend as $item)
                     <div class="flex items-center">
                         <div class="w-3 h-3 rounded-full mr-2" style="background-color: {{ $item['color'] }}"></div>
-                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ $item['label'] }}</span>
+                        <span class="text-sm text-gray-600">{{ $item['label'] }}</span>
                     </div>
                 @endforeach
             </div>
