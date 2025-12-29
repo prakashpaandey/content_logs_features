@@ -64,6 +64,9 @@
     
     <!-- ApexCharts -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <!-- Alpine.js (required for dropdowns, toggles, and x-data/x-show directives) -->
+    <script src="https://unpkg.com/alpinejs@3.12.0/dist/cdn.min.js" defer></script>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -174,7 +177,7 @@
         });
         
         // Client Selection
-        let selectedClientId = 1;
+        let selectedClientId =1;
         
         function selectClient(clientId) {
             selectedClientId = clientId;
