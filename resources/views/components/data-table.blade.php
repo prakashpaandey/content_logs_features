@@ -1,82 +1,13 @@
 @php
-    $contentData = [
-        [
-            'date' => '2024-03-15',
-            'type' => 'post',
-            'platform' => 'Instagram',
-            'title' => 'Product Launch Announcement',
-            'url' => 'https://instagram.com/p/xyz123',
-            'remarks' => 'High engagement, 500+ likes'
-        ],
-        [
-            'date' => '2024-03-14',
-            'type' => 'reel',
-            'platform' => 'Instagram',
-            'title' => 'Behind the Scenes',
-            'url' => 'https://instagram.com/reel/abc456',
-            'remarks' => 'Viral, 10K+ views'
-        ],
-        [
-            'date' => '2024-03-13',
-            'type' => 'post',
-            'platform' => 'Facebook',
-            'title' => 'Weekly Update',
-            'url' => 'https://facebook.com/post/def789',
-            'remarks' => 'Good discussion in comments'
-        ],
-        [
-            'date' => '2024-03-12',
-            'type' => 'reel',
-            'platform' => 'TikTok',
-            'title' => 'Tutorial Video',
-            'url' => 'https://tiktok.com/@user/video/ghi012',
-            'remarks' => '1M+ views, trending'
-        ],
-        [
-            'date' => '2024-03-11',
-            'type' => 'post',
-            'platform' => 'LinkedIn',
-            'title' => 'Industry Insights',
-            'url' => 'https://linkedin.com/post/jkl345',
-            'remarks' => '200+ professional reactions'
-        ],
-        [
-            'date' => '2024-03-10',
-            'type' => 'post',
-            'platform' => 'Twitter',
-            'title' => 'News Update',
-            'url' => 'https://twitter.com/tweet/mno678',
-            'remarks' => '150 retweets'
-        ],
-        [
-            'date' => '2024-03-09',
-            'type' => 'reel',
-            'platform' => 'Instagram',
-            'title' => 'Customer Testimonial',
-            'url' => 'https://instagram.com/reel/pqr901',
-            'remarks' => 'Great conversion rate'
-        ],
-        [
-            'date' => '2024-03-08',
-            'type' => 'post',
-            'platform' => 'Facebook',
-            'title' => 'Event Promotion',
-            'url' => 'https://facebook.com/post/stu234',
-            'remarks' => '200+ event responses'
-        ],
-    ];
-    
     $platformColors = [
         'Instagram' => 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300',
         'Facebook' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
         'TikTok' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
-        'LinkedIn' => 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300',
-        'Twitter' => 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300',
     ];
     
     $typeColors = [
-        'post' => 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
-        'reel' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+        'Post' => 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+        'Reel' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
     ];
 @endphp
 
@@ -110,85 +41,230 @@
                 </tr>
             </thead>
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                @foreach($contentData as $content)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                            {{ \Carbon\Carbon::parse($content['date'])->format('M d, Y') }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 py-1 text-xs font-medium rounded-full {{ $typeColors[$content['type']] }}">
-                                {{ ucfirst($content['type']) }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 py-1 text-xs font-medium rounded-full {{ $platformColors[$content['platform']] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' }}">
-                                {{ $content['platform'] }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                            {{ $content['title'] }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            <a href="{{ $content['url'] }}" target="_blank" 
-                               class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 flex items-center">
-                                <i class="fas fa-external-link-alt mr-1 text-xs"></i>
-                                View
-                            </a>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                            {{ $content['remarks'] }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right space-x-2">
-                            <button class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                @if($contentData->count() > 0)
+                    @foreach($contentData as $content)
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                {{ \Carbon\Carbon::parse($content->date)->format('M d, Y') }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full {{ $typeColors[$content->type] ?? 'bg-gray-100' }}">
+                                    {{ ucfirst($content->type) }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full {{ $platformColors[$content->platform] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' }}">
+                                    {{ $content->platform }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                {{ $content->title }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                @if($content->url)
+                                    <a href="{{ $content->url }}" target="_blank" 
+                                       class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 flex items-center">
+                                        <i class="fas fa-external-link-alt mr-1 text-xs"></i>
+                                        View
+                                    </a>
+                                @else
+                                    <span class="text-gray-400">-</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                {{ Str::limit($content->remarks, 30) }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right space-x-2">
+                                <button onclick='openEditContentModal(@json($content))' class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <form action="{{ route('contents.destroy', $content->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                @else
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                            No content found. Add some content to get started.
                         </td>
                     </tr>
-                @endforeach
+                @endif
             </tbody>
         </table>
     </div>
     
-    <!-- Empty State -->
-    <div id="empty-table-state" class="hidden p-8 text-center">
-        <div class="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-            <i class="fas fa-file-alt text-gray-400 text-xl"></i>
-        </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-1">No content yet</h3>
-        <p class="text-gray-500 text-sm mb-4">Add your first social media content</p>
-        <button class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
-            <i class="fas fa-plus mr-2"></i>
-            Add Content
-        </button>
-    </div>
+    <!-- Empty State (Only show if truly empty and no filter? Logic handled by controller, here shows empty row above) -->
     
     <!-- Pagination -->
     <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-        <div class="flex items-center justify-between">
-            <div class="text-sm text-gray-700 dark:text-gray-300">
-                Showing <span class="font-medium">1</span> to <span class="font-medium">8</span> of <span class="font-medium">50</span> entries
-            </div>
-            <div class="flex space-x-2">
-                <button onclick="goToPage(1)" 
-                        class="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                
-                @for($i = 1; $i <= 5; $i++)
-                    <button onclick="goToPage({{ $i }})" 
-                            class="page-button px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-lg {{ $i === 1 ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300' }} hover:bg-gray-50 dark:hover:bg-gray-700">
-                        {{ $i }}
+        {{ $contentData->links() }}
+    </div>
+</div>
+
+<!-- Add Content Modal -->
+<div id="add-content-modal" class="modal hidden fixed inset-0 z-50 overflow-y-auto">
+    <div class="modal-overlay absolute inset-0 bg-black opacity-50"></div>
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full mx-auto">
+             <!-- Modal Header -->
+             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Add New Content</h3>
+                    <button onclick="closeModal('add-content-modal')" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
                     </button>
-                @endfor
-                
-                <button onclick="goToPage(2)" 
-                        class="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
+                </div>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="px-6 py-4">
+                <form id="add-content-form" action="{{ route('contents.store') }}" method="POST">
+                    @csrf
+                    @if(isset($selectedClient))
+                        <input type="hidden" name="client_id" value="{{ $selectedClient->id }}">
+                    @endif
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title *</label>
+                            <input type="text" name="title" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Platform *</label>
+                                <select name="platform" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    <option value="Instagram">Instagram</option>
+                                    <option value="Facebook">Facebook</option>
+                                    <option value="TikTok">TikTok</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type *</label>
+                                <select name="type" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    <option value="Post">Post</option>
+                                    <option value="Reel">Reel</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date *</label>
+                            <input type="date" name="date" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL</label>
+                            <input type="url" name="url" placeholder="https://..." class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Remarks</label>
+                            <textarea name="remarks" rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+             <!-- Modal Footer -->
+             <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+                <button type="button" onclick="closeModal('add-content-modal')" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+                <button type="submit" form="add-content-form" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg">Add Content</button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Edit Content Modal -->
+<div id="edit-content-modal" class="modal hidden fixed inset-0 z-50 overflow-y-auto">
+    <div class="modal-overlay absolute inset-0 bg-black opacity-50"></div>
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full mx-auto">
+             <!-- Modal Header -->
+             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Edit Content</h3>
+                    <button onclick="closeModal('edit-content-modal')" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="px-6 py-4">
+                <form id="edit-content-form" method="POST">
+                    @csrf
+                    @method('PUT')
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title *</label>
+                            <input type="text" id="edit-content-title" name="title" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Platform *</label>
+                                <select id="edit-content-platform" name="platform" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    <option value="Instagram">Instagram</option>
+                                    <option value="Facebook">Facebook</option>
+                                    <option value="TikTok">TikTok</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type *</label>
+                                <select id="edit-content-type" name="type" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    <option value="Post">Post</option>
+                                    <option value="Reel">Reel</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date *</label>
+                            <input type="date" id="edit-content-date" name="date" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL</label>
+                            <input type="url" id="edit-content-url" name="url" placeholder="https://..." class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Remarks</label>
+                            <textarea id="edit-content-remarks" name="remarks" rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+             <!-- Modal Footer -->
+             <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+                <button type="button" onclick="closeModal('edit-content-modal')" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+                <button type="submit" form="edit-content-form" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg">Update Content</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openEditContentModal(content) {
+        document.getElementById('edit-content-title').value = content.title;
+        document.getElementById('edit-content-platform').value = content.platform;
+        document.getElementById('edit-content-type').value = content.type;
+        document.getElementById('edit-content-date').value = content.date.split('T')[0]; // Format date if needed
+        document.getElementById('edit-content-url').value = content.url || '';
+        document.getElementById('edit-content-remarks').value = content.remarks || '';
+        
+        // Update form action
+        document.getElementById('edit-content-form').action = `/contents/${content.id}`;
+        
+        openModal('edit-content-modal');
+    }
+</script>

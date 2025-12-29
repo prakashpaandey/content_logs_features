@@ -45,4 +45,27 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    /**
+     * Get the clients for the user.
+     */
+    public function clients()
+    {
+        return $this->hasMany(Client::class);
+    }
+
+    /**
+     * Get the contents for the user.
+     */
+    public function contents()
+    {
+        return $this->hasMany(Content::class);
+    }
+
+    /**
+     * Get the monthly targets for the user.
+     */
+    public function monthlyTargets()
+    {
+        return $this->hasMany(MonthlyTarget::class);
+    }
 }
