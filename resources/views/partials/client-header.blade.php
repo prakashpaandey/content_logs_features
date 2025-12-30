@@ -44,7 +44,7 @@
     <!-- Quick Stats -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
         <div class="text-center">
-            <div class="text-2xl font-bold text-primary-600">{{ $targets->where('status', 'active')->count() }}</div>
+            <div class="text-2xl font-bold text-primary-600">{{ $allTargets->where('status', 'active')->count() }}</div>
             <div class="text-sm text-gray-500">Active Targets</div>
         </div>
         <div class="text-center">
@@ -60,7 +60,15 @@
             <div class="text-sm text-gray-500">Total Activities</div>
         </div>
         <div class="text-center">
-            <div class="text-2xl font-bold text-purple-600">{{ \Carbon\Carbon::now()->subMonth()->format('M') }}</div>
+            @if($hasPreviousData && $previousMonth)
+                <a href="{{ route('dashboard.index', ['client_id' => $selectedClient->id, 'month' => $previousMonth->month, 'year' => $previousMonth->year]) }}" 
+                   class="text-2xl font-bold text-purple-600 hover:text-purple-800 hover:underline transition-all block"
+                   title="View Report for {{ $previousMonth->format('F Y') }}">
+                    {{ $previousMonth->format('M') }}
+                </a>
+            @else
+                <div class="text-2xl font-bold text-gray-400">N/A</div>
+            @endif
             <div class="text-sm text-gray-500">Last Report</div>
         </div>
     </div>

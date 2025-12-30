@@ -51,7 +51,7 @@
                     
                     @php
                         // Filter active targets for the main list
-                        $activeTargets = $targets->filter(function($target) {
+                        $activeTargets = $displayedTargets->filter(function($target) {
                             return !in_array($target->status, ['completed', 'archived']);
                         });
                     @endphp
@@ -384,7 +384,7 @@
                         </thead>
                         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                             @php
-                                $historyTargets = $targets->filter(function($target) {
+                                $historyTargets = $allTargets->filter(function($target) {
                                     return in_array($target->status, ['completed', 'archived']);
                                 });
                             @endphp

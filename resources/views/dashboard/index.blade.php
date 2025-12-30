@@ -7,7 +7,38 @@
     
     <!-- Overview Metrics -->
     <div class="mt-6">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Overview Metrics ({{ \Carbon\Carbon::now()->format('F Y') }})</h2>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                Overview Metrics ({{ $dateContext->format('F Y') }})
+            </h2>
+            
+            @if(isset($selectedClient))
+            <div class="flex items-center space-x-2 mt-2 sm:mt-0">
+                <a href="{{ route('dashboard.index', ['client_id' => $selectedClient->id, 'month' => $dateContext->copy()->subMonth()->month, 'year' => $dateContext->copy()->subMonth()->year]) }}" 
+                   class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 transition-colors"
+                   title="Previous Month">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 px-3 py-1 rounded-lg bg-white dark:bg-gray-800">
+                    {{ $dateContext->format('M Y') }}
+                </span>
+
+                <a href="{{ route('dashboard.index', ['client_id' => $selectedClient->id, 'month' => $dateContext->copy()->addMonth()->month, 'year' => $dateContext->copy()->addMonth()->year]) }}" 
+                   class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 transition-colors"
+                   title="Next Month">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                
+                @if(!$dateContext->isCurrentMonth())
+                    <a href="{{ route('dashboard.index', ['client_id' => $selectedClient->id]) }}" 
+                       class="ml-2 text-primary-600 hover:text-primary-700 text-sm font-medium hover:underline">
+                        Reset
+                    </a>
+                @endif
+            </div>
+            @endif
+        </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             @include('components.metric-card', [
                 'title' => 'Total Posts',

@@ -39,10 +39,32 @@ class DashboardController extends Controller
 
         $currentTarget = null;
 
+        $previousMonth = null;
+        $hasPreviousData = false;
+        $dateContext = Carbon::now();
+
         if ($selectedClient) {
-            // Metrics (Current Month)
-            $now = Carbon::now();
-            $lastMonth = Carbon::now()->subMonth();
+            // Metrics (Current Month or Selected Month)
+            $year = $request->input('year', Carbon::now()->year);
+            $month = $request->input('month', Carbon::now()->month);
+            
+            $now = Carbon::createFromDate($year, $month, 1);
+            $dateContext = $now;
+            
+            // Previous Month Calculation
+            $lastMonth = $now->copy()->subMonth();
+            $previousMonth = $lastMonth;
+            
+            // Check if previous month has any data (targets or content)
+            $hasPreviousData = $selectedClient->monthlyTargets()
+                ->whereYear('month', $lastMonth->year)
+                ->whereMonth('month', $lastMonth->month)
+                ->exists() 
+                || 
+                $selectedClient->contents()
+                ->whereYear('date', $lastMonth->year)
+                ->whereMonth('date', $lastMonth->month)
+                ->exists();
             
             $currentMonthContents = $selectedClient->contents()
                 ->whereMonth('date', $now->month)
@@ -99,17 +121,46 @@ class DashboardController extends Controller
                 $metrics['variance_growth'] = $lastVariance != 0 ? round((($metrics['variance'] - $lastVariance) / abs($lastVariance)) * 100) : 0;
             }
 
-            // Tables Data
-            $contentData = $selectedClient->contents()->latest()->paginate(10);
-            $targets = $selectedClient->monthlyTargets()->orderBy('month', 'desc')->get();
+            // Tables Data (Filtered by query if historical view is active?)
+            // For now, let's keep it latest() but maybe we should filter if request has date.
+            // User asked "Historical Dashboard Viewing".
+            // If viewing history, table should show history.
+            if ($request->has('month') && $request->has('year')) {
+                 $contentData = $selectedClient->contents()
+                    ->whereYear('date', $now->year)
+                    ->whereMonth('date', $now->month)
+                    ->latest()
+                    ->paginate(10);
+            } else {
+                 $contentData = $selectedClient->contents()->latest()->paginate(10);
+            }
+
+            // Fetch ALL targets for history
+            $allTargets = $selectedClient->monthlyTargets()->orderBy('month', 'desc')->get();
+            
+            // Filter targets for the main display (Current Month Context ONLY)
+            $displayedTargets = $selectedClient->monthlyTargets()
+                ->whereYear('month', $now->year)
+                ->whereMonth('month', $now->month)
+                ->orderBy('month', 'desc')
+                ->get();
             
             // Charts Data
-            // 1. Content Type Distribution (Overall)
-            $charts['contentDistribution'] = [
+            // 1. Content Type Distribution (Overall for the selected month?)
+            // Pie chart usually shows "Distribution". If dashboard is time-scoped, it should be for that month.
+            // But code originally used `->count()` on ALL contents (lines 109-110).
+            // Let's scope it to the view context (Month) to be consistent with "Overview Metrics".
+             $charts['contentDistribution'] = [
                 'labels' => ['Posts', 'Reels'],
                 'series' => [
-                    $selectedClient->contents()->where('type', 'Post')->count(),
-                    $selectedClient->contents()->where('type', 'Reel')->count(),
+                    $selectedClient->contents()
+                        ->whereYear('date', $now->year)
+                        ->whereMonth('date', $now->month)
+                        ->where('type', 'Post')->count(),
+                    $selectedClient->contents()
+                         ->whereYear('date', $now->year)
+                        ->whereMonth('date', $now->month)
+                        ->where('type', 'Reel')->count(),
                 ]
             ];
             
@@ -164,15 +215,14 @@ class DashboardController extends Controller
             $distributedReels = $distributeTarget($totalTargetReels, $weeksCount);
             
             // Get current month boundaries
-            $year = $now->year;
-            $month = $now->month;
+            // Use $now which is already set
             
             // Define 4 weeks for the current month
             $weekRanges = [
-                ['start' => Carbon::create($year, $month, 1), 'end' => Carbon::create($year, $month, 7)],
-                ['start' => Carbon::create($year, $month, 8), 'end' => Carbon::create($year, $month, 14)],
-                ['start' => Carbon::create($year, $month, 15), 'end' => Carbon::create($year, $month, 21)],
-                ['start' => Carbon::create($year, $month, 22), 'end' => Carbon::create($year, $month)->endOfMonth()],
+                ['start' => Carbon::create($now->year, $now->month, 1), 'end' => Carbon::create($now->year, $now->month, 7)],
+                ['start' => Carbon::create($now->year, $now->month, 8), 'end' => Carbon::create($now->year, $now->month, 14)],
+                ['start' => Carbon::create($now->year, $now->month, 15), 'end' => Carbon::create($now->year, $now->month, 21)],
+                ['start' => Carbon::create($now->year, $now->month, 22), 'end' => Carbon::create($now->year, $now->month)->endOfMonth()],
             ];
             
             foreach ($weekRanges as $index => $range) {
@@ -204,9 +254,10 @@ class DashboardController extends Controller
                 'actualPosts' => $weeklyActualPosts,
                 'targetReels' => $weeklyTargetReels,
                 'actualReels' => $weeklyActualReels,
+                'target_month_name' => $now->format('F Y') // Pass month name for chart title?
             ];
         }
 
-        return view('dashboard.index', compact('clients', 'selectedClient', 'metrics', 'contentData', 'targets', 'charts', 'currentTarget'));
+        return view('dashboard.index', compact('clients', 'selectedClient', 'metrics', 'contentData', 'displayedTargets', 'allTargets', 'charts', 'currentTarget', 'previousMonth', 'hasPreviousData', 'dateContext'));
     }
 }
