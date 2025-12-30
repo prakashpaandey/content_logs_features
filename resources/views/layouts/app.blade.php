@@ -155,7 +155,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans antialiased">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans antialiased" x-data="{ sidebarOpen: false }">
     <!-- Top Navigation -->
     @include('components.top-navigation')
     
@@ -169,8 +169,195 @@
         </main>
     </div>
     
-    <!-- Modal Container -->
-    <div id="modal-container"></div>
+    <!-- Secure Delete Client Modal -->
+    <div x-data="{ 
+            open: false, 
+            actionUrl: '', 
+            clientName: '',
+            confirmationInput: '',
+            init() {
+                window.openSecureDeleteModal = (url, name) => {
+                    this.actionUrl = url;
+                    this.clientName = name;
+                    this.confirmationInput = '';
+                    this.open = true;
+                }
+            }
+         }"
+         x-init="init()"
+         x-show="open" 
+         class="fixed inset-0 z-50 overflow-y-auto" 
+         style="display: none;">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div x-show="open" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div x-show="open" 
+                 x-transition:enter="ease-out duration-300" 
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                 x-transition:leave="ease-in duration-200" 
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                 class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <i class="fas fa-radiation text-red-600"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-bold text-red-600 dark:text-red-400" id="modal-title">
+                                Delete Client Database?
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                    This action is <span class="font-bold text-red-600">IRREVERSIBLE</span>.
+                                    All contents, targets, and history for <span class="font-bold text-gray-900 dark:text-white" x-text="clientName"></span> will be permanently destroyed.
+                                </p>
+                                <div class="mt-4">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Type <span class="font-mono bg-gray-100 dark:bg-gray-700 px-1 rounded" x-text="clientName"></span> to confirm:
+                                    </label>
+                                    <input type="text" 
+                                           x-model="confirmationInput" 
+                                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                           placeholder="Type client name here...">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <form :action="actionUrl" method="POST" class="inline-block w-full sm:w-auto">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" 
+                                :disabled="confirmationInput !== clientName"
+                                :class="{'opacity-50 cursor-not-allowed': confirmationInput !== clientName, 'hover:bg-red-700': confirmationInput === clientName}"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm transition-all">
+                            Delete Client Permanently
+                        </button>
+                    </form>
+                    <button @click="open = false" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div x-data="{ 
+            open: false, 
+            actionUrl: '', 
+            init() {
+                window.openDeleteModal = (url) => {
+                    this.actionUrl = url;
+                    this.open = true;
+                }
+            }
+         }"
+         x-init="init()"
+         x-show="open" 
+         class="fixed inset-0 z-50 overflow-y-auto" 
+         style="display: none;">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div x-show="open" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div x-show="open" 
+                 x-transition:enter="ease-out duration-300" 
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                 x-transition:leave="ease-in duration-200" 
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                 class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <i class="fas fa-exclamation-triangle text-red-600"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white" id="modal-title">
+                                Delete Item
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                    Are you sure you want to delete this? This action cannot be undone.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <form :action="actionUrl" method="POST" class="inline-block">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+                            Yes, Delete
+                        </button>
+                    </form>
+                    <button @click="open = false" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div x-data="{ 
+            show: false, 
+            message: '', 
+            type: 'success',
+            init() {
+                @if(session('success'))
+                    this.showToast('{{ session('success') }}', 'success');
+                @endif
+                @if(session('error'))
+                    this.showToast('{{ session('error') }}', 'error');
+                @endif
+            },
+            showToast(msg, type = 'success') {
+                this.message = msg;
+                this.type = type;
+                this.show = true;
+                setTimeout(() => {
+                    this.show = false;
+                }, 3000);
+            }
+         }" 
+         x-init="init()"
+         class="fixed top-20 right-4 z-50">
+        <div x-show="show" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="transform opacity-0 translate-y-2"
+             x-transition:enter-end="transform opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-300"
+             x-transition:leave-start="transform opacity-100 translate-y-0"
+             x-transition:leave-end="transform opacity-0 translate-y-2"
+             :class="{
+                'bg-green-500': type === 'success',
+                'bg-red-500': type === 'error'
+             }"
+             class="flex items-center text-white px-6 py-3 rounded-lg shadow-lg">
+            <i :class="{
+                'fas fa-check-circle': type === 'success',
+                'fas fa-exclamation-circle': type === 'error'
+            }" class="mr-3 text-xl"></i>
+            <span x-text="message" class="font-medium"></span>
+            <button @click="show = false" class="ml-4 focus:outline-none hover:text-gray-200">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
     
     <script>
         // Global Variables

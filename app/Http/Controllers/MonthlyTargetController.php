@@ -40,6 +40,13 @@ class MonthlyTargetController extends Controller
         // Append day to make it a valid date
         $validated['month'] = $validated['month'] . '-01';
 
+        // Check for duplicates
+        if (\App\Models\MonthlyTarget::where('client_id', $validated['client_id'])
+            ->where('month', $validated['month'])
+            ->exists()) {
+            return redirect()->back()->with('error', 'A target for this month already exists!');
+        }
+
         auth()->user()->monthlyTargets()->create($validated);
 
         return redirect()->back()->with('success', 'Target set successfully.');

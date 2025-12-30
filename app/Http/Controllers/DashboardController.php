@@ -33,9 +33,11 @@ class DashboardController extends Controller
         $targets = collect([]);
         $charts = [
             'monthly_progress' => ['posts' => [], 'reels' => [], 'labels' => []],
-            'type_distribution' => [0, 0], // Posts, Reels
+            'type_distribution' => [0, 0], 
             'target_vs_actual' => ['target_posts' => [], 'actual_posts' => [], 'target_reels' => [], 'actual_reels' => []]
         ];
+
+        $currentTarget = null;
 
         if ($selectedClient) {
             // Metrics (Current Month)

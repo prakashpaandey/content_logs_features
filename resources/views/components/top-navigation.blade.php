@@ -3,10 +3,15 @@
         <div class="flex justify-between h-16">
             <!-- Left side: Project Name -->
             <div class="flex items-center">
+                <!-- Mobile Menu Button -->
+                <button @click="sidebarOpen = !sidebarOpen" class="md:hidden mr-3 p-2 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700 transition duration-150 ease-in-out">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                
                 <div class="flex-shrink-0 flex items-center">
                     <i class="fas fa-stream text-primary-600 text-xl mr-3"></i>
-                    <h1 class="text-xl font-bold text-gray-900 dark:text-white">Content Management Dashboard</h1>
-                    <!-- <span class="ml-2 px-2 py-1 text-xs bg-primary-100 text-primary-800 rounded-full">Dashboard</span> -->
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-white hidden sm:block">Content Management Dashboard</h1>
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-white sm:hidden">CMD</h1>
                 </div>
             </div>
             
@@ -43,14 +48,11 @@
                             <i class="fas fa-user-circle mr-3 text-gray-500 dark:text-gray-400"></i>
                             Profile
                         </a>
-                        <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <!-- <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
                             <i class="fas fa-cog mr-3 text-gray-500 dark:text-gray-400"></i>
                             Settings
-                        </a>
-                        <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <i class="fas fa-chart-line mr-3 text-gray-500 dark:text-gray-400"></i>
-                            Analytics
-                        </a>
+                        </a> -->
+
                         <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf

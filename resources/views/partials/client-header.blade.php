@@ -23,6 +23,13 @@
         </div>
         
         <div class="flex space-x-3 mt-4 md:mt-0">
+            @if(isset($selectedClient))
+            <button onclick="openSecureDeleteModal('{{ route('clients.destroy', $selectedClient->id) }}', '{{ $selectedClient->name }}')" 
+                    class="px-4 py-2 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-colors flex items-center"
+                    title="Delete Client">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+            @endif
             <button onclick="openModal('edit-client-modal')" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center">
                 <i class="fas fa-edit mr-2"></i>
                 Edit Client

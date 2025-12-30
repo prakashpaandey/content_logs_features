@@ -78,13 +78,9 @@
                                 <button onclick='openEditContentModal(@json($content))' class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <form action="{{ route('contents.destroy', $content->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
+                                <button onclick="openDeleteModal('{{ route('contents.destroy', $content->id) }}')" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </td>
                         </tr>
                     @endforeach

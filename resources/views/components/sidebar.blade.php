@@ -1,5 +1,18 @@
-<aside class="hidden md:flex md:flex-shrink-0">
-    <div class="flex flex-col w-64 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+<!-- Mobile Overlay -->
+<div x-show="sidebarOpen"
+     @click="sidebarOpen = false"
+     x-transition:enter="transition-opacity ease-linear duration-300"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition-opacity ease-linear duration-300"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     class="fixed inset-0 z-40 bg-gray-900/50 backdrop-blur-sm md:hidden"
+     style="display: none;"></div>
+
+<aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:flex md:flex-shrink-0 border-r border-gray-200 dark:border-gray-700 shadow-xl md:shadow-none"
+       :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}">
+    <div class="flex flex-col h-full">
         <!-- Client Panel Header -->
         <div class="px-4 py-5 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
@@ -84,10 +97,10 @@
                 <div class="text-sm text-gray-500">
                     <p>{{ count($clients) }} clients</p>
                 </div>
-                <button class="text-primary-600 hover:text-primary-800 text-sm font-medium">
+                <!-- <button class="text-primary-600 hover:text-primary-800 text-sm font-medium">
                     <i class="fas fa-cog mr-1"></i>
                     Settings
-                </button>
+                </button> -->
             </div>
         </div>
     </div>

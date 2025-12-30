@@ -1,14 +1,14 @@
 <div class="mt-8">
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4 sm:gap-0">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Monthly Targets</h2>
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center space-x-2 w-full sm:w-auto">
             <button onclick="openModal('history-modal')" 
-                    class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
+                    class="flex-1 sm:flex-none justify-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
                 <i class="fas fa-history mr-2"></i>
                 View History
             </button>
             <button onclick="openModal('create-target-modal')" 
-                    class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
+                    class="flex-1 sm:flex-none justify-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
                 <i class="fas fa-plus mr-2"></i>
                 Create Monthly Target
             </button>

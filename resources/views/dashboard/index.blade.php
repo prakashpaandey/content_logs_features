@@ -145,9 +145,9 @@
     
     <!-- Content Table -->
     <div class="mt-8">
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4 sm:gap-0">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Recent Social Content</h2>
-            <button onclick="openModal('add-content-modal')" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
+            <button onclick="openModal('add-content-modal')" class="w-full sm:w-auto justify-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
                 <i class="fas fa-plus mr-2"></i>
                 Add Content
             </button>
