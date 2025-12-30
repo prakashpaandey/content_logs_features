@@ -42,6 +42,8 @@ class DashboardController extends Controller
         $previousMonth = null;
         $hasPreviousData = false;
         $dateContext = Carbon::now();
+        $allTargets = collect([]);
+        $displayedTargets = collect([]);
 
         if ($selectedClient) {
             // Metrics (Current Month or Selected Month)
@@ -121,21 +123,15 @@ class DashboardController extends Controller
                 $metrics['variance_growth'] = $lastVariance != 0 ? round((($metrics['variance'] - $lastVariance) / abs($lastVariance)) * 100) : 0;
             }
 
-            // Tables Data (Filtered by query if historical view is active?)
-            // For now, let's keep it latest() but maybe we should filter if request has date.
-            // User asked "Historical Dashboard Viewing".
-            // If viewing history, table should show history.
-            if ($request->has('month') && $request->has('year')) {
-                 $contentData = $selectedClient->contents()
-                    ->whereYear('date', $now->year)
-                    ->whereMonth('date', $now->month)
-                    ->latest()
-                    ->paginate(10);
-            } else {
-                 $contentData = $selectedClient->contents()->latest()->paginate(10);
-            }
+            // Tables Data (Strictly filtered by the active dashboard month context)
+            $contentData = $selectedClient->contents()
+                ->whereYear('date', $now->year)
+                ->whereMonth('date', $now->month)
+                ->orderBy('date', 'desc')
+                ->orderBy('id', 'desc')
+                ->paginate(10)
+                ->withQueryString();
 
-            // Fetch ALL targets for history
             $allTargets = $selectedClient->monthlyTargets()->orderBy('month', 'desc')->get();
             
             // Filter targets for the main display (Current Month Context ONLY)
@@ -164,20 +160,22 @@ class DashboardController extends Controller
                 ]
             ];
             
-            // 2. Monthly Progression (posts/reels count per month for current year)
+            // 2. Monthly Progression (posts/reels count per month for "Real Today" current year)
+            // User requested this be fixed to the current calendar year regardless of dashboard view month.
+            $currentRealYear = Carbon::now()->year;
             $months = [];
             $postsData = [];
             $reelsData = [];
             
             for ($i = 1; $i <= 12; $i++) {
-                $months[] = Carbon::createFromDate($now->year, $i, 1)->format('M');
+                $months[] = Carbon::createFromDate($currentRealYear, $i, 1)->format('M');
                 $postsData[] = $selectedClient->contents()
-                    ->whereYear('date', $now->year)
+                    ->whereYear('date', $currentRealYear)
                     ->whereMonth('date', $i)
                     ->where('type', 'Post')
                     ->count();
                 $reelsData[] = $selectedClient->contents()
-                    ->whereYear('date', $now->year)
+                    ->whereYear('date', $currentRealYear)
                     ->whereMonth('date', $i)
                     ->where('type', 'Reel')
                     ->count();
