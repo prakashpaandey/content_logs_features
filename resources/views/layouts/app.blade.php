@@ -71,6 +71,9 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Nepali Datepicker CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/@sajanm/nepali-date-picker@5.0.6/dist/nepali.datepicker.v5.0.6.min.css" rel="stylesheet" type="text/css"/>
+    
     <style>
         /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar {
@@ -642,6 +645,89 @@
                 button.classList.toggle('text-gray-700', !isCurrent);
             });
         }
+    </script>
+
+    <!-- Nepali Datepicker JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@sajanm/nepali-date-picker@5.0.6/dist/nepali.datepicker.v5.0.6.min.js" type="text/javascript"></script>
+    <script>
+        window.initializeNepaliDatePicker = function() {
+            const inputs = document.querySelectorAll(".nepali-datepicker");
+            inputs.forEach(input => {
+                if (input.dataset.initialized) return;
+                
+                if (typeof input.nepaliDatePicker === 'function') {
+                    input.nepaliDatePicker({
+                        ndpYear: true,
+                        ndpMonth: true,
+                        ndpYearCount: 20,
+                        onChange: function() {
+                            const adInputId = input.getAttribute('data-ad-id');
+                            if (adInputId) {
+                                const val = input.value;
+                                const bsDate = NepaliFunctions.ConvertToDateObject(val, "YYYY-MM-DD");
+                                const adDate = NepaliFunctions.BS2AD(bsDate);
+                                const adDateStr = NepaliFunctions.ConvertDateFormat(adDate, "YYYY-MM-DD");
+                                document.getElementById(adInputId).value = adDateStr;
+                                console.log(`Syncing ${val} (BS) to ${adDateStr} (AD)`);
+                            }
+                        }
+                    });
+                    input.dataset.initialized = "true";
+                }
+            });
+        };
+
+        window.initializeNepaliMonthPicker = function() {
+            const inputs = document.querySelectorAll(".nepali-monthpicker");
+            inputs.forEach(input => {
+                if (input.dataset.initialized) return;
+                
+                if (typeof input.nepaliDatePicker === 'function') {
+                    input.nepaliDatePicker({
+                        ndpYear: true,
+                        ndpMonth: true,
+                        ndpYearCount: 10,
+                        onChange: function() {
+                            const adInputId = input.getAttribute('data-ad-id');
+                            if (adInputId) {
+                                const val = input.value;
+                                const bsDate = NepaliFunctions.ConvertToDateObject(val, "YYYY-MM-DD");
+                                const adDate = NepaliFunctions.BS2AD(bsDate);
+                                // Manually build YYYY-MM to ensure format
+                                const year = adDate.year;
+                                const month = String(adDate.month).padStart(2, '0');
+                                const adMonthStr = `${year}-${month}`;
+                                document.getElementById(adInputId).value = adMonthStr;
+                                console.log(`Syncing Month ${val} (BS) to ${adMonthStr} (AD)`);
+                            }
+                        }
+                    });
+                    input.dataset.initialized = "true";
+                }
+            });
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Early attempt
+            initializeNepaliDatePicker();
+            initializeNepaliMonthPicker();
+            
+            // Delayed attempt for slow loading libraries
+            setTimeout(() => {
+                initializeNepaliDatePicker();
+                initializeNepaliMonthPicker();
+            }, 500);
+            setTimeout(() => {
+                initializeNepaliDatePicker();
+                initializeNepaliMonthPicker();
+            }, 2000);
+        });
+
+        // Global watcher for dynamic inputs or modals
+        document.body.addEventListener('focusin', (e) => {
+            if (e.target.classList.contains('nepali-datepicker')) initializeNepaliDatePicker();
+            if (e.target.classList.contains('nepali-monthpicker')) initializeNepaliMonthPicker();
+        });
     </script>
 </body>
 </html>

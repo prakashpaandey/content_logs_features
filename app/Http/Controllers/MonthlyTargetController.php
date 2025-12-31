@@ -34,6 +34,7 @@ class MonthlyTargetController extends Controller
             'month' => 'required|date_format:Y-m',
             'target_posts' => 'required|integer|min:0',
             'target_reels' => 'required|integer|min:0',
+            'target_boosts' => 'required|integer|min:0',
             'notes' => 'nullable|string',
         ]);
 
@@ -77,6 +78,7 @@ class MonthlyTargetController extends Controller
             'month' => 'required|date_format:Y-m',
             'target_posts' => 'required|integer|min:0',
             'target_reels' => 'required|integer|min:0',
+            'target_boosts' => 'required|integer|min:0',
             'status' => 'required|in:active,completed,archived', // Allow status update here
             'notes' => 'nullable|string',
         ]);
@@ -91,16 +93,14 @@ class MonthlyTargetController extends Controller
                 ->where('type', 'Post')
                 ->count();
 
-            $actualReels = $monthlyTarget->client->contents()
-                ->whereYear('date', \Carbon\Carbon::parse($validated['month'])->year)
-                ->whereMonth('date', \Carbon\Carbon::parse($validated['month'])->month)
-                ->where('type', 'Reel')
-                ->count();
+            $actualReels = $monthlyTarget->getActualReels();
+            $actualBoosts = $monthlyTarget->getActualBoosts();
                 
             $newTargetPosts = $validated['target_posts'];
             $newTargetReels = $validated['target_reels'];
+            $newTargetBoosts = $validated['target_boosts'];
 
-            if ($actualPosts < $newTargetPosts || $actualReels < $newTargetReels) {
+            if ($actualPosts < $newTargetPosts || $actualReels < $newTargetReels || $actualBoosts < $newTargetBoosts) {
                 return redirect()->back()->withErrors(['status' => 'Cannot mark as completed. Actual content counts must meet the targets.']);
             }
         }
@@ -120,5 +120,35 @@ class MonthlyTargetController extends Controller
     {
         $monthlyTarget->delete();
         return redirect()->back()->with('success', 'Target deleted successfully.');
+    }
+    public function bulkStore(Request $request)
+    {
+        $validated = $request->validate([
+            'month' => 'required|date_format:Y-m',
+            'target_posts' => 'required|integer|min:0',
+            'target_reels' => 'required|integer|min:0',
+            'target_boosts' => 'required|integer|min:0',
+            'notes' => 'nullable|string',
+        ]);
+
+        $month = $validated['month'] . '-01';
+        $user = auth()->user();
+        $clients = $user->clients;
+
+        foreach ($clients as $client) {
+            $client->monthlyTargets()->updateOrCreate(
+                ['month' => $month],
+                [
+                    'user_id' => $user->id,
+                    'target_posts' => $validated['target_posts'],
+                    'target_reels' => $validated['target_reels'],
+                    'target_boosts' => $validated['target_boosts'],
+                    'status' => 'active',
+                    'notes' => $validated['notes'],
+                ]
+            );
+        }
+
+        return redirect()->back()->with('success', 'Targets updated for all clients.');
     }
 }

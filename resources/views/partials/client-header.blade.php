@@ -16,7 +16,7 @@
                     </span>
                     <span class="ml-3 text-gray-600 text-sm">
                         <i class="fas fa-calendar-alt mr-1"></i>
-                        Joined {{ $selectedClient->created_at->format('M Y') }}
+                        Joined {{ $nepaliTranslate($selectedClient->created_at->format('F'), 'month') }} {{ $nepaliTranslate($selectedClient->created_at->format('Y'), 'year') }}
                     </span>
                 </div>
             </div>
@@ -41,37 +41,40 @@
         </div>
     </div>
     
-    <!-- Quick Stats -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-        <div class="text-center">
-            <div class="text-2xl font-bold text-primary-600">{{ $allTargets->where('status', 'active')->count() }}</div>
-            <div class="text-sm text-gray-500">Active Targets</div>
-        </div>
-        <div class="text-center">
-            <div class="text-2xl font-bold text-green-600">{{ $metrics['total_posts'] + $metrics['total_reels'] }}</div>
-            <div class="text-sm text-gray-500">Total Content</div>
-        </div>
-        <div class="text-center">
-            @php
-                 $latestContent = $contentData->first();
-                 $lastActive = $latestContent ? \Carbon\Carbon::parse($latestContent->date)->diffForHumans() : 'N/A';
-            @endphp
-            <div class="text-2xl font-bold text-yellow-600">{{ $contentData->count() }}</div>
-            <div class="text-sm text-gray-500">Total Activities</div>
-        </div>
-        <div class="text-center">
-            @if($hasPreviousData && $previousMonth)
-                <a href="{{ route('dashboard.index', ['client_id' => $selectedClient->id, 'month' => $previousMonth->month, 'year' => $previousMonth->year]) }}" 
-                   class="text-2xl font-bold text-purple-600 hover:text-purple-800 hover:underline transition-all block"
-                   title="View Report for {{ $previousMonth->format('F Y') }}">
-                    {{ $previousMonth->format('M') }}
+    <!-- Month Navigation -->
+    <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+            <a href="{{ route('dashboard.index', ['client_id' => $selectedClient->id, 'month' => $dateContext->copy()->subMonth()->month, 'year' => $dateContext->copy()->subMonth()->year]) }}" 
+               class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 transition-colors"
+               title="Previous Month">
+                <i class="fas fa-chevron-left text-xs"></i>
+            </a>
+            
+            <div class="flex items-center bg-gray-50 dark:bg-gray-700/50 px-4 py-1.5 rounded-lg border border-gray-100 dark:border-gray-700">
+                <i class="fas fa-calendar-alt mr-2 text-primary-500"></i>
+                <span class="text-sm font-bold text-gray-900 dark:text-white">
+                    {{ $nepaliTranslate($dateContext->format('F'), 'month') }} {{ $nepaliTranslate($dateContext->format('Y'), 'year') }}
+                </span>
+            </div>
+
+            <a href="{{ route('dashboard.index', ['client_id' => $selectedClient->id, 'month' => $dateContext->copy()->addMonth()->month, 'year' => $dateContext->copy()->addMonth()->year]) }}" 
+               class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 transition-colors"
+               title="Next Month">
+                <i class="fas fa-chevron-right text-xs"></i>
+            </a>
+            
+            @if(!$dateContext->isCurrentMonth())
+                <a href="{{ route('dashboard.index', ['client_id' => $selectedClient->id]) }}" 
+                   class="ml-2 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-xs font-bold uppercase tracking-wider transition-colors">
+                    Reset
                 </a>
-            @else
-                <div class="text-2xl font-bold text-gray-400">N/A</div>
             @endif
-            <div class="text-sm text-gray-500">Last Report</div>
         </div>
+        
+
     </div>
+    
+
 </div>
 
 <!-- Edit Client Modal -->

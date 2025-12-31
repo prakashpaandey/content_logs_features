@@ -8,6 +8,7 @@
     $typeColors = [
         'Post' => 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
         'Reel' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+        'Boost' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
     ];
 @endphp
 
@@ -45,7 +46,7 @@
                     @foreach($contentData as $content)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                {{ \Carbon\Carbon::parse($content->date)->format('M d, Y') }}
+                                {{ $nepaliTranslate(\Carbon\Carbon::parse($content->date)->format('F'), 'month') }} {{ $nepaliTranslate(\Carbon\Carbon::parse($content->date)->format('d'), 'number') }}, {{ $nepaliTranslate(\Carbon\Carbon::parse($content->date)->format('Y'), 'year') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 py-1 text-xs font-medium rounded-full {{ $typeColors[$content->type] ?? 'bg-gray-100' }}">
@@ -146,15 +147,18 @@
                                 <select name="type" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                     <option value="Post">Post</option>
                                     <option value="Reel">Reel</option>
+                                    <option value="Boost">Boost</option>
                                 </select>
                             </div>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date *</label>
-                            <input type="date" name="date" required 
-                                   value="{{ $dateContext->isCurrentMonth() ? date('Y-m-d') : $dateContext->format('Y-m-d') }}"
-                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            <input type="text" id="add-content-bs-date" class="nepali-datepicker w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                                   placeholder="Select Nepali Date"
+                                   data-ad-id="add-content-ad-date" required>
+                            <input type="hidden" name="date" id="add-content-ad-date" 
+                                   value="{{ $dateContext->isCurrentMonth() ? date('Y-m-d') : $dateContext->format('Y-m-d') }}">
                         </div>
 
                         <div>
@@ -220,13 +224,17 @@
                                 <select id="edit-content-type" name="type" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                     <option value="Post">Post</option>
                                     <option value="Reel">Reel</option>
+                                    <option value="Boost">Boost</option>
                                 </select>
                             </div>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date *</label>
-                            <input type="date" id="edit-content-date" name="date" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            <input type="text" id="edit-content-bs-date" class="nepali-datepicker w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                                   placeholder="Select Nepali Date"
+                                   data-ad-id="edit-content-ad-date" required>
+                            <input type="hidden" name="date" id="edit-content-ad-date">
                         </div>
 
                         <div>
@@ -256,7 +264,16 @@
         document.getElementById('edit-content-title').value = content.title;
         document.getElementById('edit-content-platform').value = content.platform;
         document.getElementById('edit-content-type').value = content.type;
-        document.getElementById('edit-content-date').value = content.date.split('T')[0]; // Format date if needed
+        
+        // Handle Date Conversion for Display
+        const adDateStr = content.date.split('T')[0];
+        document.getElementById('edit-content-ad-date').value = adDateStr;
+        
+        // Convert AD string to Nepali BS
+        const adDateObj = NepaliFunctions.ConvertToDateObject(adDateStr, "YYYY-MM-DD");
+        const bsDateObj = NepaliFunctions.AD2BS(adDateObj);
+        document.getElementById('edit-content-bs-date').value = NepaliFunctions.ConvertDateFormat(bsDateObj, "YYYY-MM-DD");
+        
         document.getElementById('edit-content-url').value = content.url || '';
         document.getElementById('edit-content-remarks').value = content.remarks || '';
         

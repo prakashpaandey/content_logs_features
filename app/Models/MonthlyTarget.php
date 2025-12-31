@@ -13,6 +13,7 @@ class MonthlyTarget extends Model
         'month',
         'target_posts',
         'target_reels',
+        'target_boosts',
         'status',
         'notes',
     ];
@@ -28,9 +29,12 @@ class MonthlyTarget extends Model
             // Get actual counts
             $actualPosts = $this->getActualPosts();
             $actualReels = $this->getActualReels();
+            $actualBoosts = $this->getActualBoosts();
 
             // Check if targets are met
-            if ($actualPosts >= $this->target_posts && $actualReels >= $this->target_reels) {
+            if ($actualPosts >= $this->target_posts && 
+                $actualReels >= $this->target_reels && 
+                $actualBoosts >= $this->target_boosts) {
                 if ($this->status !== 'completed') {
                     $this->update(['status' => 'completed']);
                 }
@@ -61,6 +65,15 @@ class MonthlyTarget extends Model
             ->whereYear('date',  \Carbon\Carbon::parse($this->month)->year)
             ->whereMonth('date', \Carbon\Carbon::parse($this->month)->month)
             ->where('type', 'Reel')
+            ->count();
+    }
+
+    public function getActualBoosts()
+    {
+        return $this->client->contents()
+            ->whereYear('date',  \Carbon\Carbon::parse($this->month)->year)
+            ->whereMonth('date', \Carbon\Carbon::parse($this->month)->month)
+            ->where('type', 'Boost')
             ->count();
     }
 }

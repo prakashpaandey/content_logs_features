@@ -37,6 +37,18 @@
             </div>
         </div>
         
+        <!-- Portfolio Overview Link -->
+        <div class="px-3 py-4 border-b border-gray-100 dark:border-gray-700/50">
+            <a href="{{ route('clients.overview') }}" 
+               class="flex items-center px-4 py-3 rounded-2xl {{ request()->routeIs('clients.overview') ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30' : 'bg-gray-50 dark:bg-gray-700/30 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }} transition-all group">
+                <i class="fas fa-chart-pie mr-3 {{ request()->routeIs('clients.overview') ? 'text-white' : 'text-primary-500' }}"></i>
+                <span class="text-sm font-bold truncate">All Client Overview</span>
+                @if(!request()->routeIs('clients.overview'))
+                    <i class="fas fa-chevron-right ml-auto text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                @endif
+            </a>
+        </div>
+        
         <!-- Client List -->
         <div class="flex-1 overflow-y-auto custom-scrollbar py-2">
             <!-- Loading State -->

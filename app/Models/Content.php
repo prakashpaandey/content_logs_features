@@ -11,7 +11,7 @@ class Content extends Model
         'client_id',
         'title',
         'platform',
-        'type',
+        'type', // Post, Reel, Boost
         'date',
         'url',
         'remarks',

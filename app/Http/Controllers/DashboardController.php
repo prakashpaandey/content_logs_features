@@ -80,12 +80,15 @@ class DashboardController extends Controller
             
             $metrics['total_posts'] = $currentMonthContents->where('type', 'Post')->count();
             $metrics['total_reels'] = $currentMonthContents->where('type', 'Reel')->count();
+            $metrics['total_boosts'] = $currentMonthContents->where('type', 'Boost')->count();
             
             $lastPosts = $lastMonthContents->where('type', 'Post')->count();
             $lastReels = $lastMonthContents->where('type', 'Reel')->count();
+            $lastBoosts = $lastMonthContents->where('type', 'Boost')->count();
             
             $metrics['posts_growth'] = $lastPosts > 0 ? round((($metrics['total_posts'] - $lastPosts) / $lastPosts) * 100) : 0;
             $metrics['reels_growth'] = $lastReels > 0 ? round((($metrics['total_reels'] - $lastReels) / $lastReels) * 100) : 0;
+            $metrics['boosts_growth'] = $lastBoosts > 0 ? round((($metrics['total_boosts'] - $lastBoosts) / $lastBoosts) * 100) : 0;
             
             // Monthly Target
             $currentTarget = $selectedClient->monthlyTargets()
@@ -94,8 +97,8 @@ class DashboardController extends Controller
                 ->first();
                 
             if ($currentTarget) {
-                $totalTarget = $currentTarget->target_posts + $currentTarget->target_reels;
-                $totalActual = $metrics['total_posts'] + $metrics['total_reels'];
+                $totalTarget = $currentTarget->target_posts + $currentTarget->target_reels + $currentTarget->target_boosts;
+                $totalActual = $metrics['total_posts'] + $metrics['total_reels'] + $metrics['total_boosts'];
                 
                 $metrics['target_completion'] = $totalTarget > 0 ? round(($totalActual / $totalTarget) * 100) : 0;
                 $metrics['variance'] = $totalActual - $totalTarget; // Simple variance count
@@ -108,8 +111,8 @@ class DashboardController extends Controller
                 ->first();
 
             if ($lastTarget) {
-                $lastTotalTarget = $lastTarget->target_posts + $lastTarget->target_reels;
-                $lastTotalActual = $lastPosts + $lastReels;
+                $lastTotalTarget = $lastTarget->target_posts + $lastTarget->target_reels + $lastTarget->target_boosts;
+                $lastTotalActual = $lastPosts + $lastReels + $lastBoosts;
                 
                 $lastCompletion = $lastTotalTarget > 0 ? round(($lastTotalActual / $lastTotalTarget) * 100) : 0;
                 $lastVariance = $lastTotalActual - $lastTotalTarget;
@@ -257,5 +260,73 @@ class DashboardController extends Controller
         }
 
         return view('dashboard.index', compact('clients', 'selectedClient', 'metrics', 'contentData', 'displayedTargets', 'allTargets', 'charts', 'currentTarget', 'previousMonth', 'hasPreviousData', 'dateContext'));
+    }
+    public function overview(Request $request)
+    {
+        $user = auth()->user();
+        $clients = $user->clients()->orderBy('updated_at', 'desc')->get();
+        
+        $year = $request->input('year', Carbon::now()->year);
+        $month = $request->input('month', Carbon::now()->month);
+        $now = Carbon::createFromDate($year, $month, 1);
+        $dateContext = $now;
+
+        $clientsData = [];
+        $totalAgencyMetrics = [
+            'posts' => 0,
+            'reels' => 0,
+            'boosts' => 0,
+            'target_posts' => 0,
+            'target_reels' => 0,
+            'target_boosts' => 0,
+        ];
+
+        foreach ($clients as $client) {
+            $target = $client->monthlyTargets()
+                ->whereYear('month', $now->year)
+                ->whereMonth('month', $now->month)
+                ->first();
+
+            $contents = $client->contents()
+                ->whereYear('date', $now->year)
+                ->whereMonth('date', $now->month)
+                ->get();
+
+            $actualPosts = $contents->where('type', 'Post')->count();
+            $actualReels = $contents->where('type', 'Reel')->count();
+            $actualBoosts = $contents->where('type', 'Boost')->count();
+
+            $targetPosts = $target ? $target->target_posts : 0;
+            $targetReels = $target ? $target->target_reels : 0;
+            $targetBoosts = $target ? $target->target_boosts : 0;
+
+            $totalTarget = $targetPosts + $targetReels + $targetBoosts;
+            $totalActual = $actualPosts + $actualReels + $actualBoosts;
+            $completion = $totalTarget > 0 ? min(100, round(($totalActual / $totalTarget) * 100)) : 0;
+
+            $clientsData[] = [
+                'client' => $client,
+                'target' => $target,
+                'actual_posts' => $actualPosts,
+                'actual_reels' => $actualReels,
+                'actual_boosts' => $actualBoosts,
+                'target_posts' => $targetPosts,
+                'target_reels' => $targetReels,
+                'target_boosts' => $targetBoosts,
+                'completion' => $completion,
+                'total_actual' => $totalActual,
+                'total_target' => $totalTarget,
+            ];
+
+            // Agency Totals
+            $totalAgencyMetrics['posts'] += $actualPosts;
+            $totalAgencyMetrics['reels'] += $actualReels;
+            $totalAgencyMetrics['boosts'] += $actualBoosts;
+            $totalAgencyMetrics['target_posts'] += $targetPosts;
+            $totalAgencyMetrics['target_reels'] += $targetReels;
+            $totalAgencyMetrics['target_boosts'] += $targetBoosts;
+        }
+
+        return view('dashboard.overview', compact('clientsData', 'totalAgencyMetrics', 'dateContext', 'clients'));
     }
 }

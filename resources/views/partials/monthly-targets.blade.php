@@ -30,6 +30,9 @@
                             Target Reels
                         </th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Target Boosts
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                             Created Date
                         </th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -60,7 +63,7 @@
                         @foreach($activeTargets as $target)
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                    {{ \Carbon\Carbon::parse($target->month)->format('M Y') }}
+                                    {{ $nepaliTranslate(\Carbon\Carbon::parse($target->month)->format('F'), 'month') }} {{ $nepaliTranslate(\Carbon\Carbon::parse($target->month)->format('Y'), 'year') }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                                     {{ $target->target_posts }}
@@ -69,7 +72,10 @@
                                     {{ $target->target_reels }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                    {{ $target->created_at->format('M d, Y') }}
+                                    {{ $target->target_boosts }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                    {{ $nepaliTranslate($target->created_at->format('F'), 'month') }} {{ $nepaliTranslate($target->created_at->format('d'), 'number') }}, {{ $nepaliTranslate($target->created_at->format('Y'), 'number') }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusColors[$target->status] }}">
@@ -81,6 +87,7 @@
                                         // Attach actuals for JS validation
                                         $target->actual_posts = $target->getActualPosts();
                                         $target->actual_reels = $target->getActualReels();
+                                        $target->actual_boosts = $target->getActualBoosts();
                                     @endphp
                                     <button onclick='openViewTargetModal(@json($target))' class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
                                         <i class="fas fa-eye"></i>
@@ -95,7 +102,7 @@
                         @endforeach
                     @else
                         <tr>
-                            <td colspan="6" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                            <td colspan="7" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                                 No monthly targets found. Create one to get started.
                             </td>
                         </tr>
@@ -135,8 +142,10 @@
                             <label for="target-month" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Month & Year *
                             </label>
-                            <input type="month" name="month" id="target-month" required
-                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            <input type="text" id="create-target-bs-month" class="nepali-monthpicker w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                   placeholder="Select Month"
+                                   data-ad-id="create-target-ad-month" required>
+                            <input type="hidden" name="month" id="create-target-ad-month">
                         </div>
                         
                         <div class="grid grid-cols-2 gap-4">
@@ -156,6 +165,15 @@
                                 <input type="number" name="target_reels" id="target_reels" required min="0"
                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                        placeholder="e.g., 20">
+                            </div>
+
+                            <div>
+                                <label for="target-boosts" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Target Boosts *
+                                </label>
+                                <input type="number" name="target_boosts" id="target-boosts" required min="0"
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                       placeholder="e.g., 5">
                             </div>
                         </div>
                         
@@ -221,8 +239,10 @@
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Month & Year *
                             </label>
-                            <input type="month" name="month" id="edit-target-month" required
-                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            <input type="text" id="edit-target-bs-month" class="nepali-monthpicker w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                   placeholder="Select Month"
+                                   data-ad-id="edit-target-ad-month" required>
+                            <input type="hidden" name="month" id="edit-target-ad-month">
                         </div>
                         
                         <div class="grid grid-cols-2 gap-4">
@@ -302,7 +322,7 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Month & Year
                         </label>
-                        <input type="month" id="view-target-month" readonly disabled
+                        <input type="text" id="view-target-bs-month" readonly disabled
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white cursor-not-allowed">
                     </div>
                     
@@ -320,6 +340,13 @@
                                 Target Reels
                             </label>
                             <input type="number" id="view-target-reels" readonly disabled
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white cursor-not-allowed">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Target Boosts
+                            </label>
+                            <input type="number" id="view-target-boosts" readonly disabled
                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white cursor-not-allowed">
                         </div>
                     </div>
@@ -375,8 +402,8 @@
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Month</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Target (Posts/Reels)</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actual (Posts/Reels)</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Target (Posts/Reels/Boosts)</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actual (Posts/Reels/Boosts)</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Completion Date</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
@@ -393,13 +420,13 @@
                                 @foreach($historyTargets as $target)
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                            {{ \Carbon\Carbon::parse($target->month)->format('M Y') }}
+                                            {{ $nepaliTranslate(\Carbon\Carbon::parse($target->month)->format('F'), 'month') }} {{ $nepaliTranslate(\Carbon\Carbon::parse($target->month)->format('Y'), 'year') }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            {{ $target->target_posts }} / {{ $target->target_reels }}
+                                            {{ $target->target_posts }} / {{ $target->target_reels }} / {{ $target->target_boosts }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            {{ $target->getActualPosts() }} / {{ $target->getActualReels() }}
+                                            {{ $target->getActualPosts() }} / {{ $target->getActualReels() }} / {{ $target->getActualBoosts() }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusColors[$target->status] }}">
@@ -407,7 +434,7 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            {{ $target->updated_at->format('M d, Y') }}
+                                            {{ $nepaliTranslate($target->updated_at->format('F'), 'month') }} {{ $nepaliTranslate($target->updated_at->format('d'), 'number') }}, {{ $nepaliTranslate($target->updated_at->format('Y'), 'number') }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             @if($target->status === 'archived')
@@ -451,9 +478,18 @@
 
 <script>
     function openEditTargetModal(target) {
-        document.getElementById('edit-target-month').value = target.month.substring(0, 7); // Format 2024-03-01 to 2024-03
+        // Handle Date Conversion for Display
+        const adDateStr = target.month.substring(0, 7); // Format 2024-03
+        document.getElementById('edit-target-ad-month').value = adDateStr;
+        
+        // Convert to BS for display (using first of month)
+        const adDateObj = NepaliFunctions.ConvertToDateObject(adDateStr + "-01", "YYYY-MM-DD");
+        const bsDateObj = NepaliFunctions.AD2BS(adDateObj);
+        document.getElementById('edit-target-bs-month').value = NepaliFunctions.ConvertDateFormat(bsDateObj, "YYYY-MM-DD");
+
         document.getElementById('edit-target-posts').value = target.target_posts;
         document.getElementById('edit-target-reels').value = target.target_reels;
+        document.getElementById('edit-target-boosts').value = target.target_boosts || 0;
         document.getElementById('edit-target-status').value = target.status;
         document.getElementById('edit-target-notes').value = target.notes || '';
         
@@ -461,7 +497,7 @@
         const statusSelect = document.getElementById('edit-target-status');
         const completedOption = statusSelect.querySelector('option[value="completed"]');
         
-        if (target.actual_posts < target.target_posts || target.actual_reels < target.target_reels) {
+        if (target.actual_posts < target.target_posts || target.actual_reels < target.target_reels || (target.actual_boosts || 0) < target.target_boosts) {
             completedOption.disabled = true;
             completedOption.textContent = "Completed (Targets not met)";
         } else {
@@ -473,12 +509,19 @@
         document.getElementById('edit-target-form').action = `/monthly-targets/${target.id}`;
         
         openModal('edit-target-modal');
+        if (typeof initializeNepaliDatePicker === 'function') initializeNepaliDatePicker();
     }
     
     function openViewTargetModal(target) {
-        document.getElementById('view-target-month').value = target.month.substring(0, 7);
+        // Convert to BS for display
+        const adDateStr = target.month.substring(0, 10);
+        const adDateObj = NepaliFunctions.ConvertToDateObject(adDateStr, "YYYY-MM-DD");
+        const bsDateObj = NepaliFunctions.AD2BS(adDateObj);
+        document.getElementById('view-target-bs-month').value = NepaliFunctions.GetNepaliMonthName(bsDateObj.month - 1) + " " + bsDateObj.year;
+
         document.getElementById('view-target-posts').value = target.target_posts;
         document.getElementById('view-target-reels').value = target.target_reels;
+        document.getElementById('view-target-boosts').value = target.target_boosts || 0;
         document.getElementById('view-target-status').value = target.status;
         document.getElementById('view-target-notes').value = target.notes || 'No notes available.';
         
