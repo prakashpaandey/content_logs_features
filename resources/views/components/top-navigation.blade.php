@@ -23,8 +23,8 @@
                 </button>
                 
                 <!-- User Menu -->
-                <div class="relative" x-data="{ open: false }">
-                    <button @click="open = !open" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <div class="relative" x-data="{ userMenuOpen: false }">
+                    <button @click.stop="userMenuOpen = !userMenuOpen" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                         <div class="w-8 h-8 rounded-full bg-gradient-to-r from-primary-500 to-purple-500 flex items-center justify-center text-white font-semibold">
                             {{ substr(Auth::user()->name, 0, 2) }}
                         </div>
@@ -36,7 +36,7 @@
                     </button>
                     
                     <!-- Dropdown Menu -->
-                    <div x-show="open" @click.away="open = false" 
+                    <div x-show="userMenuOpen" x-cloak @click.away="userMenuOpen = false" 
                          class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-1 border border-gray-200 dark:border-gray-700 z-50"
                          x-transition:enter="transition ease-out duration-100"
                          x-transition:enter-start="transform opacity-0 scale-95"
@@ -48,11 +48,6 @@
                             <i class="fas fa-user-circle mr-3 text-gray-500 dark:text-gray-400"></i>
                             Profile
                         </a>
-                        <!-- <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <i class="fas fa-cog mr-3 text-gray-500 dark:text-gray-400"></i>
-                            Settings
-                        </a> -->
-
                         <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf

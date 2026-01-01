@@ -6,7 +6,6 @@
     @include('partials.client-header')
     
 
-    
     <!-- Charts Section -->
     <div class="mt-8">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Content Analytics</h2>
@@ -123,7 +122,8 @@
     <!-- Content Table -->
     <div class="mt-8">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4 sm:gap-0">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Social Content for {{ $nepaliTranslate($dateContext->format('F'), 'month') }} {{ $nepaliTranslate($dateContext->format('Y'), 'year') }}</h2>
+            @php $currentBs = $dateHelpers->adToBs($dateContext); @endphp
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Social Content for {{ $nepaliTranslate($currentBs['month'], 'month') }} {{ $currentBs['year'] }}</h2>
             <button onclick="openModal('add-content-modal')" class="w-full sm:w-auto justify-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
                 <i class="fas fa-plus mr-2"></i>
                 Add Content

@@ -34,9 +34,6 @@
                         URL
                     </th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Remarks
-                    </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Actions
                     </th>
                 </tr>
@@ -46,7 +43,11 @@
                     @foreach($contentData as $content)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                {{ $nepaliTranslate(\Carbon\Carbon::parse($content->date)->format('F'), 'month') }} {{ $nepaliTranslate(\Carbon\Carbon::parse($content->date)->format('d'), 'number') }}, {{ $nepaliTranslate(\Carbon\Carbon::parse($content->date)->format('Y'), 'year') }}
+                                @php 
+                                    $contentDate = \Carbon\Carbon::parse($content->date);
+                                    $bsDate = $dateHelpers->adToBs($contentDate);
+                                @endphp
+                                {{ $nepaliTranslate($bsDate['month'], 'month') }} {{ $contentDate->format('d') }}, {{ $bsDate['year'] }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 py-1 text-xs font-medium rounded-full {{ $typeColors[$content->type] ?? 'bg-gray-100' }}">
@@ -71,9 +72,6 @@
                                 @else
                                     <span class="text-gray-400">-</span>
                                 @endif
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                {{ Str::limit($content->remarks, 30) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right space-x-2">
                                 <button onclick='openEditContentModal(@json($content))' class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
@@ -261,25 +259,31 @@
 
 <script>
     function openEditContentModal(content) {
-        document.getElementById('edit-content-title').value = content.title;
-        document.getElementById('edit-content-platform').value = content.platform;
-        document.getElementById('edit-content-type').value = content.type;
-        
-        // Handle Date Conversion for Display
-        const adDateStr = content.date.split('T')[0];
-        document.getElementById('edit-content-ad-date').value = adDateStr;
-        
-        // Convert AD string to Nepali BS
-        const adDateObj = NepaliFunctions.ConvertToDateObject(adDateStr, "YYYY-MM-DD");
-        const bsDateObj = NepaliFunctions.AD2BS(adDateObj);
-        document.getElementById('edit-content-bs-date').value = NepaliFunctions.ConvertDateFormat(bsDateObj, "YYYY-MM-DD");
-        
-        document.getElementById('edit-content-url').value = content.url || '';
-        document.getElementById('edit-content-remarks').value = content.remarks || '';
-        
-        // Update form action
-        document.getElementById('edit-content-form').action = `/contents/${content.id}`;
-        
-        openModal('edit-content-modal');
+        console.log('Opening Edit Modal for Content:', content);
+        try {
+            document.getElementById('edit-content-title').value = content.title;
+            document.getElementById('edit-content-platform').value = content.platform;
+            document.getElementById('edit-content-type').value = content.type;
+            
+            // Handle Date Conversion for Display
+            const adDateStr = content.date.split('T')[0];
+            document.getElementById('edit-content-ad-date').value = adDateStr;
+            
+            // Convert AD string to Nepali BS
+            const adDateObj = NepaliFunctions.ConvertToDateObject(adDateStr, "YYYY-MM-DD");
+            const bsDateObj = NepaliFunctions.AD2BS(adDateObj);
+            document.getElementById('edit-content-bs-date').value = NepaliFunctions.ConvertDateFormat(bsDateObj, "YYYY-MM-DD");
+            
+            document.getElementById('edit-content-url').value = content.url || '';
+            document.getElementById('edit-content-remarks').value = content.remarks || '';
+            
+            // Update form action
+            document.getElementById('edit-content-form').action = `/contents/${content.id}`;
+            
+            openModal('edit-content-modal');
+            if (typeof initializeNepaliDatePicker === 'function') initializeNepaliDatePicker();
+        } catch (e) {
+            console.error('Error opening content edit modal:', e);
+        }
     }
 </script>

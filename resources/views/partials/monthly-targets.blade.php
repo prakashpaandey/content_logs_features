@@ -63,7 +63,8 @@
                         @foreach($activeTargets as $target)
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                    {{ $nepaliTranslate(\Carbon\Carbon::parse($target->month)->format('F'), 'month') }} {{ $nepaliTranslate(\Carbon\Carbon::parse($target->month)->format('Y'), 'year') }}
+                                    @php $targetBs = $dateHelpers->adToBs($target->month); @endphp
+                                    {{ $nepaliTranslate($targetBs['month'], 'month') }} {{ $targetBs['year'] }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                                     {{ $target->target_posts }}
@@ -75,7 +76,8 @@
                                     {{ $target->target_boosts }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                    {{ $nepaliTranslate($target->created_at->format('F'), 'month') }} {{ $nepaliTranslate($target->created_at->format('d'), 'number') }}, {{ $nepaliTranslate($target->created_at->format('Y'), 'number') }}
+                                    @php $createdBs = $dateHelpers->adToBs($target->created_at); @endphp
+                                    {{ $nepaliTranslate($createdBs['month'], 'month') }} {{ $createdBs['year'] }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusColors[$target->status] }}">
@@ -89,11 +91,11 @@
                                         $target->actual_reels = $target->getActualReels();
                                         $target->actual_boosts = $target->getActualBoosts();
                                     @endphp
-                                    <button onclick='openViewTargetModal(@json($target))' class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
+                                    <button type="button" class="btn-view-target text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300" data-target='@json($target)'>
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     @if($target->status !== 'completed' && $target->status !== 'archived')
-                                        <button onclick='openEditTargetModal(@json($target))' class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300">
+                                        <button type="button" class="btn-edit-target text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300" data-target='@json($target)'>
                                             <i class="fas fa-edit"></i>
                                         </button>
                                     @endif
@@ -142,10 +144,8 @@
                             <label for="target-month" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Month & Year *
                             </label>
-                            <input type="text" id="create-target-bs-month" class="nepali-monthpicker w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                                   placeholder="Select Month"
-                                   data-ad-id="create-target-ad-month" required>
-                            <input type="hidden" name="month" id="create-target-ad-month">
+                            <x-nepali-month-picker id="create-target-picker" adInputId="create-target-ad-month" placeholder="Select Month" />
+                            <input type="hidden" name="month" id="create-target-ad-month" required>
                         </div>
                         
                         <div class="grid grid-cols-2 gap-4">
@@ -155,7 +155,7 @@
                                 </label>
                                 <input type="number" name="target_posts" id="target-posts" required min="0"
                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                                       placeholder="e.g., 100">
+                                       placeholder="">
                             </div>
                             
                             <div>
@@ -164,7 +164,7 @@
                                 </label>
                                 <input type="number" name="target_reels" id="target_reels" required min="0"
                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                                       placeholder="e.g., 20">
+                                       placeholder="">
                             </div>
 
                             <div>
@@ -173,7 +173,7 @@
                                 </label>
                                 <input type="number" name="target_boosts" id="target-boosts" required min="0"
                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                                       placeholder="e.g., 5">
+                                       placeholder="">
                             </div>
                         </div>
                         
@@ -236,14 +236,11 @@
                     
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Month & Year *
-                            </label>
-                            <input type="text" id="edit-target-bs-month" class="nepali-monthpicker w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                                   placeholder="Select Month"
-                                   data-ad-id="edit-target-ad-month" required>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Month & Year *</label>
+                            <x-nepali-month-picker id="edit-target-picker" adInputId="edit-target-ad-month" placeholder="Select Month" />
                             <input type="hidden" name="month" id="edit-target-ad-month">
                         </div>
+                        
                         
                         <div class="grid grid-cols-2 gap-4">
                             <div>
@@ -259,6 +256,14 @@
                                     Target Reels *
                                 </label>
                                 <input type="number" name="target_reels" id="edit-target-reels" required min="0"
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Target Boosts *
+                                </label>
+                                <input type="number" name="target_boosts" id="edit-target-boosts" required min="0"
                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                             </div>
                         </div>
@@ -420,7 +425,8 @@
                                 @foreach($historyTargets as $target)
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                            {{ $nepaliTranslate(\Carbon\Carbon::parse($target->month)->format('F'), 'month') }} {{ $nepaliTranslate(\Carbon\Carbon::parse($target->month)->format('Y'), 'year') }}
+                                            @php $targetBs = $dateHelpers->adToBs($target->month); @endphp
+                                            {{ $nepaliTranslate($targetBs['month'], 'month') }} {{ $targetBs['year'] }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                             {{ $target->target_posts }} / {{ $target->target_reels }} / {{ $target->target_boosts }}
@@ -434,7 +440,8 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            {{ $nepaliTranslate($target->updated_at->format('F'), 'month') }} {{ $nepaliTranslate($target->updated_at->format('d'), 'number') }}, {{ $nepaliTranslate($target->updated_at->format('Y'), 'number') }}
+                                            @php $updatedBs = $dateHelpers->adToBs($target->updated_at); @endphp
+                                            {{ $nepaliTranslate($updatedBs['month'], 'month') }} {{ $updatedBs['year'] }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             @if($target->status === 'archived')
@@ -477,54 +484,133 @@
 </div>
 
 <script>
-    function openEditTargetModal(target) {
-        // Handle Date Conversion for Display
-        const adDateStr = target.month.substring(0, 7); // Format 2024-03
-        document.getElementById('edit-target-ad-month').value = adDateStr;
+    // Event delegation for view and edit buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Monthly targets: DOMContentLoaded - Setting up event listeners');
         
-        // Convert to BS for display (using first of month)
-        const adDateObj = NepaliFunctions.ConvertToDateObject(adDateStr + "-01", "YYYY-MM-DD");
-        const bsDateObj = NepaliFunctions.AD2BS(adDateObj);
-        document.getElementById('edit-target-bs-month').value = NepaliFunctions.ConvertDateFormat(bsDateObj, "YYYY-MM-DD");
+        // View target buttons
+        document.addEventListener('click', function(e) {
+            const viewBtn = e.target.closest('.btn-view-target');
+            if (viewBtn) {
+                console.log('View button clicked');
+                e.preventDefault();
+                const target = JSON.parse(viewBtn.getAttribute('data-target'));
+                openViewTargetModal(target);
+            }
+            
+            const editBtn = e.target.closest('.btn-edit-target');
+            if (editBtn) {
+                console.log('Edit button clicked!');
+                e.preventDefault();
+                try {
+                    const targetData = editBtn.getAttribute('data-target');
+                    console.log('Raw target data:', targetData);
+                    const target = JSON.parse(targetData);
+                    console.log('Parsed target:', target);
+                    openEditTargetModal(target);
+                } catch (e) {
+                    console.error('Error parsing target data:', e);
+                    alert('Error: Could not parse target data');
+                }
+            }
+        });
+        
+        console.log('Monthly targets: Event listeners set up complete');
+    });
 
-        document.getElementById('edit-target-posts').value = target.target_posts;
-        document.getElementById('edit-target-reels').value = target.target_reels;
-        document.getElementById('edit-target-boosts').value = target.target_boosts || 0;
-        document.getElementById('edit-target-status').value = target.status;
-        document.getElementById('edit-target-notes').value = target.notes || '';
+    function openEditTargetModal(target) {
+        console.log('Opening Edit Modal for Target:', target);
+        console.log('Checking if openModal is defined:', typeof openModal);
+        console.log('Checking if NepaliFunctions is defined:', typeof NepaliFunctions);
         
-        // Disable 'Completed' option if targets not met
-        const statusSelect = document.getElementById('edit-target-status');
-        const completedOption = statusSelect.querySelector('option[value="completed"]');
-        
-        if (target.actual_posts < target.target_posts || target.actual_reels < target.target_reels || (target.actual_boosts || 0) < target.target_boosts) {
-            completedOption.disabled = true;
-            completedOption.textContent = "Completed (Targets not met)";
-        } else {
-            completedOption.disabled = false;
-            completedOption.textContent = "Completed";
+        try {
+            // Handle Date Conversion for Display
+            const adStr = target.month.substring(0, 7); // Format 2024-03
+            console.log('AD String:', adStr);
+            document.getElementById('edit-target-ad-month').value = adStr;
+            
+            // Convert AD string to Nepali object for display
+            if (typeof NepaliFunctions === 'undefined') {
+                console.error('NepaliFunctions is not defined!');
+                alert('Error: NepaliFunctions library not loaded. Please refresh the page.');
+                return;
+            }
+            
+            const adObj = NepaliFunctions.ConvertToDateObject(adStr + "-01", "YYYY-MM-DD");
+            const bsDate = NepaliFunctions.AD2BS(adObj);
+            console.log('BS Date:', bsDate);
+            
+            // Dispatch event to the custom Alpine picker
+            window.dispatchEvent(new CustomEvent('set-month', { 
+                detail: { 
+                    targetId: 'edit-target-picker', 
+                    year: bsDate.year, 
+                    month: bsDate.month 
+                } 
+            }));
+
+            document.getElementById('edit-target-posts').value = target.target_posts;
+            document.getElementById('edit-target-reels').value = target.target_reels;
+            document.getElementById('edit-target-boosts').value = target.target_boosts || 0;
+            document.getElementById('edit-target-status').value = target.status;
+            document.getElementById('edit-target-notes').value = target.notes || '';
+            
+            // Disable 'Completed' option if targets not met
+            const statusSelect = document.getElementById('edit-target-status');
+            const completedOption = statusSelect.querySelector('option[value="completed"]');
+            
+            if (completedOption) {
+                if (target.actual_posts < target.target_posts || target.actual_reels < target.target_reels || (target.actual_boosts || 0) < target.target_boosts) {
+                    completedOption.disabled = true;
+                    completedOption.textContent = "Completed (Targets not met)";
+                } else {
+                    completedOption.disabled = false;
+                    completedOption.textContent = "Completed";
+                }
+            }
+            
+            // Update form action
+            document.getElementById('edit-target-form').action = `/monthly-targets/${target.id}`;
+            
+            console.log('About to call openModal...');
+            if (typeof openModal === 'function') {
+                openModal('edit-target-modal');
+                console.log('openModal called successfully');
+            } else {
+                console.error('openModal is not a function!');
+                alert('Error: openModal function not found. Please refresh the page.');
+            }
+        } catch (e) {
+            console.error('Error opening edit modal:', e);
+            alert('Error opening edit modal: ' + e.message);
         }
-        
-        // Update form action
-        document.getElementById('edit-target-form').action = `/monthly-targets/${target.id}`;
-        
-        openModal('edit-target-modal');
-        if (typeof initializeNepaliDatePicker === 'function') initializeNepaliDatePicker();
     }
     
     function openViewTargetModal(target) {
-        // Convert to BS for display
-        const adDateStr = target.month.substring(0, 10);
-        const adDateObj = NepaliFunctions.ConvertToDateObject(adDateStr, "YYYY-MM-DD");
-        const bsDateObj = NepaliFunctions.AD2BS(adDateObj);
-        document.getElementById('view-target-bs-month').value = NepaliFunctions.GetNepaliMonthName(bsDateObj.month - 1) + " " + bsDateObj.year;
+        console.log('Opening View Modal for Target:', target);
+        try {
+            // Convert to BS for display
+            const adDateStr = target.month.substring(0, 10);
+            const adDateObj = NepaliFunctions.ConvertToDateObject(adDateStr, "YYYY-MM-DD");
+            const bsDateObj = NepaliFunctions.AD2BS(adDateObj);
+            
+            const monthNames = [
+                'Baisakh', 'Jestha', 'Asar', 'Shrawan', 'Bhadra', 'Ashwin',
+                'Kartik', 'Mangsir', 'Poush', 'Magh', 'Falgun', 'Chaitra'
+            ];
+            const bsMonthName = monthNames[bsDateObj.month - 1] || '';
+            
+            document.getElementById('view-target-bs-month').value = bsMonthName + " " + bsDateObj.year;
 
-        document.getElementById('view-target-posts').value = target.target_posts;
-        document.getElementById('view-target-reels').value = target.target_reels;
-        document.getElementById('view-target-boosts').value = target.target_boosts || 0;
-        document.getElementById('view-target-status').value = target.status;
-        document.getElementById('view-target-notes').value = target.notes || 'No notes available.';
-        
-        openModal('view-target-modal');
+            document.getElementById('view-target-posts').value = target.target_posts;
+            document.getElementById('view-target-reels').value = target.target_reels;
+            document.getElementById('view-target-boosts').value = target.target_boosts || 0;
+            document.getElementById('view-target-status').value = target.status;
+            document.getElementById('view-target-notes').value = target.notes || 'No notes available.';
+            
+            openModal('view-target-modal');
+        } catch (e) {
+            console.error('Error opening view modal:', e);
+        }
     }
 </script>

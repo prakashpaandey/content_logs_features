@@ -16,7 +16,8 @@
                     </span>
                     <span class="ml-3 text-gray-600 text-sm">
                         <i class="fas fa-calendar-alt mr-1"></i>
-                        Joined {{ $nepaliTranslate($selectedClient->created_at->format('F'), 'month') }} {{ $nepaliTranslate($selectedClient->created_at->format('Y'), 'year') }}
+                        @php $joinedBs = $dateHelpers->adToBs($selectedClient->created_at); @endphp
+                        Joined {{ $nepaliTranslate($joinedBs['month'], 'month') }} {{ $joinedBs['year'] }}
                     </span>
                 </div>
             </div>
@@ -42,9 +43,23 @@
     </div>
     
     <!-- Month Navigation -->
+    @php
+        $currentBs = $dateHelpers->adToBs($dateContext);
+        
+        // Calculate Prev BS Month
+        $prevBsMonth = $currentBs['month'] - 1;
+        $prevBsYear = $currentBs['year'];
+        if ($prevBsMonth < 1) { $prevBsMonth = 12; $prevBsYear--; }
+        
+        // Calculate Next BS Month
+        $nextBsMonth = $currentBs['month'] + 1;
+        $nextBsYear = $currentBs['year'];
+        if ($nextBsMonth > 12) { $nextBsMonth = 1; $nextBsYear++; }
+    @endphp
     <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between">
         <div class="flex items-center space-x-2">
-            <a href="{{ route('dashboard.index', ['client_id' => $selectedClient->id, 'month' => $dateContext->copy()->subMonth()->month, 'year' => $dateContext->copy()->subMonth()->year]) }}" 
+            <a href="{{ route('dashboard.index', ['client_id' => $selectedClient->id, 'month' => $prevBsMonth, 'year' => $prevBsYear]) }}" 
+               @click.stop
                class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 transition-colors"
                title="Previous Month">
                 <i class="fas fa-chevron-left text-xs"></i>
@@ -53,11 +68,12 @@
             <div class="flex items-center bg-gray-50 dark:bg-gray-700/50 px-4 py-1.5 rounded-lg border border-gray-100 dark:border-gray-700">
                 <i class="fas fa-calendar-alt mr-2 text-primary-500"></i>
                 <span class="text-sm font-bold text-gray-900 dark:text-white">
-                    {{ $nepaliTranslate($dateContext->format('F'), 'month') }} {{ $nepaliTranslate($dateContext->format('Y'), 'year') }}
+                    {{ $nepaliTranslate($currentBs['month'], 'month') }} {{ $currentBs['year'] }}
                 </span>
             </div>
 
-            <a href="{{ route('dashboard.index', ['client_id' => $selectedClient->id, 'month' => $dateContext->copy()->addMonth()->month, 'year' => $dateContext->copy()->addMonth()->year]) }}" 
+            <a href="{{ route('dashboard.index', ['client_id' => $selectedClient->id, 'month' => $nextBsMonth, 'year' => $nextBsYear]) }}" 
+               @click.stop
                class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 transition-colors"
                title="Next Month">
                 <i class="fas fa-chevron-right text-xs"></i>

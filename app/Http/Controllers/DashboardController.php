@@ -21,8 +21,10 @@ class DashboardController extends Controller
         $metrics = [
             'total_posts' => 0,
             'total_reels' => 0,
+            'total_boosts' => 0,
             'posts_growth' => 0,
             'reels_growth' => 0,
+            'boosts_growth' => 0,
             'target_completion' => 0,
             'target_growth' => 0,
             'variance' => 0,
@@ -47,10 +49,29 @@ class DashboardController extends Controller
 
         if ($selectedClient) {
             // Metrics (Current Month or Selected Month)
-            $year = $request->input('year', Carbon::now()->year);
-            $month = $request->input('month', Carbon::now()->month);
+            $yearInput = $request->input('year');
+            $monthInput = $request->input('month');
+
+            if ($yearInput && $yearInput > 2050) {
+                // Convert BS Input to AD for querying
+                $bsMonth = (int)$monthInput ?: 1;
+                $bsYear = (int)$yearInput;
+                
+                if ($bsMonth <= 9) {
+                    $adMonth = $bsMonth + 3;
+                    $adYear = $bsYear - 57;
+                } else {
+                    $adMonth = $bsMonth - 9;
+                    $adYear = $bsYear - 56;
+                }
+                $now = Carbon::createFromDate($adYear, $adMonth, 1);
+            } else {
+                // Use AD input or default to now
+                $adYear = $yearInput ?: Carbon::now()->year;
+                $adMonth = $monthInput ?: Carbon::now()->month;
+                $now = Carbon::createFromDate($adYear, $adMonth, 1);
+            }
             
-            $now = Carbon::createFromDate($year, $month, 1);
             $dateContext = $now;
             
             // Previous Month Calculation
@@ -255,7 +276,7 @@ class DashboardController extends Controller
                 'actualPosts' => $weeklyActualPosts,
                 'targetReels' => $weeklyTargetReels,
                 'actualReels' => $weeklyActualReels,
-                'target_month_name' => $now->format('F Y') // Pass month name for chart title?
+                'target_month_name' => $now->format('F Y')
             ];
         }
 
@@ -266,9 +287,26 @@ class DashboardController extends Controller
         $user = auth()->user();
         $clients = $user->clients()->orderBy('updated_at', 'desc')->get();
         
-        $year = $request->input('year', Carbon::now()->year);
-        $month = $request->input('month', Carbon::now()->month);
-        $now = Carbon::createFromDate($year, $month, 1);
+        $yearInput = $request->input('year');
+        $monthInput = $request->input('month');
+
+        if ($yearInput && $yearInput > 2050) {
+            $bsMonth = (int)$monthInput ?: 1;
+            $bsYear = (int)$yearInput;
+            
+            if ($bsMonth <= 9) {
+                $adMonth = $bsMonth + 3;
+                $adYear = $bsYear - 57;
+            } else {
+                $adMonth = $bsMonth - 9;
+                $adYear = $bsYear - 56;
+            }
+            $now = Carbon::createFromDate($adYear, $adMonth, 1);
+        } else {
+            $adYear = $yearInput ?: Carbon::now()->year;
+            $adMonth = $monthInput ?: Carbon::now()->month;
+            $now = Carbon::createFromDate($adYear, $adMonth, 1);
+        }
         $dateContext = $now;
 
         $clientsData = [];

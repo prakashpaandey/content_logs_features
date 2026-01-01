@@ -1,5 +1,6 @@
 <!-- Mobile Overlay -->
 <div x-show="sidebarOpen"
+     x-cloak
      @click="sidebarOpen = false"
      x-transition:enter="transition-opacity ease-linear duration-300"
      x-transition:enter-start="opacity-0"

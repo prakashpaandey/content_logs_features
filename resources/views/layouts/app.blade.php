@@ -1,7 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script>
+        // Immediate Theme Detection to prevent FOUC
+        if (localStorage.getItem('dark-mode') === 'true' || 
+            (!('dark-mode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ContentLog - Client Dashboard</title>
     
@@ -67,6 +76,98 @@
 
     <!-- Alpine.js (required for dropdowns, toggles, and x-data/x-show directives) -->
     <script src="https://unpkg.com/alpinejs@3.12.0/dist/cdn.min.js" defer></script>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('nepaliMonthPicker', (config) => ({
+                open: false,
+                nepaliMonths: [
+                    { nepali: 'बैशाख', english: 'Baisakh' },
+                    { nepali: 'जेठ', english: 'Jestha' },
+                    { nepali: 'असार', english: 'Asar' },
+                    { nepali: 'साउन', english: 'Shrawan' },
+                    { nepali: 'भदौ', english: 'Bhadra' },
+                    { nepali: 'असोज', english: 'Ashwin' },
+                    { nepali: 'कार्तिक', english: 'Kartik' },
+                    { nepali: 'मंसिर', english: 'Mangsir' },
+                    { nepali: 'पौष', english: 'Poush' },
+                    { nepali: 'माघ', english: 'Magh' },
+                    { nepali: 'फागुन', english: 'Falgun' },
+                    { nepali: 'चैत', english: 'Chaitra' }
+                ],
+                selectedYear: null,
+                selectedMonth: null,
+                viewYear: 2081,
+                displayBs: '',
+                adInputId: config.adInputId,
+
+                init() {
+                    // If we have an initial value (BS format YYYY-MM)
+                    if (config.initialBsValue && config.initialBsValue !== '') {
+                        const parts = config.initialBsValue.split('-');
+                        if (parts.length >= 2) {
+                            this.selectedYear = parseInt(parts[0]);
+                            this.selectedMonth = parseInt(parts[1]) - 1;
+                            this.viewYear = this.selectedYear;
+                            this.updateDisplay();
+                        }
+                    } else {
+                        // Default to current BS month
+                        const todayAD = new Date();
+                        if (typeof NepaliFunctions !== 'undefined') {
+                            const bsToday = NepaliFunctions.AD2BS({
+                                year: todayAD.getFullYear(),
+                                month: todayAD.getMonth() + 1,
+                                day: todayAD.getDate()
+                            });
+                            this.viewYear = bsToday.year;
+                        } else {
+                            this.viewYear = 2081;
+                        }
+                    }
+                },
+
+                toggle() {
+                    this.open = !this.open;
+                },
+
+                changeYear(dir) {
+                    this.viewYear += dir;
+                },
+
+                selectMonth(index) {
+                    this.selectedMonth = index;
+                    this.selectedYear = this.viewYear;
+                    this.updateDisplay();
+                    this.syncToAd();
+                    this.open = false;
+                },
+
+                updateDisplay() {
+                    const month = this.nepaliMonths[this.selectedMonth];
+                    if (month) {
+                        this.displayBs = `${month.english} ${this.selectedYear}`;
+                    }
+                },
+
+                syncToAd() {
+                    if (!this.adInputId) return;
+                    const adInput = document.getElementById(this.adInputId);
+                    if (adInput && typeof NepaliFunctions !== 'undefined') {
+                        // Convert BS to AD (Always use day 1 for month picking)
+                        const adDate = NepaliFunctions.BS2AD({
+                            year: this.selectedYear,
+                            month: this.selectedMonth + 1,
+                            day: 1
+                        });
+                        const year = adDate.year;
+                        const month = String(adDate.month).padStart(2, '0');
+                        adInput.value = `${year}-${month}`;
+                        console.log(`Synced custom BS picked to AD: ${adInput.value}`);
+                    }
+                }
+            }));
+        });
+    </script>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -75,6 +176,8 @@
     <link href="https://cdn.jsdelivr.net/npm/@sajanm/nepali-date-picker@5.0.6/dist/nepali.datepicker.v5.0.6.min.css" rel="stylesheet" type="text/css"/>
     
     <style>
+        [x-cloak] { display: none !important; }
+
         /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
@@ -172,7 +275,6 @@
         </main>
     </div>
     
-    <!-- Secure Delete Client Modal -->
     <div x-data="{ 
             open: false, 
             actionUrl: '', 
@@ -188,11 +290,11 @@
             }
          }"
          x-init="init()"
-         x-show="open" 
+         x-show="open" x-cloak
          class="fixed inset-0 z-50 overflow-y-auto" 
          style="display: none;">
         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            <div x-show="open" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div x-show="open" x-cloak x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 transition-opacity" aria-hidden="true">
                 <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
 
@@ -264,11 +366,11 @@
             }
          }"
          x-init="init()"
-         x-show="open" 
+         x-show="open" x-cloak
          class="fixed inset-0 z-50 overflow-y-auto" 
          style="display: none;">
         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            <div x-show="open" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div x-show="open" x-cloak x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 transition-opacity" aria-hidden="true">
                 <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
 
@@ -339,7 +441,7 @@
          }" 
          x-init="init()"
          class="fixed top-20 right-4 z-50">
-        <div x-show="show" 
+        <div x-show="show" x-cloak
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="transform opacity-0 translate-y-2"
              x-transition:enter-end="transform opacity-100 translate-y-0"
@@ -393,22 +495,16 @@
                 return;
             }
 
-            // Set Initial State
-            if (localStorage.getItem('dark-mode') === 'true' || 
-                (!('dark-mode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-                themeIcon.className = 'fas fa-sun';
-            } else {
-                document.documentElement.classList.remove('dark');
-                themeIcon.className = 'fas fa-moon';
-            }
+            // Sync Toggle Icon State based on current class (set by head script)
+            const isDark = document.documentElement.classList.contains('dark');
+            themeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
 
-            // Event Listener
+            // Event Listener for Manual Toggles
             themeToggle.addEventListener('click', () => {
                 document.documentElement.classList.toggle('dark');
-                const isDark = document.documentElement.classList.contains('dark');
-                localStorage.setItem('dark-mode', isDark);
-                themeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+                const nowDark = document.documentElement.classList.contains('dark');
+                localStorage.setItem('dark-mode', nowDark);
+                themeIcon.className = nowDark ? 'fas fa-sun' : 'fas fa-moon';
                     
                 // Re-draw charts to update colors
                 setTimeout(initializeCharts, 100);
@@ -660,6 +756,7 @@
                         ndpYear: true,
                         ndpMonth: true,
                         ndpYearCount: 20,
+                        language: "english",
                         onChange: function() {
                             const adInputId = input.getAttribute('data-ad-id');
                             if (adInputId) {
@@ -687,6 +784,7 @@
                         ndpYear: true,
                         ndpMonth: true,
                         ndpYearCount: 10,
+                        language: "english",
                         onChange: function() {
                             const adInputId = input.getAttribute('data-ad-id');
                             if (adInputId) {
@@ -725,8 +823,12 @@
 
         // Global watcher for dynamic inputs or modals
         document.body.addEventListener('focusin', (e) => {
-            if (e.target.classList.contains('nepali-datepicker')) initializeNepaliDatePicker();
-            if (e.target.classList.contains('nepali-monthpicker')) initializeNepaliMonthPicker();
+            if (e.target.classList.contains('nepali-datepicker')) {
+                initializeNepaliDatePicker();
+                // Ensure date grid is visible
+                const calendar = document.getElementById('ndp-nepali-datepicker');
+                if (calendar) calendar.style.display = 'block';
+            }
         });
     </script>
 </body>

@@ -40,11 +40,10 @@ class AppServiceProvider extends ServiceProvider
                 'October' => 'Kartik', 'November' => 'Mangsir', 'December' => 'Poush'
             ];
 
-            // Direct Number to BS Month mapping
             $numMonths = [
-                1 => 'Magh', 2 => 'Falgun', 3 => 'Chaitra', 4 => 'Baisakh',
-                5 => 'Jestha', 6 => 'Asar', 7 => 'Shrawan', 8 => 'Bhadra',
-                9 => 'Ashwin', 10 => 'Kartik', 11 => 'Mangsir', 12 => 'Poush'
+                1 => 'Baisakh', 2 => 'Jestha', 3 => 'Asar', 4 => 'Shrawan',
+                5 => 'Bhadra', 6 => 'Ashwin', 7 => 'Kartik', 8 => 'Mangsir',
+                9 => 'Poush', 10 => 'Magh', 11 => 'Falgun', 12 => 'Chaitra'
             ];
             
             if ($type === 'month') {
@@ -52,14 +51,46 @@ class AppServiceProvider extends ServiceProvider
             }
 
             if ($type === 'number') {
-                return $text; // Standard numerals for Romanized look
+                return $text; 
             }
 
             if ($type === 'year') {
-                return (string)((int)$text + 56); // Standard numerals BS Year
+                // If text is a full date string or just year
+                return $text; // Usually passed as BS year now
             }
 
             return $text;
+        });
+
+        // BS to AD and AD to BS Helpers
+        View::share('dateHelpers', new class {
+            public function adToBs($adDate) {
+                $carbon = is_string($adDate) ? \Carbon\Carbon::parse($adDate) : $adDate;
+                $m = $carbon->month;
+                $y = $carbon->year;
+                
+                if ($m >= 4) {
+                    $bsMonth = $m - 3;
+                    $bsYear = $y + 57;
+                } else {
+                    $bsMonth = $m + 9;
+                    $bsYear = $y + 56;
+                }
+                
+                return ['month' => $bsMonth, 'year' => $bsYear];
+            }
+
+            public function bsToAd($bsMonth, $bsYear) {
+                if ($bsMonth <= 9) {
+                    $adMonth = $bsMonth + 3;
+                    $adYear = $bsYear - 57;
+                } else {
+                    $adMonth = $bsMonth - 9;
+                    $adYear = $bsYear - 56;
+                }
+                
+                return ['month' => $adMonth, 'year' => $adYear];
+            }
         });
     }
 }

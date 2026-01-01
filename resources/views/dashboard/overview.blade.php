@@ -8,26 +8,34 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">All Clients Overview</h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Monitoring progress for all active clients in {{ $nepaliTranslate($dateContext->format('F'), 'month') }} {{ $nepaliTranslate($dateContext->format('Y'), 'year') }}
+                    @php $currentBs = $dateHelpers->adToBs($dateContext); @endphp
+                    Monitoring progress for all active clients in {{ $nepaliTranslate($currentBs['month'], 'month') }} {{ $currentBs['year'] }}
                 </p>
             </div>
             
             <div class="flex items-center gap-3">
-                <button onclick="openModal('bulk-target-modal')" 
-                        class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/20 flex items-center">
-                    <i class="fas fa-bullseye mr-2"></i>
-                    Set Target For all Clients
-                </button>
                 
                 <div class="flex items-center bg-gray-50 dark:bg-gray-700/50 p-1 rounded-xl border border-gray-200 dark:border-gray-600">
-                    <a href="{{ route('clients.overview', ['month' => $dateContext->copy()->subMonth()->month, 'year' => $dateContext->copy()->subMonth()->year]) }}" 
+                    @php
+                        // Calculate BS Prev/Next
+                        $prevBsMonth = $currentBs['month'] - 1;
+                        $prevBsYear = $currentBs['year'];
+                        if ($prevBsMonth < 1) { $prevBsMonth = 12; $prevBsYear--; }
+                        
+                        $nextBsMonth = $currentBs['month'] + 1;
+                        $nextBsYear = $currentBs['year'];
+                        if ($nextBsMonth > 12) { $nextBsMonth = 1; $nextBsYear++; }
+                    @endphp
+                    <a href="{{ route('clients.overview', ['month' => $prevBsMonth, 'year' => $prevBsYear]) }}" 
+                       @click.stop
                        class="p-2 hover:bg-white dark:hover:bg-gray-600 rounded-lg text-gray-600 dark:text-gray-400 transition-all">
                         <i class="fas fa-chevron-left text-xs"></i>
                     </a>
                     <span class="px-4 text-sm font-bold text-gray-900 dark:text-white min-w-[120px] text-center">
-                        {{ $nepaliTranslate($dateContext->format('F'), 'month') }}
+                        {{ $nepaliTranslate($currentBs['month'], 'month') }} {{ $currentBs['year'] }}
                     </span>
-                    <a href="{{ route('clients.overview', ['month' => $dateContext->copy()->addMonth()->month, 'year' => $dateContext->copy()->addMonth()->year]) }}" 
+                    <a href="{{ route('clients.overview', ['month' => $nextBsMonth, 'year' => $nextBsYear]) }}" 
+                       @click.stop
                        class="p-2 hover:bg-white dark:hover:bg-gray-600 rounded-lg text-gray-600 dark:text-gray-400 transition-all">
                         <i class="fas fa-chevron-right text-xs"></i>
                     </a>
@@ -110,20 +118,41 @@
                                     <span class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ $data['completion'] }}%</span>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center">
-                                <span class="text-xs font-bold @if($data['actual_posts'] >= $data['target_posts'] && $data['target_posts'] > 0) text-green-600 @else text-gray-700 dark:text-gray-300 @endif">
-                                    {{ $data['actual_posts'] }} / {{ $data['target_posts'] }}
-                                </span>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @php
+                                    $postProgress = $data['target_posts'] > 0 ? min(100, round(($data['actual_posts'] / $data['target_posts']) * 100)) : 0;
+                                @endphp
+                                <div class="flex items-center gap-2">
+                                    <div class="flex-1 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-primary-500 transition-all duration-500" 
+                                             style="width: {{ $postProgress }}%"></div>
+                                    </div>
+                                    <span class="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[35px] text-right">{{ $postProgress }}%</span>
+                                </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center">
-                                <span class="text-xs font-bold @if($data['actual_reels'] >= $data['target_reels'] && $data['target_reels'] > 0) text-green-600 @else text-gray-700 dark:text-gray-300 @endif">
-                                    {{ $data['actual_reels'] }} / {{ $data['target_reels'] }}
-                                </span>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @php
+                                    $reelProgress = $data['target_reels'] > 0 ? min(100, round(($data['actual_reels'] / $data['target_reels']) * 100)) : 0;
+                                @endphp
+                                <div class="flex items-center gap-2">
+                                    <div class="flex-1 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-green-500 transition-all duration-500" 
+                                             style="width: {{ $reelProgress }}%"></div>
+                                    </div>
+                                    <span class="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[35px] text-right">{{ $reelProgress }}%</span>
+                                </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center">
-                                <span class="text-xs font-bold @if($data['actual_boosts'] >= $data['target_boosts'] && $data['target_boosts'] > 0) text-green-600 @else text-gray-700 dark:text-gray-300 @endif">
-                                    {{ $data['actual_boosts'] }} / {{ $data['target_boosts'] }}
-                                </span>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @php
+                                    $boostProgress = $data['target_boosts'] > 0 ? min(100, round(($data['actual_boosts'] / $data['target_boosts']) * 100)) : 0;
+                                @endphp
+                                <div class="flex items-center gap-2">
+                                    <div class="flex-1 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-blue-500 transition-all duration-500" 
+                                             style="width: {{ $boostProgress }}%"></div>
+                                    </div>
+                                    <span class="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[35px] text-right">{{ $boostProgress }}%</span>
+                                </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                 @if($data['target'])
@@ -149,78 +178,6 @@
                     @endforeach
                 </tbody>
             </table>
-        </div>
-    </div>
-</div>
-
-<!-- Bulk Target Modal -->
-<div id="bulk-target-modal" class="modal hidden fixed inset-0 z-50 overflow-y-auto">
-    <div class="modal-overlay absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-    <div class="relative min-h-screen flex items-center justify-center p-4">
-        <div class="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-lg w-full p-8 overflow-hidden">
-            <div class="absolute top-0 right-0 p-6">
-                <button onclick="closeModal('bulk-target-modal')" class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-
-            <div class="mb-8">
-                <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mb-4">
-                    <i class="fas fa-bullseye text-primary-600 dark:text-primary-400 text-xl"></i>
-                </div>
-                <h2 class="text-2xl font-black text-gray-900 dark:text-white">Set Target for all Clients</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Apply the same targets to all {{ $clients->count() }} clients simultaneously.
-                </p>
-            </div>
-
-            <form action="{{ route('monthly-targets.bulk') }}" method="POST" class="space-y-6">
-                @csrf
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Target Month</label>
-                        <input type="text" id="bulk-target-bs-month" class="nepali-monthpicker w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none transition-all"
-                               placeholder="Select Month"
-                               data-ad-id="bulk-target-ad-month" required>
-                        <input type="hidden" name="month" id="bulk-target-ad-month" value="{{ $dateContext->format('Y-m') }}">
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Posts</label>
-                            <input type="number" name="target_posts" required min="0" placeholder="0"
-                                   class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none transition-all text-center font-bold">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Reels</label>
-                            <input type="number" name="target_reels" required min="0" placeholder="0"
-                                   class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none transition-all text-center font-bold">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Boosts</label>
-                            <input type="number" name="target_boosts" required min="0" placeholder="0"
-                                   class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none transition-all text-center font-bold">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Notes (Optional)</label>
-                        <textarea name="notes" rows="2" 
-                                  class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none transition-all"
-                                  placeholder="Standard target for all clients..."></textarea>
-                    </div>
-                </div>
-
-                <div class="pt-4">
-                    <button type="submit" 
-                            class="w-full py-4 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-2xl shadow-xl shadow-primary-500/20 transition-all transform active:scale-[0.98]">
-                        Apply to All Clients
-                    </button>
-                    <p class="text-[10px] text-center text-gray-400 mt-4 uppercase tracking-widest font-bold">
-                        This will overwrite existing targets for the selected month.
-                    </p>
-                </div>
-            </form>
         </div>
     </div>
 </div>
