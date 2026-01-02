@@ -13,7 +13,7 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $clients = $user->clients()->orderBy('updated_at', 'desc')->get();
+        $clients = Client::orderBy('updated_at', 'desc')->get();
         
         $selectedClientId = $request->query('client_id');
         $selectedClient = $clients->where('id', $selectedClientId)->first() ?? $clients->first();
@@ -348,7 +348,7 @@ class DashboardController extends Controller
     public function overview(Request $request)
     {
         $user = auth()->user();
-        $clients = $user->clients()->orderBy('updated_at', 'desc')->get();
+        $clients = Client::orderBy('updated_at', 'desc')->get();
         
         $bsMonth = (int)$request->query('month');
         $bsYear = (int)$request->query('year');

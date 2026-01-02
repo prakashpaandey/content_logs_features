@@ -64,7 +64,10 @@ class ContentController extends Controller
             }
         }
 
-        auth()->user()->contents()->create($validated);
+        Content::create([
+            ...$validated,
+            'user_id' => auth()->id(), // Keep for audit trail
+        ]);
 
         // Check Monthly Target for completion
         try {

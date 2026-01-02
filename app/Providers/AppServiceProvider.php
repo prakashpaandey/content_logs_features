@@ -25,7 +25,7 @@ class AppServiceProvider extends ServiceProvider
         // Share clients with the sidebar component globally
         View::composer('components.sidebar', function ($view) {
             if (Auth::check()) {
-                $view->with('clients', Auth::user()->clients()->orderBy('name')->get());
+                $view->with('clients', Client::orderBy('name')->get());
             } else {
                 $view->with('clients', collect());
             }

@@ -39,9 +39,10 @@ class ClientController extends Controller
             return strtoupper(substr($segment, 0, 1));
         })->take(2)->join('');
 
-        auth()->user()->clients()->create([
+        Client::create([
             ...$validated,
             'initials' => $visuals,
+            'user_id' => auth()->id(), // Keep for audit trail
         ]);
 
         return redirect()->back()->with('success', 'Client created successfully.');
