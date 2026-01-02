@@ -11,12 +11,35 @@ class MonthlyTarget extends Model
         'user_id',
         'client_id',
         'month',
+        'bs_month',
+        'bs_year',
         'target_posts',
         'target_reels',
         'target_boosts',
         'status',
         'notes',
     ];
+
+    protected $appends = [
+        'actual_posts',
+        'actual_reels',
+        'actual_boosts',
+    ];
+
+    public function getActualPostsAttribute()
+    {
+        return $this->getActualPosts();
+    }
+
+    public function getActualReelsAttribute()
+    {
+        return $this->getActualReels();
+    }
+
+    public function getActualBoostsAttribute()
+    {
+        return $this->getActualBoosts();
+    }
 
     public function client()
     {
@@ -52,28 +75,40 @@ class MonthlyTarget extends Model
 
     public function getActualPosts()
     {
+        // Use explicit BS month/year if available, fallback to conversion
+        $bsMonth = $this->bs_month ?? \App\Helpers\NepaliDateHelper::representativeAdToBs($this->month)['month'];
+        $bsYear = $this->bs_year ?? \App\Helpers\NepaliDateHelper::representativeAdToBs($this->month)['year'];
+        
+        [$startDate, $endDate] = \App\Helpers\NepaliDateHelper::getBsMonthRange($bsMonth, $bsYear);
+
         return $this->client->contents()
-            ->whereYear('date',  \Carbon\Carbon::parse($this->month)->year)
-            ->whereMonth('date', \Carbon\Carbon::parse($this->month)->month)
+            ->whereBetween('date', [$startDate, $endDate])
             ->where('type', 'Post')
             ->count();
     }
 
     public function getActualReels()
     {
+        $bsMonth = $this->bs_month ?? \App\Helpers\NepaliDateHelper::representativeAdToBs($this->month)['month'];
+        $bsYear = $this->bs_year ?? \App\Helpers\NepaliDateHelper::representativeAdToBs($this->month)['year'];
+        
+        [$startDate, $endDate] = \App\Helpers\NepaliDateHelper::getBsMonthRange($bsMonth, $bsYear);
+
         return $this->client->contents()
-            ->whereYear('date',  \Carbon\Carbon::parse($this->month)->year)
-            ->whereMonth('date', \Carbon\Carbon::parse($this->month)->month)
+            ->whereBetween('date', [$startDate, $endDate])
             ->where('type', 'Reel')
             ->count();
     }
 
     public function getActualBoosts()
     {
-        return $this->client->contents()
-            ->whereYear('date',  \Carbon\Carbon::parse($this->month)->year)
-            ->whereMonth('date', \Carbon\Carbon::parse($this->month)->month)
-            ->where('type', 'Boost')
+        $bsMonth = $this->bs_month ?? \App\Helpers\NepaliDateHelper::representativeAdToBs($this->month)['month'];
+        $bsYear = $this->bs_year ?? \App\Helpers\NepaliDateHelper::representativeAdToBs($this->month)['year'];
+        
+        [$startDate, $endDate] = \App\Helpers\NepaliDateHelper::getBsMonthRange($bsMonth, $bsYear);
+
+        return $this->client->boosts()
+            ->whereBetween('date', [$startDate, $endDate])
             ->count();
     }
 }

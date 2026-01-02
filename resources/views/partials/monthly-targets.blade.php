@@ -2,6 +2,13 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4 sm:gap-0">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Monthly Targets</h2>
         <div class="flex items-center space-x-2 w-full sm:w-auto">
+            @if(!isset($selectedClient))
+            <button onclick="openModal('bulk-target-modal')" 
+                    class="flex-1 sm:flex-none justify-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
+                <i class="fas fa-users-cog mr-2"></i>
+                Set for All Clients
+            </button>
+            @endif
             <button onclick="openModal('history-modal')" 
                     class="flex-1 sm:flex-none justify-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
                 <i class="fas fa-history mr-2"></i>
@@ -46,8 +53,8 @@
                 <tbody id="targets-table-body" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     @php
                         $statusColors = [
-                            'active' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-                            'completed' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+                            'active' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+                            'completed' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
                             'archived' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
                         ];
                     @endphp
@@ -63,8 +70,11 @@
                         @foreach($activeTargets as $target)
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                    @php $targetBs = $dateHelpers->adToBs($target->month); @endphp
-                                    {{ $nepaliTranslate($targetBs['month'], 'month') }} {{ $targetBs['year'] }}
+                                    @php 
+                                        $m = $target->bs_month ?? $dateHelpers->representativeAdToBs($target->month)['month'];
+                                        $y = $target->bs_year ?? $dateHelpers->representativeAdToBs($target->month)['year'];
+                                    @endphp
+                                    {{ $nepaliTranslate($m, 'month') }} {{ $y }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                                     {{ $target->target_posts }}
@@ -115,6 +125,70 @@
     </div>
 </div>
 
+<!-- Bulk Target Modal -->
+<div id="bulk-target-modal" class="modal hidden fixed inset-0 z-50 overflow-y-auto">
+    <div class="modal-overlay absolute inset-0 bg-black opacity-50"></div>
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+    <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full mx-auto">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Set Target for All Clients</h3>
+                    <button onclick="closeModal('bulk-target-modal')" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">This will update or create targets for all your clients.</p>
+            </div>
+            
+            <div class="px-6 py-4">
+                <form id="bulk-target-form" action="{{ route('monthly-targets.bulk') }}" method="POST">
+                    @csrf
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Month & Year *</label>
+                            <x-nepali-month-picker 
+                                id="bulk-target-picker" 
+                                adInputId="bulk-target-ad-month" 
+                                bsMonthInputId="bulk-target-bs-month" 
+                                bsYearInputId="bulk-target-bs-year" 
+                                value="{{ $bsYear . '-' . str_pad($bsMonth, 2, '0', STR_PAD_LEFT) }}"
+                                placeholder="Select Month" />
+                            <input type="hidden" name="month" id="bulk-target-ad-month" required>
+                            <input type="hidden" name="bs_month" id="bulk-target-bs-month">
+                            <input type="hidden" name="bs_year" id="bulk-target-bs-year">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Posts *</label>
+                                <input type="number" name="target_posts" required min="0" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Reels *</label>
+                                <input type="number" name="target_reels" required min="0" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Boosts *</label>
+                                <input type="number" name="target_boosts" required min="0" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
+                            <textarea name="notes" rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+                <button type="button" onclick="closeModal('bulk-target-modal')" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+                <button type="submit" form="bulk-target-form" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">Set All Targets</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Create Target Modal -->
 <div id="create-target-modal" class="modal hidden fixed inset-0 z-50 overflow-y-auto">
     <div class="modal-overlay absolute inset-0 bg-black opacity-50"></div>
@@ -144,8 +218,15 @@
                             <label for="target-month" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Month & Year *
                             </label>
-                            <x-nepali-month-picker id="create-target-picker" adInputId="create-target-ad-month" placeholder="Select Month" />
+                            <x-nepali-month-picker id="create-target-picker" 
+                                adInputId="create-target-ad-month" 
+                                bsMonthInputId="create-target-bs-month" 
+                                bsYearInputId="create-target-bs-year" 
+                                value="{{ $bsYear . '-' . str_pad($bsMonth, 2, '0', STR_PAD_LEFT) }}"
+                                placeholder="Select Month" />
                             <input type="hidden" name="month" id="create-target-ad-month" required>
+                            <input type="hidden" name="bs_month" id="create-target-bs-month">
+                            <input type="hidden" name="bs_year" id="create-target-bs-year">
                         </div>
                         
                         <div class="grid grid-cols-2 gap-4">
@@ -237,8 +318,14 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Month & Year *</label>
-                            <x-nepali-month-picker id="edit-target-picker" adInputId="edit-target-ad-month" placeholder="Select Month" />
+                            <x-nepali-month-picker id="edit-target-picker" 
+                                adInputId="edit-target-ad-month" 
+                                bsMonthInputId="edit-target-bs-month" 
+                                bsYearInputId="edit-target-bs-year" 
+                                placeholder="Select Month" />
                             <input type="hidden" name="month" id="edit-target-ad-month">
+                            <input type="hidden" name="bs_month" id="edit-target-bs-month">
+                            <input type="hidden" name="bs_year" id="edit-target-bs-year">
                         </div>
                         
                         
@@ -425,8 +512,11 @@
                                 @foreach($historyTargets as $target)
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                            @php $targetBs = $dateHelpers->adToBs($target->month); @endphp
-                                            {{ $nepaliTranslate($targetBs['month'], 'month') }} {{ $targetBs['year'] }}
+                                            @php 
+                                                $m = $target->bs_month ?? $dateHelpers->representativeAdToBs($target->month)['month'];
+                                                $y = $target->bs_year ?? $dateHelpers->representativeAdToBs($target->month)['year'];
+                                            @endphp
+                                            {{ $nepaliTranslate($m, 'month') }} {{ $y }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                             {{ $target->target_posts }} / {{ $target->target_reels }} / {{ $target->target_boosts }}
@@ -449,8 +539,11 @@
                                                     @csrf
                                                     @method('PUT')
                                                     <input type="hidden" name="month" value="{{ date('Y-m', strtotime($target->month)) }}">
+                                                    <input type="hidden" name="bs_month" value="{{ $target->bs_month }}">
+                                                    <input type="hidden" name="bs_year" value="{{ $target->bs_year }}">
                                                     <input type="hidden" name="target_posts" value="{{ $target->target_posts }}">
                                                     <input type="hidden" name="target_reels" value="{{ $target->target_reels }}">
+                                                    <input type="hidden" name="target_boosts" value="{{ $target->target_boosts }}">
                                                     <input type="hidden" name="status" value="active">
                                                     <button type="submit" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" title="Restore to Active">
                                                         <i class="fas fa-undo-alt mr-1"></i> Restore
@@ -484,6 +577,11 @@
 </div>
 
 <script>
+    const monthNames = [
+        'Baisakh', 'Jestha', 'Asar', 'Shrawan', 'Bhadra', 'Ashwin',
+        'Kartik', 'Mangsir', 'Poush', 'Magh', 'Falgun', 'Chaitra'
+    ];
+
     // Event delegation for view and edit buttons
     document.addEventListener('DOMContentLoaded', function() {
         console.log('Monthly targets: DOMContentLoaded - Setting up event listeners');
@@ -519,33 +617,37 @@
     });
 
     function openEditTargetModal(target) {
-        console.log('Opening Edit Modal for Target:', target);
-        console.log('Checking if openModal is defined:', typeof openModal);
-        console.log('Checking if NepaliFunctions is defined:', typeof NepaliFunctions);
-        
         try {
             // Handle Date Conversion for Display
             const adStr = target.month.substring(0, 7); // Format 2024-03
-            console.log('AD String:', adStr);
             document.getElementById('edit-target-ad-month').value = adStr;
             
             // Convert AD string to Nepali object for display
             if (typeof NepaliFunctions === 'undefined') {
-                console.error('NepaliFunctions is not defined!');
                 alert('Error: NepaliFunctions library not loaded. Please refresh the page.');
                 return;
             }
             
             const adObj = NepaliFunctions.ConvertToDateObject(adStr + "-01", "YYYY-MM-DD");
-            const bsDate = NepaliFunctions.AD2BS(adObj);
-            console.log('BS Date:', bsDate);
+            
+            // Representative Conversion: 
+            // Apr(4) to Dec(12) -> BS Month = Month - 3, BS Year = Year + 57
+            // Jan(1) to Mar(3) -> BS Month = Month + 9, BS Year = Year + 56
+            let bsMonth, bsYear;
+            if (adObj.month >= 4) {
+                bsMonth = adObj.month - 3;
+                bsYear = adObj.year + 57;
+            } else {
+                bsMonth = adObj.month + 9;
+                bsYear = adObj.year + 56;
+            }
             
             // Dispatch event to the custom Alpine picker
             window.dispatchEvent(new CustomEvent('set-month', { 
                 detail: { 
                     targetId: 'edit-target-picker', 
-                    year: bsDate.year, 
-                    month: bsDate.month 
+                    year: bsYear, 
+                    month: bsMonth 
                 } 
             }));
 
@@ -572,12 +674,9 @@
             // Update form action
             document.getElementById('edit-target-form').action = `/monthly-targets/${target.id}`;
             
-            console.log('About to call openModal...');
             if (typeof openModal === 'function') {
                 openModal('edit-target-modal');
-                console.log('openModal called successfully');
             } else {
-                console.error('openModal is not a function!');
                 alert('Error: openModal function not found. Please refresh the page.');
             }
         } catch (e) {
@@ -591,16 +690,22 @@
         try {
             // Convert to BS for display
             const adDateStr = target.month.substring(0, 10);
-            const adDateObj = NepaliFunctions.ConvertToDateObject(adDateStr, "YYYY-MM-DD");
-            const bsDateObj = NepaliFunctions.AD2BS(adDateObj);
+            const adObj = NepaliFunctions.ConvertToDateObject(adDateStr, "YYYY-MM-DD");
             
-            const monthNames = [
-                'Baisakh', 'Jestha', 'Asar', 'Shrawan', 'Bhadra', 'Ashwin',
-                'Kartik', 'Mangsir', 'Poush', 'Magh', 'Falgun', 'Chaitra'
-            ];
-            const bsMonthName = monthNames[bsDateObj.month - 1] || '';
+            // Representative Conversion
+            let bsMonth, bsYear;
+            if (adObj.month >= 4) {
+                bsMonth = adObj.month - 3;
+                bsYear = adObj.year + 57;
+            } else {
+                bsMonth = adObj.month + 9;
+                bsYear = adObj.year + 56;
+            }
             
-            document.getElementById('view-target-bs-month').value = bsMonthName + " " + bsDateObj.year;
+            const bsMonthName = monthNames[(target.bs_month || bsMonth) - 1] || '';
+            const displayBsYear = target.bs_year || bsYear;
+            
+            document.getElementById('view-target-bs-month').value = bsMonthName + " " + displayBsYear;
 
             document.getElementById('view-target-posts').value = target.target_posts;
             document.getElementById('view-target-reels').value = target.target_reels;

@@ -1,0 +1,144 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Boost;
+use App\Models\Client;
+use App\Models\MonthlyTarget;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class BoostController extends Controller
+{
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'client_id' => 'required|exists:clients,id',
+            'title' => 'required|string|max:255',
+            'platform' => 'required|in:Instagram,TikTok,Facebook',
+            'boosted_content_type' => 'required|in:Post,Reel',
+            'date' => 'required|date',
+            'url' => 'nullable|url|max:500',
+            'amount' => 'required|numeric|min:0',
+            'remarks' => 'nullable|string|max:1000',
+        ]);
+
+        $date = \Carbon\Carbon::parse($validated['date']);
+        $now = \Carbon\Carbon::now();
+        $contentBs = \App\Helpers\NepaliDateHelper::adToBs($date);
+        $nowBs = \App\Helpers\NepaliDateHelper::adToBs($now);
+
+        // 1. Prevent future dates
+        if ($date->isFuture()) {
+            return redirect()->back()->withInput()->with('error', 'Cannot create boost records for upcoming dates.');
+        }
+
+        // 2. Prevent creating boosts for months ahead of the current real Nepali month
+        if ($contentBs['year'] > $nowBs['year'] || ($contentBs['year'] == $nowBs['year'] && $contentBs['month'] > $nowBs['month'])) {
+            return redirect()->back()->withInput()->with('error', 'Cannot create boost records for future Nepali months.');
+        }
+
+        // 3. Context-based validation: Date must match the dashboard context
+        if ($request->has('context_bs_month') && $request->has('context_bs_year')) {
+            $contextBsMonth = (int) $request->context_bs_month;
+            $contextBsYear = (int) $request->context_bs_year;
+            
+            if ($contentBs['month'] !== $contextBsMonth || $contentBs['year'] !== $contextBsYear) {
+                return redirect()->back()->withInput()->with('error', 'Selected date must match the dashboard month context (Nepali Calendar).');
+            }
+        }
+
+        $boost = Boost::create([
+            'user_id' => Auth::id(),
+            'client_id' => $validated['client_id'],
+            'title' => $validated['title'],
+            'platform' => $validated['platform'],
+            'boosted_content_type' => $validated['boosted_content_type'],
+            'date' => $validated['date'],
+            'url' => $validated['url'],
+            'amount' => $validated['amount'],
+            'remarks' => $validated['remarks'],
+        ]);
+
+        // Check and update target status
+        $bsDate = \App\Helpers\NepaliDateHelper::adToBs($date);
+        $repAd = \App\Helpers\NepaliDateHelper::bsToAd($bsDate['month'], $bsDate['year']);
+        
+        $target = MonthlyTarget::where('client_id', $validated['client_id'])
+            ->whereYear('month', $repAd['year'])
+            ->whereMonth('month', $repAd['month'])
+            ->first();
+
+        if ($target) {
+            $target->checkCompletionStatus();
+        }
+
+        return redirect()->back()->with('success', 'Boost record added successfully.');
+    }
+
+    public function update(Request $request, Boost $boost)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'platform' => 'required|in:Instagram,TikTok,Facebook',
+            'boosted_content_type' => 'required|in:Post,Reel',
+            'date' => 'required|date',
+            'url' => 'nullable|url|max:500',
+            'amount' => 'required|numeric|min:0',
+            'remarks' => 'nullable|string|max:1000',
+        ]);
+
+        $date = \Carbon\Carbon::parse($validated['date']);
+        $now = \Carbon\Carbon::now();
+
+        // 1. Prevent future dates
+        if ($date->isFuture()) {
+            return redirect()->back()->withInput()->with('error', 'Cannot update boost records to upcoming dates or months.');
+        }
+
+        // 2. Prevent updating boosts to future months
+        if ($date->year > $now->year || ($date->year == $now->year && $date->month > $now->month)) {
+            return redirect()->back()->withInput()->with('error', 'Cannot update boost records to future months.');
+        }
+
+        $boost->update($validated);
+
+        // Check and update target status
+        $bsDate = \App\Helpers\NepaliDateHelper::adToBs($date);
+        $repAd = \App\Helpers\NepaliDateHelper::bsToAd($bsDate['month'], $bsDate['year']);
+        
+        $target = MonthlyTarget::where('client_id', $boost->client_id)
+            ->whereYear('month', $repAd['year'])
+            ->whereMonth('month', $repAd['month'])
+            ->first();
+
+        if ($target) {
+            $target->checkCompletionStatus();
+        }
+
+        return redirect()->back()->with('success', 'Boost record updated successfully.');
+    }
+
+    public function destroy(Boost $boost)
+    {
+        $clientId = $boost->client_id;
+        $date = $boost->date;
+        
+        $boost->delete();
+
+        // Check and update target status
+        $bsDate = \App\Helpers\NepaliDateHelper::adToBs($date);
+        $repAd = \App\Helpers\NepaliDateHelper::bsToAd($bsDate['month'], $bsDate['year']);
+        
+        $target = MonthlyTarget::where('client_id', $clientId)
+            ->whereYear('month', $repAd['year'])
+            ->whereMonth('month', $repAd['month'])
+            ->first();
+
+        if ($target) {
+            $target->checkCompletionStatus();
+        }
+
+        return redirect()->back()->with('success', 'Boost record deleted successfully.');
+    }
+}

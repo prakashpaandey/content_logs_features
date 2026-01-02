@@ -27,7 +27,17 @@
              -->
             <!-- Progress Visualization -->
             <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Monthly Progress</h3>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Monthly Progress</h3>
+                    @if($currentTarget)
+                        <span class="px-3 py-1 text-xs font-bold rounded-full uppercase tracking-widest
+                            {{ $currentTarget->status === 'completed' 
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
+                                : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' }}">
+                            {{ ucfirst($currentTarget->status) }}
+                        </span>
+                    @endif
+                </div>
                 <div class="space-y-6">
                     @php
                         // $currentTarget is passed from controller and represents the target for the current month
@@ -96,19 +106,18 @@
                     </div>
                     
                     <!-- Stats Summary -->
-                    <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <div class="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                             <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $metrics['total_posts'] + $metrics['total_reels'] + $metrics['total_boosts'] }}</div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Total Done</div>
                         </div>
                         <div class="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            @php
-                                $totalTarget = $currentTarget ? ($currentTarget->target_posts + $currentTarget->target_reels + $currentTarget->target_boosts) : 0;
-                                $totalDone = $metrics['total_posts'] + $metrics['total_reels'] + $metrics['total_boosts'];
-                                $left = max(0, $totalTarget - $totalDone);
-                            @endphp
-                            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $left }}</div>
+                            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $metrics['total_left'] ?? 0 }}</div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Total Left</div>
+                        </div>
+                        <div class="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">Rs. {{ number_format($metrics['total_boost_amount'], 0) }}</div>
+                            <div class="text-sm text-blue-500 dark:text-blue-300">Boost Amount</div>
                         </div>
                     </div>
                 </div>
@@ -119,18 +128,41 @@
     <!-- Monthly Targets -->
     @include('partials.monthly-targets')
     
-    <!-- Content Table -->
-    <div class="mt-8">
+    <!-- Content & Boosts Section -->
+    <div class="mt-8" x-data="{ activeTab: 'content' }">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4 sm:gap-0">
-            @php $currentBs = $dateHelpers->adToBs($dateContext); @endphp
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Social Content for {{ $nepaliTranslate($currentBs['month'], 'month') }} {{ $currentBs['year'] }}</h2>
-            <button onclick="openModal('add-content-modal')" class="w-full sm:w-auto justify-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
-                <i class="fas fa-plus mr-2"></i>
-                Add Content
-            </button>
+            <div class="flex items-center space-x-1 p-1 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
+                <button @click="activeTab = 'content'" 
+                        :class="activeTab === 'content' ? 'bg-white dark:bg-gray-800 shadow-sm text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
+                        class="px-4 py-1.5 text-sm font-medium rounded-md transition-all duration-200">
+                    Social Content
+                </button>
+                <button @click="activeTab = 'boosts'" 
+                        :class="activeTab === 'boosts' ? 'bg-white dark:bg-gray-800 shadow-sm text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
+                        class="px-4 py-1.5 text-sm font-medium rounded-md transition-all duration-200">
+                    Boost Tracking
+                </button>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <button x-show="activeTab === 'content'" @click="openModal('add-content-modal')" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
+                    <i class="fas fa-plus mr-2"></i>
+                    Add Content
+                </button>
+                <button x-show="activeTab === 'boosts'" @click="openModal('add-boost-modal')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
+                    <i class="fas fa-rocket mr-2"></i>
+                    Add Boost Record
+                </button>
+            </div>
         </div>
         
-        @include('components.data-table')
+        <div x-show="activeTab === 'content'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+            @include('components.data-table', ['contentData' => $contentData, 'bsMonth' => $bsMonth, 'bsYear' => $bsYear])
+        </div>
+
+        <div x-show="activeTab === 'boosts'" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+            @include('components.boosts-table', ['boostData' => $boostData, 'bsMonth' => $bsMonth, 'bsYear' => $bsYear])
+        </div>
     </div>
 </div>
 

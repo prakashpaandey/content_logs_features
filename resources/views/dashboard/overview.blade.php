@@ -8,43 +8,26 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">All Clients Overview</h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    @php $currentBs = $dateHelpers->adToBs($dateContext); @endphp
+                    @php $currentBs = ['month' => $bsMonth, 'year' => $bsYear]; @endphp
                     Monitoring progress for all active clients in {{ $nepaliTranslate($currentBs['month'], 'month') }} {{ $currentBs['year'] }}
                 </p>
             </div>
             
             <div class="flex items-center gap-3">
                 
-                <div class="flex items-center bg-gray-50 dark:bg-gray-700/50 p-1 rounded-xl border border-gray-200 dark:border-gray-600">
-                    @php
-                        // Calculate BS Prev/Next
-                        $prevBsMonth = $currentBs['month'] - 1;
-                        $prevBsYear = $currentBs['year'];
-                        if ($prevBsMonth < 1) { $prevBsMonth = 12; $prevBsYear--; }
-                        
-                        $nextBsMonth = $currentBs['month'] + 1;
-                        $nextBsYear = $currentBs['year'];
-                        if ($nextBsMonth > 12) { $nextBsMonth = 1; $nextBsYear++; }
-                    @endphp
-                    <a href="{{ route('clients.overview', ['month' => $prevBsMonth, 'year' => $prevBsYear]) }}" 
-                       @click.stop
-                       class="p-2 hover:bg-white dark:hover:bg-gray-600 rounded-lg text-gray-600 dark:text-gray-400 transition-all">
-                        <i class="fas fa-chevron-left text-xs"></i>
-                    </a>
-                    <span class="px-4 text-sm font-bold text-gray-900 dark:text-white min-w-[120px] text-center">
-                        {{ $nepaliTranslate($currentBs['month'], 'month') }} {{ $currentBs['year'] }}
-                    </span>
-                    <a href="{{ route('clients.overview', ['month' => $nextBsMonth, 'year' => $nextBsYear]) }}" 
-                       @click.stop
-                       class="p-2 hover:bg-white dark:hover:bg-gray-600 rounded-lg text-gray-600 dark:text-gray-400 transition-all">
-                        <i class="fas fa-chevron-right text-xs"></i>
-                    </a>
+                <div class="flex items-center space-x-2 min-w-[220px]">
+                    <x-nepali-month-picker 
+                        id="overview-month-nav" 
+                        value="{{ $bsYear . '-' . str_pad($bsMonth, 2, '0', STR_PAD_LEFT) }}"
+                        placeholder="Select Month"
+                        redirectPattern="{{ route('clients.overview') }}?month=:month&year=:year" 
+                    />
                 </div>
             </div>
         </div>
 
         <!-- Portfolio Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
             <div class="bg-purple-50 dark:bg-purple-900/10 p-4 rounded-xl border border-purple-100 dark:border-purple-900/20">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Total Posts</span>
@@ -77,6 +60,16 @@
                     <span class="text-sm text-gray-500">/ {{ $totalAgencyMetrics['target_boosts'] }}</span>
                 </div>
             </div>
+
+            <div class="bg-yellow-50 dark:bg-yellow-900/10 p-4 rounded-xl border border-yellow-100 dark:border-yellow-900/20">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-yellow-600 dark:text-yellow-400 uppercase tracking-wider">Boost Amount</span>
+                    <i class="fas fa-hand-holding-usd text-yellow-500"></i>
+                </div>
+                <div class="mt-2 flex items-baseline gap-2">
+                    <span class="text-2xl font-black text-gray-900 dark:text-white">Rs. {{ number_format($totalAgencyMetrics['boost_amount'], 0) }}</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -91,6 +84,7 @@
                         <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Posts</th>
                         <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Reels</th>
                         <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Boosts</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Boost Amt</th>
                         <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                     </tr>
@@ -153,6 +147,9 @@
                                     </div>
                                     <span class="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[35px] text-right">{{ $boostProgress }}%</span>
                                 </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <span class="text-sm font-bold text-gray-900 dark:text-white">Rs. {{ number_format($data['boost_amount'], 0) }}</span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                 @if($data['target'])

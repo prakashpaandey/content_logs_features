@@ -1,8 +1,11 @@
-@props(['id', 'name' => null, 'value' => null, 'adInputId' => null, 'placeholder' => 'Select Month'])
+@props(['id', 'name' => null, 'value' => null, 'adInputId' => null, 'bsMonthInputId' => null, 'bsYearInputId' => null, 'placeholder' => 'Select Month', 'redirectPattern' => null])
 
 <div x-data="nepaliMonthPicker({
     adInputId: '{{ $adInputId }}',
-    initialBsValue: '{{ $value }}'
+    bsMonthInputId: '{{ $bsMonthInputId }}',
+    bsYearInputId: '{{ $bsYearInputId }}',
+    initialBsValue: '{{ $value }}',
+    redirectPattern: '{{ $redirectPattern }}'
 })" 
 @set-month.window="if($event.detail.targetId === '{{ $id }}') { selectedYear = parseInt($event.detail.year); selectedMonth = parseInt($event.detail.month) - 1; viewYear = selectedYear; updateDisplay(); }"
 class="relative w-full" id="{{ $id }}">

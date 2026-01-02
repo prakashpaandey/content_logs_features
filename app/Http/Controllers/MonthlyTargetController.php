@@ -32,6 +32,8 @@ class MonthlyTargetController extends Controller
         $validated = $request->validate([
             'client_id' => 'required|exists:clients,id',
             'month' => 'required|date_format:Y-m',
+            'bs_month' => 'nullable|integer',
+            'bs_year' => 'nullable|integer',
             'target_posts' => 'required|integer|min:0',
             'target_reels' => 'required|integer|min:0',
             'target_boosts' => 'required|integer|min:0',
@@ -43,7 +45,8 @@ class MonthlyTargetController extends Controller
 
         // Check for duplicates
         if (\App\Models\MonthlyTarget::where('client_id', $validated['client_id'])
-            ->where('month', $validated['month'])
+            ->where('bs_month', $validated['bs_month'])
+            ->where('bs_year', $validated['bs_year'])
             ->exists()) {
             return redirect()->back()->with('error', 'A target for this month already exists!');
         }
@@ -76,6 +79,8 @@ class MonthlyTargetController extends Controller
     {
         $validated = $request->validate([
             'month' => 'required|date_format:Y-m',
+            'bs_month' => 'nullable|integer',
+            'bs_year' => 'nullable|integer',
             'target_posts' => 'required|integer|min:0',
             'target_reels' => 'required|integer|min:0',
             'target_boosts' => 'required|integer|min:0',
@@ -87,12 +92,7 @@ class MonthlyTargetController extends Controller
 
         // Prevent setting status to 'completed' if targets are not met
         if ($request->input('status') === 'completed') {
-            $actualPosts = $monthlyTarget->client->contents()
-                ->whereYear('date', \Carbon\Carbon::parse($validated['month'])->year)
-                ->whereMonth('date', \Carbon\Carbon::parse($validated['month'])->month)
-                ->where('type', 'Post')
-                ->count();
-
+            $actualPosts = $monthlyTarget->getActualPosts();
             $actualReels = $monthlyTarget->getActualReels();
             $actualBoosts = $monthlyTarget->getActualBoosts();
                 
@@ -125,6 +125,8 @@ class MonthlyTargetController extends Controller
     {
         $validated = $request->validate([
             'month' => 'required|date_format:Y-m',
+            'bs_month' => 'nullable|integer',
+            'bs_year' => 'nullable|integer',
             'target_posts' => 'required|integer|min:0',
             'target_reels' => 'required|integer|min:0',
             'target_boosts' => 'required|integer|min:0',
@@ -137,8 +139,12 @@ class MonthlyTargetController extends Controller
 
         foreach ($clients as $client) {
             $client->monthlyTargets()->updateOrCreate(
-                ['month' => $month],
                 [
+                    'bs_month' => $validated['bs_month'] ?? \App\Helpers\NepaliDateHelper::representativeAdToBs($month)['month'],
+                    'bs_year' => $validated['bs_year'] ?? \App\Helpers\NepaliDateHelper::representativeAdToBs($month)['year']
+                ],
+                [
+                    'month' => $month,
                     'user_id' => $user->id,
                     'target_posts' => $validated['target_posts'],
                     'target_reels' => $validated['target_reels'],

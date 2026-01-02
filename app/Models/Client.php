@@ -24,4 +24,9 @@ class Client extends Model
     {
         return $this->hasMany(MonthlyTarget::class);
     }
+
+    public function boosts()
+    {
+        return $this->hasMany(Boost::class);
+    }
 }

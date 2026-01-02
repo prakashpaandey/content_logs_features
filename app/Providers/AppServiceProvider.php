@@ -65,31 +65,15 @@ class AppServiceProvider extends ServiceProvider
         // BS to AD and AD to BS Helpers
         View::share('dateHelpers', new class {
             public function adToBs($adDate) {
-                $carbon = is_string($adDate) ? \Carbon\Carbon::parse($adDate) : $adDate;
-                $m = $carbon->month;
-                $y = $carbon->year;
-                
-                if ($m >= 4) {
-                    $bsMonth = $m - 3;
-                    $bsYear = $y + 57;
-                } else {
-                    $bsMonth = $m + 9;
-                    $bsYear = $y + 56;
-                }
-                
-                return ['month' => $bsMonth, 'year' => $bsYear];
+                return \App\Helpers\NepaliDateHelper::adToBs($adDate);
+            }
+
+            public function representativeAdToBs($adDate) {
+                return \App\Helpers\NepaliDateHelper::representativeAdToBs($adDate);
             }
 
             public function bsToAd($bsMonth, $bsYear) {
-                if ($bsMonth <= 9) {
-                    $adMonth = $bsMonth + 3;
-                    $adYear = $bsYear - 57;
-                } else {
-                    $adMonth = $bsMonth - 9;
-                    $adYear = $bsYear - 56;
-                }
-                
-                return ['month' => $adMonth, 'year' => $adYear];
+                return \App\Helpers\NepaliDateHelper::bsToAd($bsMonth, $bsYear);
             }
         });
     }

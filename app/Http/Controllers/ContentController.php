@@ -39,14 +39,39 @@ class ContentController extends Controller
             'remarks' => 'nullable|string',
         ]);
 
+        $date = \Carbon\Carbon::parse($validated['date']);
+        $now = \Carbon\Carbon::now();
+        $contentBs = \App\Helpers\NepaliDateHelper::adToBs($date);
+        $nowBs = \App\Helpers\NepaliDateHelper::adToBs($now);
+
+        // 1. Prevent future dates
+        if ($date->isFuture()) {
+            return redirect()->back()->withInput()->with('error', 'Cannot create content for upcoming dates.');
+        }
+
+        // 2. Prevent creating content for months ahead of the current real Nepali month
+        if ($contentBs['year'] > $nowBs['year'] || ($contentBs['year'] == $nowBs['year'] && $contentBs['month'] > $nowBs['month'])) {
+            return redirect()->back()->withInput()->with('error', 'Cannot create content for future Nepali months.');
+        }
+
+        // 3. Context-based validation: Date must match the dashboard context
+        if ($request->has('context_bs_month') && $request->has('context_bs_year')) {
+            $contextBsMonth = (int) $request->context_bs_month;
+            $contextBsYear = (int) $request->context_bs_year;
+            
+            if ($contentBs['month'] !== $contextBsMonth || $contentBs['year'] !== $contextBsYear) {
+                return redirect()->back()->withInput()->with('error', 'Selected date must match the dashboard month context (Nepali Calendar).');
+            }
+        }
+
         auth()->user()->contents()->create($validated);
 
         // Check Monthly Target for completion
         try {
-            $date = \Carbon\Carbon::parse($validated['date']);
+            $repAd = \App\Helpers\NepaliDateHelper::bsToAd($contentBs['month'], $contentBs['year']);
             $target = \App\Models\MonthlyTarget::where('client_id', $validated['client_id'])
-                ->whereYear('month', $date->year)
-                ->whereMonth('month', $date->month)
+                ->whereYear('month', $repAd['year'])
+                ->whereMonth('month', $repAd['month'])
                 ->first();
 
             if ($target) {
@@ -89,14 +114,29 @@ class ContentController extends Controller
             'remarks' => 'nullable|string',
         ]);
 
+        $date = \Carbon\Carbon::parse($validated['date']);
+        $now = \Carbon\Carbon::now();
+
+        // 1. Prevent future dates
+        if ($date->isFuture()) {
+            return redirect()->back()->withInput()->with('error', 'Cannot update content to upcoming dates or months.');
+        }
+
+        // 2. Prevent updating content to future months
+        if ($date->year > $now->year || ($date->year == $now->year && $date->month > $now->month)) {
+            return redirect()->back()->withInput()->with('error', 'Cannot update content to future months.');
+        }
+
         $content->update($validated);
 
         // Check Monthly Target for completion
         try {
-            $date = \Carbon\Carbon::parse($validated['date']);
+            $contentBs = \App\Helpers\NepaliDateHelper::adToBs($date);
+            $repAd = \App\Helpers\NepaliDateHelper::bsToAd($contentBs['month'], $contentBs['year']);
+            
             $target = \App\Models\MonthlyTarget::where('client_id', $content->client_id)
-                ->whereYear('month', $date->year)
-                ->whereMonth('month', $date->month)
+                ->whereYear('month', $repAd['year'])
+                ->whereMonth('month', $repAd['month'])
                 ->first();
 
             if ($target) {
@@ -121,9 +161,12 @@ class ContentController extends Controller
 
         // Check Monthly Target for completion (revert if needed)
         try {
+            $contentBs = \App\Helpers\NepaliDateHelper::adToBs($date);
+            $repAd = \App\Helpers\NepaliDateHelper::bsToAd($contentBs['month'], $contentBs['year']);
+            
             $target = \App\Models\MonthlyTarget::where('client_id', $clientId)
-                ->whereYear('month', $date->year)
-                ->whereMonth('month', $date->month)
+                ->whereYear('month', $repAd['year'])
+                ->whereMonth('month', $repAd['month'])
                 ->first();
 
             if ($target) {

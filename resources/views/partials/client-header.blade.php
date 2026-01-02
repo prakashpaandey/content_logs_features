@@ -44,16 +44,16 @@
     
     <!-- Month Navigation -->
     @php
-        $currentBs = $dateHelpers->adToBs($dateContext);
+        $currentBs = ['month' => $bsMonth, 'year' => $bsYear];
         
         // Calculate Prev BS Month
-        $prevBsMonth = $currentBs['month'] - 1;
-        $prevBsYear = $currentBs['year'];
+        $prevBsMonth = $bsMonth - 1;
+        $prevBsYear = $bsYear;
         if ($prevBsMonth < 1) { $prevBsMonth = 12; $prevBsYear--; }
         
         // Calculate Next BS Month
-        $nextBsMonth = $currentBs['month'] + 1;
-        $nextBsYear = $currentBs['year'];
+        $nextBsMonth = $bsMonth + 1;
+        $nextBsYear = $bsYear;
         if ($nextBsMonth > 12) { $nextBsMonth = 1; $nextBsYear++; }
     @endphp
     <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between">
@@ -65,11 +65,13 @@
                 <i class="fas fa-chevron-left text-xs"></i>
             </a>
             
-            <div class="flex items-center bg-gray-50 dark:bg-gray-700/50 px-4 py-1.5 rounded-lg border border-gray-100 dark:border-gray-700">
-                <i class="fas fa-calendar-alt mr-2 text-primary-500"></i>
-                <span class="text-sm font-bold text-gray-900 dark:text-white">
-                    {{ $nepaliTranslate($currentBs['month'], 'month') }} {{ $currentBs['year'] }}
-                </span>
+            <div class="flex items-center space-x-2 min-w-[200px]">
+                <x-nepali-month-picker 
+                    id="dashboard-month-nav" 
+                    value="{{ $bsYear . '-' . str_pad($bsMonth, 2, '0', STR_PAD_LEFT) }}"
+                    placeholder="Select Month"
+                    redirectPattern="{{ route('dashboard.index', ['client_id' => $selectedClient->id]) }}&month=:month&year=:year" 
+                />
             </div>
 
             <a href="{{ route('dashboard.index', ['client_id' => $selectedClient->id, 'month' => $nextBsMonth, 'year' => $nextBsYear]) }}" 
@@ -79,7 +81,12 @@
                 <i class="fas fa-chevron-right text-xs"></i>
             </a>
             
-            @if(!$dateContext->isCurrentMonth())
+            @php
+                $todayBs = \App\Helpers\NepaliDateHelper::adToBs(now());
+                $isCurrentMonth = ($bsMonth == $todayBs['month'] && $bsYear == $todayBs['year']);
+            @endphp
+            
+            @if(!$isCurrentMonth)
                 <a href="{{ route('dashboard.index', ['client_id' => $selectedClient->id]) }}" 
                    class="ml-2 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-xs font-bold uppercase tracking-wider transition-colors">
                     Reset

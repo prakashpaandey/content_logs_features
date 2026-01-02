@@ -99,6 +99,8 @@
                 viewYear: 2081,
                 displayBs: '',
                 adInputId: config.adInputId,
+                bsMonthInputId: config.bsMonthInputId,
+                bsYearInputId: config.bsYearInputId,
 
                 init() {
                     // If we have an initial value (BS format YYYY-MM)
@@ -109,20 +111,29 @@
                             this.selectedMonth = parseInt(parts[1]) - 1;
                             this.viewYear = this.selectedYear;
                             this.updateDisplay();
+                            this.syncToBSFields();
                         }
                     } else {
-                        // Default to current BS month
+                        // Default to current BS month using stable logic
                         const todayAD = new Date();
-                        if (typeof NepaliFunctions !== 'undefined') {
-                            const bsToday = NepaliFunctions.AD2BS({
-                                year: todayAD.getFullYear(),
-                                month: todayAD.getMonth() + 1,
-                                day: todayAD.getDate()
-                            });
-                            this.viewYear = bsToday.year;
+                        const adM = todayAD.getMonth() + 1;
+                        const adY = todayAD.getFullYear();
+                        
+                        let bsM, bsY;
+                        if (adM >= 4) {
+                            bsM = adM - 3;
+                            bsY = adY + 57;
                         } else {
-                            this.viewYear = 2081;
+                            bsM = adM + 9;
+                            bsY = adY + 56;
                         }
+                        
+                        this.selectedMonth = bsM - 1;
+                        this.selectedYear = bsY;
+                        this.viewYear = bsY;
+                        this.updateDisplay();
+                        this.syncToAd();
+                        this.syncToBSFields();
                     }
                 },
 
@@ -139,10 +150,19 @@
                     this.selectedYear = this.viewYear;
                     this.updateDisplay();
                     this.syncToAd();
+                    this.syncToBSFields();
                     this.open = false;
+
+                    if (config.redirectPattern && config.redirectPattern !== '') {
+                        const url = config.redirectPattern
+                            .replace(':month', this.selectedMonth + 1)
+                            .replace(':year', this.selectedYear);
+                        window.location.href = url;
+                    }
                 },
 
                 updateDisplay() {
+                    if (this.selectedMonth === null) return;
                     const month = this.nepaliMonths[this.selectedMonth];
                     if (month) {
                         this.displayBs = `${month.english} ${this.selectedYear}`;
@@ -150,19 +170,41 @@
                 },
 
                 syncToAd() {
-                    if (!this.adInputId) return;
+                    if (!this.adInputId || this.selectedMonth === null) return;
                     const adInput = document.getElementById(this.adInputId);
-                    if (adInput && typeof NepaliFunctions !== 'undefined') {
-                        // Convert BS to AD (Always use day 1 for month picking)
-                        const adDate = NepaliFunctions.BS2AD({
-                            year: this.selectedYear,
-                            month: this.selectedMonth + 1,
-                            day: 1
-                        });
-                        const year = adDate.year;
-                        const month = String(adDate.month).padStart(2, '0');
-                        adInput.value = `${year}-${month}`;
-                        console.log(`Synced custom BS picked to AD: ${adInput.value}`);
+                    if (adInput) {
+                        // Stable 1-to-1 Mapping:
+                        // BS 1-9 (Baisakh-Poush) -> AD Month = BS + 3, AD Year = BS - 57
+                        // BS 10-12 (Magh-Chaitra) -> AD Month = BS - 9, AD Year = BS - 56
+                        const bsM = this.selectedMonth + 1;
+                        const bsY = this.selectedYear;
+                        let adM, adY;
+                        
+                        if (bsM <= 9) {
+                            adM = bsM + 3;
+                            adY = bsY - 57;
+                        } else {
+                            adM = bsM - 9;
+                            adY = bsY - 56;
+                        }
+                        
+                        const monthStr = String(adM).padStart(2, '0');
+                        adInput.value = `${adY}-${monthStr}`;
+                    }
+                },
+
+                syncToBSFields() {
+                    if (this.selectedMonth === null) return;
+                    const bsM = this.selectedMonth + 1;
+                    const bsY = this.selectedYear;
+
+                    if (this.bsMonthInputId) {
+                        const mInput = document.getElementById(this.bsMonthInputId);
+                        if (mInput) mInput.value = bsM;
+                    }
+                    if (this.bsYearInputId) {
+                        const yInput = document.getElementById(this.bsYearInputId);
+                        if (yInput) yInput.value = bsY;
                     }
                 }
             }));
@@ -545,6 +587,9 @@
                     }, {
                         name: 'Reels',
                         data: chartData.monthlyProgression.reels
+                    }, {
+                        name: 'Boosts',
+                        data: chartData.monthlyProgression.boosts
                     }],
                     chart: {
                         height: 350,
@@ -553,7 +598,7 @@
                         toolbar: { show: true },
                         foreColor: textColor
                     },
-                    colors: ['#3B82F6', '#10B981'],
+                    colors: ['#3B82F6', '#10B981', '#F59E0B'],
                     dataLabels: { enabled: false },
                     stroke: { curve: 'smooth', width: 3 },
                     title: {
@@ -600,6 +645,12 @@
                     }, {
                         name: 'Actual Reels',
                         data: chartData.targetVsActual.actualReels
+                    }, {
+                        name: 'Target Boosts',
+                        data: chartData.targetVsActual.targetBoosts
+                    }, {
+                        name: 'Actual Boosts',
+                        data: chartData.targetVsActual.actualBoosts
                     }],
                     chart: {
                         type: 'bar',
@@ -607,7 +658,7 @@
                         toolbar: { show: true },
                         foreColor: textColor
                     },
-                    colors: ['#3B82F6', '#60A5FA', '#10B981', '#34D399'],
+                    colors: ['#3B82F6', '#60A5FA', '#10B981', '#34D399', '#F59E0B', '#FBBF24'],
                     plotOptions: {
                         bar: { horizontal: false, columnWidth: '55%', borderRadius: 4 }
                     },
@@ -751,28 +802,73 @@
             inputs.forEach(input => {
                 if (input.dataset.initialized) return;
                 
+                const adInputId = input.getAttribute('data-ad-id');
+                const adInput = adInputId ? document.getElementById(adInputId) : null;
+
+                const syncValue = (val) => {
+                    if (!adInput || !val) return;
+                    try {
+                        let bsDate;
+                        if (typeof val === 'object' && val.year) {
+                            bsDate = val;
+                        } else {
+                            const cleanVal = String(val).trim().replace(/\//g, '-');
+                            bsDate = NepaliFunctions.ConvertToDateObject(cleanVal, "YYYY-MM-DD");
+                        }
+
+                        if (bsDate && bsDate.year) {
+                            const adDate = NepaliFunctions.BS2AD(bsDate);
+                            const adDateStr = NepaliFunctions.ConvertDateFormat(adDate, "YYYY-MM-DD");
+                            adInput.value = adDateStr;
+                        }
+                    } catch (err) {
+                        console.error("Date sync error:", err);
+                    }
+                };
+
                 if (typeof input.nepaliDatePicker === 'function') {
                     input.nepaliDatePicker({
                         ndpYear: true,
                         ndpMonth: true,
                         ndpYearCount: 20,
+                        dateFormat: "YYYY-MM-DD",
                         language: "english",
-                        onChange: function() {
-                            const adInputId = input.getAttribute('data-ad-id');
-                            if (adInputId) {
-                                const val = input.value;
-                                const bsDate = NepaliFunctions.ConvertToDateObject(val, "YYYY-MM-DD");
-                                const adDate = NepaliFunctions.BS2AD(bsDate);
-                                const adDateStr = NepaliFunctions.ConvertDateFormat(adDate, "YYYY-MM-DD");
-                                document.getElementById(adInputId).value = adDateStr;
-                                console.log(`Syncing ${val} (BS) to ${adDateStr} (AD)`);
-                            }
+                        onChange: function(selected) {
+                            // The library may pass a string or an object
+                            syncValue(selected || input.value);
                         }
                     });
+                    
+                    // Sync initial value if present
+                    if (input.value) syncValue(input.value);
+                    
+                    input.addEventListener('change', () => syncValue(input.value));
+                    input.addEventListener('input', () => syncValue(input.value));
                     input.dataset.initialized = "true";
                 }
             });
         };
+
+        // Safety: Ensure all forms sync before submit
+        document.addEventListener('submit', (e) => {
+            const form = e.target;
+            const nepaliInputs = form.querySelectorAll('.nepali-datepicker');
+            nepaliInputs.forEach(input => {
+                const adInputId = input.getAttribute('data-ad-id');
+                const adInput = adInputId ? document.getElementById(adInputId) : null;
+                if (adInput && input.value) {
+                    try {
+                        const cleanVal = String(input.value).trim().replace(/\//g, '-');
+                        const bsDate = NepaliFunctions.ConvertToDateObject(cleanVal, "YYYY-MM-DD");
+                        if (bsDate && bsDate.year) {
+                            const adDate = NepaliFunctions.BS2AD(bsDate);
+                            const adDateStr = NepaliFunctions.ConvertDateFormat(adDate, "YYYY-MM-DD");
+                            adInput.value = adDateStr;
+                        }
+                    } catch (err) { }
+                }
+            });
+        });
 
         window.initializeNepaliMonthPicker = function() {
             const inputs = document.querySelectorAll(".nepali-monthpicker");
