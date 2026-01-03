@@ -43,7 +43,7 @@
                         // $currentTarget is passed from controller and represents the target for the current month
                         $postProgress = $currentTarget && $currentTarget->target_posts > 0 ? min(100, round(($metrics['total_posts'] / $currentTarget->target_posts) * 100)) : 0;
                         $reelProgress = $currentTarget && $currentTarget->target_reels > 0 ? min(100, round(($metrics['total_reels'] / $currentTarget->target_reels) * 100)) : 0;
-                        $boostProgress = $currentTarget && $currentTarget->target_boosts > 0 ? min(100, round(($metrics['total_boosts'] / $currentTarget->target_boosts) * 100)) : 0;
+                        $boostProgress = $currentTarget && $currentTarget->target_boost_budget > 0 ? min(100, round(($metrics['total_boost_amount'] / $currentTarget->target_boost_budget) * 100)) : 0;
                     @endphp
 
                     <!-- Overall Progress -->
@@ -97,7 +97,7 @@
                                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Boosts</span>
                             </div>
                             <span class="text-sm font-medium text-gray-900 dark:text-white">
-                                {{ $boostProgress }}% ({{ $metrics['total_boosts'] }}/{{ $currentTarget ? $currentTarget->target_boosts : 0 }})
+                                {{ $boostProgress }}% ($ {{ number_format($metrics['total_boost_amount']) }} / $ {{ number_format($currentTarget ? $currentTarget->target_boost_budget : 0) }})
                             </span>
                         </div>
                         <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
@@ -116,7 +116,7 @@
                             <div class="text-sm text-gray-500 dark:text-gray-400">Total Left</div>
                         </div>
                         <div class="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">Rs. {{ number_format($metrics['total_boost_amount'], 0) }}</div>
+                            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">$ {{ number_format($metrics['total_boost_amount'], 0) }}</div>
                             <div class="text-sm text-blue-500 dark:text-blue-300">Boost Amount</div>
                         </div>
                     </div>

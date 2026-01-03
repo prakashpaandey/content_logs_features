@@ -36,12 +36,19 @@ class MonthlyTargetController extends Controller
             'bs_year' => 'nullable|integer',
             'target_posts' => 'required|integer|min:0',
             'target_reels' => 'required|integer|min:0',
-            'target_boosts' => 'required|integer|min:0',
+            'target_boost_budget' => 'required|numeric|min:0',
             'notes' => 'nullable|string',
         ]);
 
         // Append day to make it a valid date
         $validated['month'] = $validated['month'] . '-01';
+
+        // Ensure BS dates are populated
+        if (empty($validated['bs_month']) || empty($validated['bs_year'])) {
+            $bsDate = \App\Helpers\NepaliDateHelper::representativeAdToBs($validated['month']);
+            $validated['bs_month'] = $bsDate['month'];
+            $validated['bs_year'] = $bsDate['year'];
+        }
 
         // Check for duplicates
         if (\App\Models\MonthlyTarget::where('client_id', $validated['client_id'])
@@ -51,7 +58,10 @@ class MonthlyTargetController extends Controller
             return redirect()->back()->with('error', 'A target for this month already exists!');
         }
 
-        auth()->user()->monthlyTargets()->create($validated);
+        MonthlyTarget::create([
+            ...$validated,
+            'user_id' => auth()->id(),
+        ]);
 
         return redirect()->back()->with('success', 'Target set successfully.');
     }
@@ -83,7 +93,7 @@ class MonthlyTargetController extends Controller
             'bs_year' => 'nullable|integer',
             'target_posts' => 'required|integer|min:0',
             'target_reels' => 'required|integer|min:0',
-            'target_boosts' => 'required|integer|min:0',
+            'target_boost_budget' => 'required|numeric|min:0',
             'status' => 'required|in:active,completed,archived', // Allow status update here
             'notes' => 'nullable|string',
         ]);
@@ -94,13 +104,13 @@ class MonthlyTargetController extends Controller
         if ($request->input('status') === 'completed') {
             $actualPosts = $monthlyTarget->getActualPosts();
             $actualReels = $monthlyTarget->getActualReels();
-            $actualBoosts = $monthlyTarget->getActualBoosts();
+            $actualBoostAmount = $monthlyTarget->getActualBoostAmount();
                 
             $newTargetPosts = $validated['target_posts'];
             $newTargetReels = $validated['target_reels'];
-            $newTargetBoosts = $validated['target_boosts'];
+            $newTargetBoostBudget = $validated['target_boost_budget'];
 
-            if ($actualPosts < $newTargetPosts || $actualReels < $newTargetReels || $actualBoosts < $newTargetBoosts) {
+            if ($actualPosts < $newTargetPosts || $actualReels < $newTargetReels || $actualBoostAmount < $newTargetBoostBudget) {
                 return redirect()->back()->withErrors(['status' => 'Cannot mark as completed. Actual content counts must meet the targets.']);
             }
         }
@@ -129,13 +139,15 @@ class MonthlyTargetController extends Controller
             'bs_year' => 'nullable|integer',
             'target_posts' => 'required|integer|min:0',
             'target_reels' => 'required|integer|min:0',
-            'target_boosts' => 'required|integer|min:0',
+            'target_boost_budget' => 'required|numeric|min:0',
             'notes' => 'nullable|string',
         ]);
 
         $month = $validated['month'] . '-01';
         $user = auth()->user();
-        $clients = $user->clients;
+        
+        // Fetch ALL active clients globally instead of just user's clients
+        $clients = \App\Models\Client::where('status', 'active')->get();
 
         foreach ($clients as $client) {
             $client->monthlyTargets()->updateOrCreate(
@@ -148,7 +160,7 @@ class MonthlyTargetController extends Controller
                     'user_id' => $user->id,
                     'target_posts' => $validated['target_posts'],
                     'target_reels' => $validated['target_reels'],
-                    'target_boosts' => $validated['target_boosts'],
+                    'target_boost_budget' => $validated['target_boost_budget'],
                     'status' => 'active',
                     'notes' => $validated['notes'],
                 ]

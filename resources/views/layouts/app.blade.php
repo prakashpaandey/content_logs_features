@@ -471,6 +471,9 @@
                 @if(session('error'))
                     this.showToast('{{ session('error') }}', 'error');
                 @endif
+                @if($errors->any())
+                    this.showToast('{{ $errors->first() }}', 'error');
+                @endif
             },
             showToast(msg, type = 'success') {
                 this.message = msg;
@@ -646,11 +649,11 @@
                         name: 'Actual Reels',
                         data: chartData.targetVsActual.actualReels
                     }, {
-                        name: 'Target Boosts',
-                        data: chartData.targetVsActual.targetBoosts
+                        name: 'Boost Budget',
+                        data: chartData.targetVsActual.targetBoostBudget
                     }, {
-                        name: 'Actual Boosts',
-                        data: chartData.targetVsActual.actualBoosts
+                        name: 'Boost Amount',
+                        data: chartData.targetVsActual.actualBoostAmount
                     }],
                     chart: {
                         type: 'bar',

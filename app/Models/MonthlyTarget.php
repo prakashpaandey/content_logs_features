@@ -15,7 +15,7 @@ class MonthlyTarget extends Model
         'bs_year',
         'target_posts',
         'target_reels',
-        'target_boosts',
+        'target_boost_budget',
         'status',
         'notes',
     ];
@@ -23,7 +23,7 @@ class MonthlyTarget extends Model
     protected $appends = [
         'actual_posts',
         'actual_reels',
-        'actual_boosts',
+        'actual_boost_amount',
     ];
 
     public function getActualPostsAttribute()
@@ -36,9 +36,9 @@ class MonthlyTarget extends Model
         return $this->getActualReels();
     }
 
-    public function getActualBoostsAttribute()
+    public function getActualBoostAmountAttribute()
     {
-        return $this->getActualBoosts();
+        return $this->getActualBoostAmount();
     }
 
     public function client()
@@ -52,12 +52,12 @@ class MonthlyTarget extends Model
             // Get actual counts
             $actualPosts = $this->getActualPosts();
             $actualReels = $this->getActualReels();
-            $actualBoosts = $this->getActualBoosts();
+            $actualBoostAmount = $this->getActualBoostAmount();
 
             // Check if targets are met
             if ($actualPosts >= $this->target_posts && 
                 $actualReels >= $this->target_reels && 
-                $actualBoosts >= $this->target_boosts) {
+                $actualBoostAmount >= $this->target_boost_budget) {
                 if ($this->status !== 'completed') {
                     $this->update(['status' => 'completed']);
                 }
@@ -100,7 +100,7 @@ class MonthlyTarget extends Model
             ->count();
     }
 
-    public function getActualBoosts()
+    public function getActualBoostAmount()
     {
         $bsMonth = $this->bs_month ?? \App\Helpers\NepaliDateHelper::representativeAdToBs($this->month)['month'];
         $bsYear = $this->bs_year ?? \App\Helpers\NepaliDateHelper::representativeAdToBs($this->month)['year'];
@@ -109,6 +109,6 @@ class MonthlyTarget extends Model
 
         return $this->client->boosts()
             ->whereBetween('date', [$startDate, $endDate])
-            ->count();
+            ->sum('amount');
     }
 }

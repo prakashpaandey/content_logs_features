@@ -98,7 +98,7 @@ class NepaliDateHelper
      * Approximate conversion from BS Month/Year to AD Month/Year
      * This returns the AD month that CONTAINS THE START of the BS month.
      */
-    public static function bsToAd($bsMonth, $bsYear)
+    public static function bsToAd($bsMonth, $bsYear, $bsDay = 1)
     {
         if ($bsMonth <= 9) {
             $adMonth = $bsMonth + 3;
@@ -108,7 +108,26 @@ class NepaliDateHelper
             $adYear = $bsYear - 56;
         }
 
-        return ['month' => $adMonth, 'year' => $adYear];
+        // Calculate exact AD date based on the split
+        $split = self::$splits[$adMonth] ?? 15;
+        
+        try {
+            // Create Carbon instance for the 1st day of the BS month
+            // (Which corresponds to AD Year-Month-Split)
+            $adDate = Carbon::create($adYear, $adMonth, $split)->startOfDay();
+            
+            // Add the days offset (bsDay - 1)
+            $adDate->addDays($bsDay - 1);
+            
+            return [
+                'year' => $adDate->year, 
+                'month' => $adDate->month, 
+                'day' => $adDate->day
+            ];
+        } catch (\Exception $e) {
+            // Fallback for edge cases or invalid dates
+            return ['year' => $adYear, 'month' => $adMonth, 'day' => 1];
+        }
     }
 
     /**

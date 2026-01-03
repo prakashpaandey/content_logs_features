@@ -37,7 +37,7 @@
                             Target Reels
                         </th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Target Boosts
+                            Boost Budget
                         </th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                             Created Date
@@ -83,7 +83,7 @@
                                     {{ $target->target_reels }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                    {{ $target->target_boosts }}
+                                    $ {{ number_format($target->target_boost_budget, 2) }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                                     @php $createdBs = $dateHelpers->adToBs($target->created_at); @endphp
@@ -99,7 +99,7 @@
                                         // Attach actuals for JS validation
                                         $target->actual_posts = $target->getActualPosts();
                                         $target->actual_reels = $target->getActualReels();
-                                        $target->actual_boosts = $target->getActualBoosts();
+                                        $target->actual_boost_amount = $target->getActualBoostAmount();
                                     @endphp
                                     <button type="button" class="btn-view-target text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300" data-target='@json($target)'>
                                         <i class="fas fa-eye"></i>
@@ -168,8 +168,8 @@
                                 <input type="number" name="target_reels" required min="0" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Boosts *</label>
-                                <input type="number" name="target_boosts" required min="0" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Boost Budget ($) *</label>
+                                <input type="number" name="target_boost_budget" required min="0" step="0.01" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                             </div>
                         </div>
                         
@@ -250,11 +250,11 @@
 
                             <div>
                                 <label for="target-boosts" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Target Boosts *
+                                    Boost Budget ($) *
                                 </label>
-                                <input type="number" name="target_boosts" id="target-boosts" required min="0"
+                                <input type="number" name="target_boost_budget" id="target-boost-budget" required min="0" step="0.01"
                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                                       placeholder="">
+                                       placeholder="e.g. 50">
                             </div>
                         </div>
                         
@@ -348,9 +348,9 @@
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Target Boosts *
+                                    Boost Budget ($) *
                                 </label>
-                                <input type="number" name="target_boosts" id="edit-target-boosts" required min="0"
+                                <input type="number" name="target_boost_budget" id="edit-target-boost-budget" required min="0" step="0.01"
                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                             </div>
                         </div>
@@ -436,9 +436,9 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Target Boosts
+                                Boost Budget
                             </label>
-                            <input type="number" id="view-target-boosts" readonly disabled
+                            <input type="text" id="view-target-boost-budget" readonly disabled
                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white cursor-not-allowed">
                         </div>
                     </div>
@@ -494,8 +494,8 @@
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Month</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Target (Posts/Reels/Boosts)</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actual (Posts/Reels/Boosts)</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Target (Posts/Reels/Budget)</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actual (Posts/Reels/Spent)</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Completion Date</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
@@ -519,10 +519,10 @@
                                             {{ $nepaliTranslate($m, 'month') }} {{ $y }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            {{ $target->target_posts }} / {{ $target->target_reels }} / {{ $target->target_boosts }}
+                                            {{ $target->target_posts }} / {{ $target->target_reels }} / $ {{ number_format($target->target_boost_budget ?? 0, 2) }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            {{ $target->getActualPosts() }} / {{ $target->getActualReels() }} / {{ $target->getActualBoosts() }}
+                                            {{ $target->getActualPosts() }} / {{ $target->getActualReels() }} / $ {{ number_format($target->getActualBoostAmount(), 2) }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusColors[$target->status] }}">
@@ -543,7 +543,7 @@
                                                     <input type="hidden" name="bs_year" value="{{ $target->bs_year }}">
                                                     <input type="hidden" name="target_posts" value="{{ $target->target_posts }}">
                                                     <input type="hidden" name="target_reels" value="{{ $target->target_reels }}">
-                                                    <input type="hidden" name="target_boosts" value="{{ $target->target_boosts }}">
+                                                    <input type="hidden" name="target_boost_budget" value="{{ $target->target_boost_budget }}">
                                                     <input type="hidden" name="status" value="active">
                                                     <button type="submit" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" title="Restore to Active">
                                                         <i class="fas fa-undo-alt mr-1"></i> Restore
@@ -653,7 +653,7 @@
 
             document.getElementById('edit-target-posts').value = target.target_posts;
             document.getElementById('edit-target-reels').value = target.target_reels;
-            document.getElementById('edit-target-boosts').value = target.target_boosts || 0;
+            document.getElementById('edit-target-boost-budget').value = target.target_boost_budget || 0;
             document.getElementById('edit-target-status').value = target.status;
             document.getElementById('edit-target-notes').value = target.notes || '';
             
@@ -662,7 +662,7 @@
             const completedOption = statusSelect.querySelector('option[value="completed"]');
             
             if (completedOption) {
-                if (target.actual_posts < target.target_posts || target.actual_reels < target.target_reels || (target.actual_boosts || 0) < target.target_boosts) {
+                if (target.actual_posts < target.target_posts || target.actual_reels < target.target_reels || (target.actual_boost_amount || 0) < target.target_boost_budget) {
                     completedOption.disabled = true;
                     completedOption.textContent = "Completed (Targets not met)";
                 } else {
@@ -709,7 +709,9 @@
 
             document.getElementById('view-target-posts').value = target.target_posts;
             document.getElementById('view-target-reels').value = target.target_reels;
-            document.getElementById('view-target-boosts').value = target.target_boosts || 0;
+            document.getElementById('view-target-posts').value = target.target_posts;
+            document.getElementById('view-target-reels').value = target.target_reels;
+            document.getElementById('view-target-boost-budget').value = "$ " + (target.target_boost_budget || 0);
             document.getElementById('view-target-status').value = target.status;
             document.getElementById('view-target-notes').value = target.notes || 'No notes available.';
             

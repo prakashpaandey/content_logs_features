@@ -41,7 +41,7 @@
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 @if($contentData->count() > 0)
                     @foreach($contentData as $content)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" title="Added by: {{ $content->user->name ?? ($content->user_id ? 'User ID: '.$content->user_id : 'Unknown') }}">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                                 @php 
                                     $contentDate = \Carbon\Carbon::parse($content->date);
@@ -74,7 +74,10 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right space-x-2">
-                                <button onclick='openEditContentModal(@json($content))' class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
+                                @php
+                                    $bsDateStr = $bsDate['year'] . '-' . sprintf('%02d', $bsDate['month']) . '-' . sprintf('%02d', $bsDate['day']);
+                                @endphp
+                                <button onclick='openEditContentModal(@json($content), "{{ $bsDateStr }}")' class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 <button onclick="openDeleteModal('{{ route('contents.destroy', $content->id) }}')" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
@@ -126,6 +129,7 @@
                     @endif
                     <input type="hidden" name="context_bs_month" value="{{ $bsMonth }}">
                     <input type="hidden" name="context_bs_year" value="{{ $bsYear }}">
+                    <input type="hidden" name="manual_bs_date" id="add-content-manual-bs-date">
                     
                     <div class="space-y-4">
                         <div>
@@ -166,7 +170,7 @@
                                 $defaultAdDate = $contextStartDate->copy()->addDays($defaultDay - 1)->format('Y-m-d');
                             @endphp
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date *</label>
-                            <input type="text" id="add-content-bs-date" class="nepali-datepicker w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                            <input type="text" id="add-content-bs-date" name="bs_date" class="nepali-datepicker w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
                                    placeholder="Select Nepali Date"
                                    data-ad-id="add-content-ad-date" 
                                    data-nepali-format="YYYY-MM-DD"
@@ -191,7 +195,7 @@
              <!-- Modal Footer -->
              <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
                 <button type="button" onclick="closeModal('add-content-modal')" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
-                <button type="submit" form="add-content-form" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg">Add Content</button>
+                <button type="submit" form="add-content-form" onclick="document.getElementById('add-content-manual-bs-date').value = document.getElementById('add-content-bs-date').value" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg">Add Content</button>
             </div>
         </div>
     </div>
@@ -217,6 +221,7 @@
                 <form id="edit-content-form" method="POST">
                     @csrf
                     @method('PUT')
+                    <input type="hidden" name="manual_bs_date" id="edit-content-manual-bs-date">
                     
                     <div class="space-y-4">
                         <div>
@@ -245,7 +250,7 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date *</label>
-                            <input type="text" id="edit-content-bs-date" class="nepali-datepicker w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                            <input type="text" id="edit-content-bs-date" name="bs_date" class="nepali-datepicker w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
                                    placeholder="Select Nepali Date"
                                    data-nepali-format="YYYY-MM-DD"
                                    data-ad-id="edit-content-ad-date" required>
@@ -268,14 +273,14 @@
              <!-- Modal Footer -->
              <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
                 <button type="button" onclick="closeModal('edit-content-modal')" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
-                <button type="submit" form="edit-content-form" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg">Update Content</button>
+                <button type="submit" form="edit-content-form" onclick="document.getElementById('edit-content-manual-bs-date').value = document.getElementById('edit-content-bs-date').value" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg">Update Content</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    function openEditContentModal(content) {
+    function openEditContentModal(content, bsDateStr) {
         console.log('Opening Edit Modal for Content:', content);
         try {
             document.getElementById('edit-content-title').value = content.title;
@@ -286,10 +291,8 @@
             const adDateStr = content.date.split('T')[0];
             document.getElementById('edit-content-ad-date').value = adDateStr;
             
-            // Convert AD string to Nepali BS
-            const adDateObj = NepaliFunctions.ConvertToDateObject(adDateStr, "YYYY-MM-DD");
-            const bsDateObj = NepaliFunctions.AD2BS(adDateObj);
-            document.getElementById('edit-content-bs-date').value = NepaliFunctions.ConvertDateFormat(bsDateObj, "YYYY-MM-DD");
+            // Use provided BS Date string
+            document.getElementById('edit-content-bs-date').value = bsDateStr;
             
             document.getElementById('edit-content-url').value = content.url || '';
             document.getElementById('edit-content-remarks').value = content.remarks || '';

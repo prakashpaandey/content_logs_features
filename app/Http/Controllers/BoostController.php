@@ -23,13 +23,29 @@ class BoostController extends Controller
             'remarks' => 'nullable|string|max:1000',
         ]);
 
+        // Check if bs_date is provided (Server-side date conversion fallback)
+        $bsDateInput = $request->bs_date ?? $request->manual_bs_date;
+        if ($bsDateInput) {
+            try {
+                $bsDateStr = $bsDateInput;
+                $parts = explode('-', $bsDateStr);
+                if (count($parts) === 3) {
+                    $bsYear = (int)$parts[0];
+                    $bsMonth = (int)$parts[1];
+                    $bsDay = (int)$parts[2];
+                    $adDate = \App\Helpers\NepaliDateHelper::bsToAd($bsMonth, $bsYear, $bsDay);
+                    $validated['date'] = $adDate['year'] . '-' . str_pad($adDate['month'], 2, '0', STR_PAD_LEFT) . '-' . str_pad($adDate['day'], 2, '0', STR_PAD_LEFT);
+                }
+            } catch (\Exception $e) {}
+        }
+
         $date = \Carbon\Carbon::parse($validated['date']);
         $now = \Carbon\Carbon::now();
         $contentBs = \App\Helpers\NepaliDateHelper::adToBs($date);
         $nowBs = \App\Helpers\NepaliDateHelper::adToBs($now);
 
         // 1. Prevent future dates
-        if ($date->isFuture()) {
+        if ($date->startOfDay()->gt(\Carbon\Carbon::today())) {
             return redirect()->back()->withInput()->with('error', 'Cannot create boost records for upcoming dates.');
         }
 
@@ -88,12 +104,28 @@ class BoostController extends Controller
             'remarks' => 'nullable|string|max:1000',
         ]);
 
+        // Check if bs_date is provided (Server-side date conversion fallback)
+        $bsDateInput = $request->bs_date ?? $request->manual_bs_date;
+        if ($bsDateInput) {
+            try {
+                $bsDateStr = $bsDateInput;
+                $parts = explode('-', $bsDateStr);
+                if (count($parts) === 3) {
+                    $bsYear = (int)$parts[0];
+                    $bsMonth = (int)$parts[1];
+                    $bsDay = (int)$parts[2];
+                    $adDate = \App\Helpers\NepaliDateHelper::bsToAd($bsMonth, $bsYear, $bsDay);
+                    $validated['date'] = $adDate['year'] . '-' . str_pad($adDate['month'], 2, '0', STR_PAD_LEFT) . '-' . str_pad($adDate['day'], 2, '0', STR_PAD_LEFT);
+                }
+            } catch (\Exception $e) {}
+        }
+
         $date = \Carbon\Carbon::parse($validated['date']);
         $now = \Carbon\Carbon::now();
 
         // 1. Prevent future dates
-        if ($date->isFuture()) {
-            return redirect()->back()->withInput()->with('error', 'Cannot update boost records to upcoming dates or months.');
+        if ($date->startOfDay()->gt(\Carbon\Carbon::today())) {
+            return redirect()->back()->withInput()->with('error', 'Cannot update boost records to upcoming dates.');
         }
 
         // 2. Prevent updating boosts to future months

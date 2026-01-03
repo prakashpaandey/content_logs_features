@@ -118,10 +118,12 @@ class DashboardController extends Controller
                 ->exists();
             
             $currentMonthContents = $selectedClient->contents()
+                ->with('user')
                 ->whereBetween('date', [$startDate, $endDate])
                 ->get();
 
             $currentMonthBoosts = $selectedClient->boosts()
+                ->with('user')
                 ->whereBetween('date', [$startDate, $endDate])
                 ->get();
                 
@@ -155,23 +157,29 @@ class DashboardController extends Controller
                 ->first();
                 
             if ($currentTarget) {
-                // Better Logic: Sum of capped actuals to prevent over-performance in one area masking failure in another
-                $cappedPosts = min($metrics['total_posts'], $currentTarget->target_posts);
-                $cappedReels = min($metrics['total_reels'], $currentTarget->target_reels);
-                $cappedBoosts = min($metrics['total_boosts'], $currentTarget->target_boosts);
+                // Calculate individual completion percentages
+                $postsCompletion = $currentTarget->target_posts > 0 
+                    ? min(100, round(($metrics['total_posts'] / $currentTarget->target_posts) * 100)) 
+                    : 0;
+                $reelsCompletion = $currentTarget->target_reels > 0 
+                    ? min(100, round(($metrics['total_reels'] / $currentTarget->target_reels) * 100)) 
+                    : 0;
+                $boostCompletion = $currentTarget->target_boost_budget > 0 
+                    ? min(100, round(($metrics['total_boost_amount'] / $currentTarget->target_boost_budget) * 100)) 
+                    : 0;
                 
-                $totalTarget = $currentTarget->target_posts + $currentTarget->target_reels + $currentTarget->target_boosts;
-                $totalCappedActual = $cappedPosts + $cappedReels + $cappedBoosts;
+                // Overall completion = average of three percentages
+                $metrics['target_completion'] = round(($postsCompletion + $reelsCompletion + $boostCompletion) / 3);
                 
-                $metrics['target_completion'] = $totalTarget > 0 ? round(($totalCappedActual / $totalTarget) * 100) : 0;
-                $metrics['variance'] = ($metrics['total_posts'] + $metrics['total_reels'] + $metrics['total_boosts']) - $totalTarget; 
-                
-                // Add robust "Left" calculation
+                // Remaining counts/amounts
                 $leftPosts = max(0, $currentTarget->target_posts - $metrics['total_posts']);
                 $leftReels = max(0, $currentTarget->target_reels - $metrics['total_reels']);
-                $leftBoosts = max(0, $currentTarget->target_boosts - $metrics['total_boosts']);
-                $metrics['total_left'] = $leftPosts + $leftReels + $leftBoosts;
-                $metrics['total_target'] = $totalTarget;
+                $leftBoostBudget = max(0, $currentTarget->target_boost_budget - $metrics['total_boost_amount']);
+                
+                $metrics['total_left'] = $leftPosts + $leftReels; // Count only
+                $metrics['left_boost_budget'] = $leftBoostBudget; // Money
+                $metrics['total_target'] = $currentTarget->target_posts + $currentTarget->target_reels;
+                $metrics['target_boost_budget'] = $currentTarget->target_boost_budget;
 
                 // On-the-fly status sync fallback
                 if ($metrics['target_completion'] >= 100 && $currentTarget->status !== 'completed') {
@@ -181,9 +189,10 @@ class DashboardController extends Controller
                 }
             } else {
                 $metrics['target_completion'] = 0;
-                $metrics['variance'] = 0;
                 $metrics['total_left'] = 0;
+                $metrics['left_boost_budget'] = 0;
                 $metrics['total_target'] = 0;
+                $metrics['target_boost_budget'] = 0;
             }
 
             // Previous Month Metrics for Growth Comp (Target & Variance)
@@ -193,14 +202,20 @@ class DashboardController extends Controller
                 ->first();
 
             if ($lastTarget) {
-                $lastTotalTarget = $lastTarget->target_posts + $lastTarget->target_reels + $lastTarget->target_boosts;
-                $lastTotalActual = $lastPosts + $lastReels + $lastBoosts;
+                // Calculate previous month completion using same percentage average method
+                $lastPostsCompletion = $lastTarget->target_posts > 0 
+                    ? min(100, round(($lastPosts / $lastTarget->target_posts) * 100)) 
+                    : 0;
+                $lastReelsCompletion = $lastTarget->target_reels > 0 
+                    ? min(100, round(($lastReels / $lastTarget->target_reels) * 100)) 
+                    : 0;
+                $lastBoostCompletion = $lastTarget->target_boost_budget > 0 
+                    ? min(100, round(($lastBoostAmount / $lastTarget->target_boost_budget) * 100)) 
+                    : 0;
                 
-                $lastCompletion = $lastTotalTarget > 0 ? round(($lastTotalActual / $lastTotalTarget) * 100) : 0;
-                $lastVariance = $lastTotalActual - $lastTotalTarget;
+                $lastCompletion = round(($lastPostsCompletion + $lastReelsCompletion + $lastBoostCompletion) / 3);
 
                 $metrics['target_growth'] = $lastCompletion > 0 ? round((($metrics['target_completion'] - $lastCompletion) / $lastCompletion) * 100) : 0;
-                $metrics['variance_growth'] = $lastVariance != 0 ? round((($metrics['variance'] - $lastVariance) / abs($lastVariance)) * 100) : 0;
             }
 
             // Tables Data (Strictly filtered by the active dashboard month context)
@@ -278,12 +293,12 @@ class DashboardController extends Controller
             $weeklyActualPosts = [];
             $weeklyTargetReels = [];
             $weeklyActualReels = [];
-            $weeklyTargetBoosts = [];
-            $weeklyActualBoosts = [];
+            $weeklyTargetBoostBudget = [];
+            $weeklyActualBoostAmount = [];
             
             $totalTargetPosts = $currentTarget ? $currentTarget->target_posts : 0;
             $totalTargetReels = $currentTarget ? $currentTarget->target_reels : 0;
-            $totalTargetBoosts = $currentTarget ? $currentTarget->target_boosts : 0;
+            $totalTargetBoostBudget = $currentTarget ? $currentTarget->target_boost_budget : 0;
             $weeksCount = 4;
             
             $distributeTarget = function($total, $parts) {
@@ -298,7 +313,7 @@ class DashboardController extends Controller
             
             $distributedPosts = $distributeTarget($totalTargetPosts, $weeksCount);
             $distributedReels = $distributeTarget($totalTargetReels, $weeksCount);
-            $distributedBoosts = $distributeTarget($totalTargetBoosts, $weeksCount);
+            $distributedBoostBudget = $distributeTarget($totalTargetBoostBudget, $weeksCount);
             
             // Divide BS month into 4 weeks
             $totalDays = $startDate->diffInDays($endDate) + 1;
@@ -322,13 +337,13 @@ class DashboardController extends Controller
                     ->where('type', 'Reel')
                     ->count();
 
-                $weeklyActualBoosts[] = $selectedClient->boosts()
+                $weeklyActualBoostAmount[] = $selectedClient->boosts()
                     ->whereBetween('date', [$wStart, $wEnd])
-                    ->count();
+                    ->sum('amount');
                 
                 $weeklyTargetPosts[] = $distributedPosts[$i];
                 $weeklyTargetReels[] = $distributedReels[$i];
-                $weeklyTargetBoosts[] = $distributedBoosts[$i];
+                $weeklyTargetBoostBudget[] = $distributedBoostBudget[$i];
             }
             
             $charts['targetVsActual'] = [
@@ -337,8 +352,8 @@ class DashboardController extends Controller
                 'actualPosts' => $weeklyActualPosts,
                 'targetReels' => $weeklyTargetReels,
                 'actualReels' => $weeklyActualReels,
-                'targetBoosts' => $weeklyTargetBoosts,
-                'actualBoosts' => $weeklyActualBoosts,
+                'targetBoostBudget' => $weeklyTargetBoostBudget,
+                'actualBoostAmount' => $weeklyActualBoostAmount,
                 'target_month_name' => $now->format('F Y')
             ];
         }
@@ -352,6 +367,7 @@ class DashboardController extends Controller
         
         $bsMonth = (int)$request->query('month');
         $bsYear = (int)$request->query('year');
+        $statusFilter = $request->query('status', 'all');
 
         if (!$bsYear || $bsYear < 2050) {
             $todayBs = \App\Helpers\NepaliDateHelper::adToBs(now());
@@ -375,7 +391,7 @@ class DashboardController extends Controller
             'boost_amount' => 0,
             'target_posts' => 0,
             'target_reels' => 0,
-            'target_boosts' => 0,
+            'target_boost_budget' => 0,
         ];
 
         foreach ($clients as $client) {
@@ -384,16 +400,32 @@ class DashboardController extends Controller
                 ->whereMonth('month', $now->month)
                 ->first();
 
-            $actualPosts = $client->contents()
-                ->whereBetween('date', [$startDate, $endDate])
-                ->where('type', 'Post')->count();
+            // Status Filtering Logic
+            if ($statusFilter !== 'all') {
+                if ($statusFilter === 'no-target' && $target) {
+                    continue;
+                }
+                if ($statusFilter === 'active' && (!$target || $target->status !== 'active')) {
+                    continue;
+                }
+                if ($statusFilter === 'completed' && (!$target || $target->status !== 'completed')) {
+                    continue;
+                }
+            }
 
-            $actualReels = $client->contents()
+            $contentRecords = $client->contents()
+                ->with('user')
                 ->whereBetween('date', [$startDate, $endDate])
-                ->where('type', 'Reel')->count();
+                ->orderBy('date', 'desc')
+                ->get();
+
+            $actualPosts = $contentRecords->where('type', 'Post')->count();
+            $actualReels = $contentRecords->where('type', 'Reel')->count();
 
             $boostRecords = $client->boosts()
+                ->with('user')
                 ->whereBetween('date', [$startDate, $endDate])
+                ->orderBy('date', 'desc')
                 ->get();
 
             $actualBoosts = $boostRecords->count();
@@ -401,17 +433,15 @@ class DashboardController extends Controller
 
             $targetPosts = $target ? $target->target_posts : 0;
             $targetReels = $target ? $target->target_reels : 0;
-            $targetBoosts = $target ? $target->target_boosts : 0;
+            $targetBoostBudget = $target ? $target->target_boost_budget : 0;
 
-            $totalTarget = $targetPosts + $targetReels + $targetBoosts;
+            // Calculate individual completion percentages
+            $postsCompletion = $targetPosts > 0 ? min(100, round(($actualPosts / $targetPosts) * 100)) : 0;
+            $reelsCompletion = $targetReels > 0 ? min(100, round(($actualReels / $targetReels) * 100)) : 0;
+            $boostCompletion = $targetBoostBudget > 0 ? min(100, round(($boostAmount / $targetBoostBudget) * 100)) : 0;
             
-            // Capped calculation for honest progress
-            $cappedPosts = min($actualPosts, $targetPosts);
-            $cappedReels = min($actualReels, $targetReels);
-            $cappedBoosts = min($actualBoosts, $targetBoosts);
-            $totalCappedActual = $cappedPosts + $cappedReels + $cappedBoosts;
-
-            $completion = $totalTarget > 0 ? round(($totalCappedActual / $totalTarget) * 100) : 0;
+            // Overall completion = average of three percentages
+            $completion = round(($postsCompletion + $reelsCompletion + $boostCompletion) / 3);
 
             // On-the-fly status sync fallback for overview
             if ($target) {
@@ -431,11 +461,16 @@ class DashboardController extends Controller
                 'boost_amount' => $boostAmount,
                 'target_posts' => $targetPosts,
                 'target_reels' => $targetReels,
-                'target_boosts' => $targetBoosts,
+                'target_boost_budget' => $targetBoostBudget,
                 'completion' => $completion,
+                'posts_completion' => $postsCompletion,
+                'reels_completion' => $reelsCompletion,
+                'boost_completion' => $boostCompletion,
                 'total_actual' => $actualPosts + $actualReels + $actualBoosts,
-                'total_target' => $totalTarget,
-                'total_left' => (max(0, $targetPosts - $actualPosts) + max(0, $targetReels - $actualReels) + max(0, $targetBoosts - $actualBoosts)),
+                'total_target' => $targetPosts + $targetReels,
+                'total_left' => (max(0, $targetPosts - $actualPosts) + max(0, $targetReels - $actualReels)),
+                'contents' => $contentRecords,
+                'boosts' => $boostRecords,
             ];
 
             // Agency Totals
@@ -445,7 +480,7 @@ class DashboardController extends Controller
             $totalAgencyMetrics['boost_amount'] += $boostAmount;
             $totalAgencyMetrics['target_posts'] += $targetPosts;
             $totalAgencyMetrics['target_reels'] += $targetReels;
-            $totalAgencyMetrics['target_boosts'] += $targetBoosts;
+            $totalAgencyMetrics['target_boost_budget'] += $targetBoostBudget;
         }
 
         return view('dashboard.overview', compact('clientsData', 'totalAgencyMetrics', 'dateContext', 'clients', 'bsMonth', 'bsYear'));

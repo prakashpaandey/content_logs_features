@@ -33,12 +33,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Nepali Translation Helper (Romanized BS Labels)
         View::share('nepaliTranslate', function($text, $type = 'month') {
-            $months = [
-                'January' => 'Magh', 'February' => 'Falgun', 'March' => 'Chaitra',
-                'April' => 'Baisakh', 'May' => 'Jestha', 'June' => 'Asar',
-                'July' => 'Shrawan', 'August' => 'Bhadra', 'September' => 'Ashwin',
-                'October' => 'Kartik', 'November' => 'Mangsir', 'December' => 'Poush'
-            ];
+            
 
             $numMonths = [
                 1 => 'Baisakh', 2 => 'Jestha', 3 => 'Asar', 4 => 'Shrawan',
@@ -47,7 +42,7 @@ class AppServiceProvider extends ServiceProvider
             ];
             
             if ($type === 'month') {
-                return $months[$text] ?? ($numMonths[$text] ?? $text);
+                return $numMonths[$text] ?? $text;
             }
 
             if ($type === 'number') {
@@ -55,14 +50,13 @@ class AppServiceProvider extends ServiceProvider
             }
 
             if ($type === 'year') {
-                // If text is a full date string or just year
-                return $text; // Usually passed as BS year now
+                return $text; 
             }
 
             return $text;
         });
 
-        // BS to AD and AD to BS Helpers
+        
         View::share('dateHelpers', new class {
             public function adToBs($adDate) {
                 return \App\Helpers\NepaliDateHelper::adToBs($adDate);

@@ -8,14 +8,11 @@
     </div>
     
     <div class="bg-white rounded-xl border border-gray-200 p-6">
-        <!-- Timeline -->
+        
         <div class="relative">
-            <!-- Timeline line -->
             <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
             
-            <!-- Timeline items -->
             <div class="space-y-8">
-                <!-- Item 1 -->
                 <div class="relative pl-12">
                     <div class="absolute left-0 w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center">
                         <i class="fas fa-edit text-white text-sm"></i>

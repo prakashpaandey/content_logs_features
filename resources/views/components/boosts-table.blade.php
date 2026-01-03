@@ -43,7 +43,7 @@
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 @if($boostData->count() > 0)
                     @foreach($boostData as $boost)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" title="Added by: {{ $boost->user->name ?? ($boost->user_id ? 'User ID: '.$boost->user_id : 'Unknown') }}">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                                 @php 
                                     $boostDate = \Carbon\Carbon::parse($boost->date);
@@ -65,7 +65,7 @@
                                 {{ $boost->title }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white font-semibold">
-                                Rs. {{ number_format($boost->amount, 2) }}
+                                $ {{ number_format($boost->amount, 2) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 @if($boost->url)
@@ -79,7 +79,10 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right space-x-2">
-                                <button onclick='openEditBoostModal(@json($boost))' class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
+                                @php
+                                    $bsDateStr = $bsDate['year'] . '-' . sprintf('%02d', $bsDate['month']) . '-' . sprintf('%02d', $bsDate['day']);
+                                @endphp
+                                <button onclick='openEditBoostModal(@json($boost), "{{ $bsDateStr }}")' class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 <button onclick="openDeleteModal('{{ route('boosts.destroy', $boost->id) }}')" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
@@ -129,6 +132,7 @@
                     @endif
                     <input type="hidden" name="context_bs_month" value="{{ $bsMonth }}">
                     <input type="hidden" name="context_bs_year" value="{{ $bsYear }}">
+                    <input type="hidden" name="manual_bs_date" id="add-boost-manual-bs-date">
                     
                     <div class="space-y-4">
                         <div>
@@ -170,7 +174,7 @@
                                     $defaultAdDate = $contextStartDate->copy()->addDays($defaultDay - 1)->format('Y-m-d');
                                 @endphp
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date *</label>
-                                <input type="text" id="add-boost-bs-date" class="nepali-datepicker w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                                <input type="text" id="add-boost-bs-date" name="bs_date" class="nepali-datepicker w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
                                        placeholder="Select Nepali Date"
                                        data-ad-id="add-boost-ad-date" 
                                        data-nepali-format="YYYY-MM-DD"
@@ -200,7 +204,7 @@
              <!-- Modal Footer -->
              <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
                 <button type="button" onclick="closeModal('add-boost-modal')" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
-                <button type="submit" form="add-boost-form" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg">Add Boost</button>
+                <button type="submit" form="add-boost-form" onclick="document.getElementById('add-boost-manual-bs-date').value = document.getElementById('add-boost-bs-date').value" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg">Add Boost</button>
             </div>
         </div>
     </div>
@@ -226,6 +230,7 @@
                 <form id="edit-boost-form" method="POST">
                     @csrf
                     @method('PUT')
+                    <input type="hidden" name="manual_bs_date" id="edit-boost-manual-bs-date">
                     
                     <div class="space-y-4">
                         <div>
@@ -254,7 +259,7 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date *</label>
-                                <input type="text" id="edit-boost-bs-date" class="nepali-datepicker w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                                <input type="text" id="edit-boost-bs-date" name="bs_date" class="nepali-datepicker w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
                                        placeholder="Select Nepali Date"
                                        data-nepali-format="YYYY-MM-DD"
                                        data-ad-id="edit-boost-ad-date" required>
@@ -282,14 +287,14 @@
              <!-- Modal Footer -->
              <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
                 <button type="button" onclick="closeModal('edit-boost-modal')" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
-                <button type="submit" form="edit-boost-form" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg">Update Boost</button>
+                <button type="submit" form="edit-boost-form" onclick="document.getElementById('edit-boost-manual-bs-date').value = document.getElementById('edit-boost-bs-date').value" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg">Update Boost</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    function openEditBoostModal(boost) {
+    function openEditBoostModal(boost, bsDateStr) {
         console.log('Opening Edit Modal for Boost:', boost);
         try {
             document.getElementById('edit-boost-title').value = boost.title;
@@ -301,10 +306,8 @@
             const adDateStr = boost.date.split('T')[0];
             document.getElementById('edit-boost-ad-date').value = adDateStr;
             
-            // Convert AD string to Nepali BS
-            const adDateObj = NepaliFunctions.ConvertToDateObject(adDateStr, "YYYY-MM-DD");
-            const bsDateObj = NepaliFunctions.AD2BS(adDateObj);
-            document.getElementById('edit-boost-bs-date').value = NepaliFunctions.ConvertDateFormat(bsDateObj, "YYYY-MM-DD");
+            // Use provided BS Date string
+            document.getElementById('edit-boost-bs-date').value = bsDateStr;
             
             document.getElementById('edit-boost-url').value = boost.url || '';
             document.getElementById('edit-boost-remarks').value = boost.remarks || '';
