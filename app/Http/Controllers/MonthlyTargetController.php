@@ -64,13 +64,12 @@ class MonthlyTargetController extends Controller
             'target_posts' => 'required|integer|min:0',
             'target_reels' => 'required|integer|min:0',
             'target_boost_budget' => 'required|numeric|min:0',
-            'status' => 'required|in:active,completed,archived', // Allow status update here
+            'status' => 'required|in:active,completed,archived',
             'notes' => 'nullable|string',
         ]);
 
         $validated['month'] = $validated['month'] . '-01';
 
-        // Prevent setting status to 'completed' if targets are not met
         if ($request->input('status') === 'completed') {
             $actualPosts = $monthlyTarget->getActualPosts();
             $actualReels = $monthlyTarget->getActualReels();

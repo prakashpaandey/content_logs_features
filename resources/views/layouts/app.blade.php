@@ -112,6 +112,7 @@
                             this.viewYear = this.selectedYear;
                             this.updateDisplay();
                             this.syncToBSFields();
+                            this.syncToAd();
                         }
                     } else {
                         // Default to current BS month using stable logic

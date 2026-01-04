@@ -23,7 +23,7 @@ class BoostController extends Controller
             'remarks' => 'nullable|string|max:1000',
         ]);
 
-        // Check if bs_date is provided (Server-side date conversion fallback)
+        
         $bsDateInput = $request->bs_date ?? $request->manual_bs_date;
         if ($bsDateInput) {
             try {
@@ -44,23 +44,25 @@ class BoostController extends Controller
         $contentBs = \App\Helpers\NepaliDateHelper::adToBs($date);
         $nowBs = \App\Helpers\NepaliDateHelper::adToBs($now);
 
-        // 1. Prevent future dates
+        //Prevent future dates
         if ($date->startOfDay()->gt(\Carbon\Carbon::today())) {
             return redirect()->back()->withInput()->with('error', 'Cannot create boost records for upcoming dates.');
         }
 
-        // 2. Prevent creating boosts for months ahead of the current real Nepali month
+        
+
+        //Prevent creating boosts for months ahead of the current month
         if ($contentBs['year'] > $nowBs['year'] || ($contentBs['year'] == $nowBs['year'] && $contentBs['month'] > $nowBs['month'])) {
-            return redirect()->back()->withInput()->with('error', 'Cannot create boost records for future Nepali months.');
+            return redirect()->back()->withInput()->with('error', 'Cannot create boost records for future  months.');
         }
 
-        // 3. Context-based validation: Date must match the dashboard context
+        //Context-based validation: Date must match the dashboard context
         if ($request->has('context_bs_month') && $request->has('context_bs_year')) {
             $contextBsMonth = (int) $request->context_bs_month;
             $contextBsYear = (int) $request->context_bs_year;
             
             if ($contentBs['month'] !== $contextBsMonth || $contentBs['year'] !== $contextBsYear) {
-                return redirect()->back()->withInput()->with('error', 'Selected date must match the dashboard month context (Nepali Calendar).');
+                return redirect()->back()->withInput()->with('error', 'Selected date must match the dashboard month).');
             }
         }
 
@@ -123,12 +125,12 @@ class BoostController extends Controller
         $date = \Carbon\Carbon::parse($validated['date']);
         $now = \Carbon\Carbon::now();
 
-        // 1. Prevent future dates
+        //Prevent future dates
         if ($date->startOfDay()->gt(\Carbon\Carbon::today())) {
             return redirect()->back()->withInput()->with('error', 'Cannot update boost records to upcoming dates.');
         }
 
-        // 2. Prevent updating boosts to future months
+        //Prevent updating boosts to future months
         if ($date->year > $now->year || ($date->year == $now->year && $date->month > $now->month)) {
             return redirect()->back()->withInput()->with('error', 'Cannot update boost records to future months.');
         }

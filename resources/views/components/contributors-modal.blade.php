@@ -59,6 +59,7 @@
                                 <tr>
                                     <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Date</th>
                                     <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Title</th>
+                                    <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Amount</th>
                                     <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Username</th>
                                 </tr>
                             </thead>
@@ -67,6 +68,10 @@
                                     <tr>
                                         <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 dark:text-gray-400" x-text="item.date"></td>
                                         <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900 dark:text-white" x-text="item.title"></td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900 dark:text-white">
+                                            <span x-show="item.amount" class="text-green-600 dark:text-green-400" x-text="item.amount"></span>
+                                            <span x-show="!item.amount" class="text-gray-400">-</span>
+                                        </td>
                                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
                                             <div class="flex items-center">
                                                 <div class="h-6 w-6 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center text-xs font-bold text-primary-600 dark:text-primary-400 mr-2" x-text="item.avatar"></div>
@@ -111,19 +116,23 @@
                         const data = JSON.parse(dataScript.textContent);
                         
                         // Normalize contents
-                        let contentItems = data.contents.map(c => ({
-                            date: new Date(c.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                            type: c.type,
-                            title: c.title,
+                        const rawContents = Array.isArray(data.contents) ? data.contents : Object.values(data.contents || {});
+                        let contentItems = rawContents.map(c => ({
+                            date: c.date ? new Date(c.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A',
+                            type: c.type || 'Content',
+                            title: c.title || 'Untitled',
+                            amount: null,
                             user: c.user ? c.user.name : (c.user_id ? 'User ID: ' + c.user_id : 'Not Recorded'),
                             avatar: c.user ? c.user.name.substring(0, 2).toUpperCase() : '??'
                         }));
                         
                         // Normalize boosts
-                        let boostItems = data.boosts.map(b => ({
-                            date: new Date(b.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                            type: 'Boost (' + b.boosted_content_type + ')',
-                            title: b.title,
+                        const rawBoosts = Array.isArray(data.boosts) ? data.boosts : Object.values(data.boosts || {});
+                        let boostItems = rawBoosts.map(b => ({
+                            date: b.date ? new Date(b.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A',
+                            type: 'Boost (' + (b.boosted_content_type || 'General') + ')',
+                            title: b.title || 'Untitled Boost',
+                            amount: b.amount ? '$ ' + parseFloat(b.amount).toLocaleString() : '$ 0',
                             user: b.user ? b.user.name : (b.user_id ? 'User ID: ' + b.user_id : 'Not Recorded'),
                             avatar: b.user ? b.user.name.substring(0, 2).toUpperCase() : '??'
                         }));

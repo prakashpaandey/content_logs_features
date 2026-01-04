@@ -176,8 +176,8 @@ class DashboardController extends Controller
                 $leftReels = max(0, $currentTarget->target_reels - $metrics['total_reels']);
                 $leftBoostBudget = max(0, $currentTarget->target_boost_budget - $metrics['total_boost_amount']);
                 
-                $metrics['total_left'] = $leftPosts + $leftReels; // Count only
-                $metrics['left_boost_budget'] = $leftBoostBudget; // Money
+                $metrics['total_left'] = $leftPosts + $leftReels;
+                $metrics['left_boost_budget'] = $leftBoostBudget;
                 $metrics['total_target'] = $currentTarget->target_posts + $currentTarget->target_reels;
                 $metrics['target_boost_budget'] = $currentTarget->target_boost_budget;
 

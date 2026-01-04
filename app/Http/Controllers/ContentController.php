@@ -44,7 +44,6 @@ class ContentController extends Controller
         if ($bsDateInput) {
             try {
                 $bsDateStr = $bsDateInput;
-                // Parse YYYY-MM-DD
                 $parts = explode('-', $bsDateStr);
                 if (count($parts) === 3) {
                     $bsYear = (int)$parts[0];
@@ -52,11 +51,10 @@ class ContentController extends Controller
                     $bsDay = (int)$parts[2];
                     
                     $adDate = \App\Helpers\NepaliDateHelper::bsToAd($bsMonth, $bsYear, $bsDay);
-                    // Update validation array with the faithful AD date
                     $validated['date'] = $adDate['year'] . '-' . str_pad($adDate['month'], 2, '0', STR_PAD_LEFT) . '-' . str_pad($adDate['day'], 2, '0', STR_PAD_LEFT);
                 }
             } catch (\Exception $e) {
-                // formatting error, fall back to $validated['date']
+               
             }
         }
 
@@ -65,32 +63,32 @@ class ContentController extends Controller
         $contentBs = \App\Helpers\NepaliDateHelper::adToBs($date);
         $nowBs = \App\Helpers\NepaliDateHelper::adToBs($now);
 
-        // 1. Prevent future dates
+        // Prevent future dates
         if ($date->startOfDay()->gt(\Carbon\Carbon::today())) {
-            return redirect()->back()->withInput()->with('error', 'Cannot create content for upcoming dates. Please select today or a past date.');
+            return redirect()->back()->withInput()->with('error', 'Cannot create content for upcoming dates!');
         }
 
-        // 2. Prevent creating content for months ahead of the current real Nepali month
+        //Prevent creating content for months ahead of the current real Nepali month
         if ($contentBs['year'] > $nowBs['year'] || ($contentBs['year'] == $nowBs['year'] && $contentBs['month'] > $nowBs['month'])) {
-            return redirect()->back()->withInput()->with('error', 'Cannot create content for future Nepali months.');
+            return redirect()->back()->withInput()->with('error', 'Cannot create content for future months.');
         }
 
-        // 3. Context-based validation: Date must match the dashboard context
+        //Context-based validation: Date must match the dashboard context
         if ($request->has('context_bs_month') && $request->has('context_bs_year')) {
             $contextBsMonth = (int) $request->context_bs_month;
             $contextBsYear = (int) $request->context_bs_year;
             
             if ($contentBs['month'] !== $contextBsMonth || $contentBs['year'] !== $contextBsYear) {
-                return redirect()->back()->withInput()->with('error', 'Selected date must match the dashboard month context (Nepali Calendar).');
+                return redirect()->back()->withInput()->with('error', 'Selected date must match the dashboard month');
             }
         }
 
         Content::create([
             ...$validated,
-            'user_id' => auth()->id(), // Keep for audit trail
+            'user_id' => auth()->id(),
         ]);
 
-        // Check Monthly Target for completion
+        //Check Monthly Target for completion
         try {
             $repAd = \App\Helpers\NepaliDateHelper::bsToAd($contentBs['month'], $contentBs['year']);
             $target = \App\Models\MonthlyTarget::where('client_id', $validated['client_id'])
@@ -102,7 +100,7 @@ class ContentController extends Controller
                 $target->checkCompletionStatus();
             }
         } catch (\Exception $e) {
-            // silent fail
+           
         }
 
         return redirect()->back()->with('success', 'Content added successfully.');
@@ -157,12 +155,12 @@ class ContentController extends Controller
         $date = \Carbon\Carbon::parse($validated['date']);
         $now = \Carbon\Carbon::now();
 
-        // 1. Prevent future dates
+        //Prevent future dates
         if ($date->startOfDay()->gt($now->startOfDay())) {
             return redirect()->back()->withInput()->with('error', 'Cannot update content to upcoming dates.');
         }
 
-        // 2. Prevent updating content to future months
+        //Prevent updating content to future months
         if ($date->year > $now->year || ($date->year == $now->year && $date->month > $now->month)) {
             return redirect()->back()->withInput()->with('error', 'Cannot update content to future months.');
         }
@@ -183,15 +181,12 @@ class ContentController extends Controller
                 $target->checkCompletionStatus();
             }
         } catch (\Exception $e) {
-            // silent fail
+            
         }
 
         return redirect()->back()->with('success', 'Content updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Content $content)
     {
         $clientId = $content->client_id;
@@ -213,7 +208,7 @@ class ContentController extends Controller
                 $target->checkCompletionStatus();
             }
         } catch (\Exception $e) {
-            // silent fail
+            
         }
 
         return redirect()->back()->with('success', 'Content deleted successfully.');
