@@ -5,16 +5,16 @@
             <div class="w-16 h-16 rounded-full bg-gradient-to-r from-{{ $selectedClient->status == 'active' ? 'primary' : 'gray' }}-500 to-{{ $selectedClient->status == 'active' ? 'purple' : 'slate' }}-500 flex items-center justify-center text-white font-bold text-xl mr-4">
                 {{ $selectedClient->initials }}
             </div>
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $selectedClient->name }}</h1>
-                <div class="flex items-center mt-1">
-                    <p class="text-gray-600 dark:text-gray-400">{{ $selectedClient->business_name }}</p>
-                    <span class="mx-3 text-gray-300">•</span>
-                    <span class="px-3 py-1 {{ $selectedClient->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }} text-xs font-medium rounded-full">
+            <div class="min-w-0 flex-1">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white truncate">{{ $selectedClient->name }}</h1>
+                <div class="flex items-center mt-1 flex-wrap">
+                    <p class="text-gray-600 dark:text-gray-400 truncate max-w-[200px] md:max-w-md" title="{{ $selectedClient->business_name }}">{{ $selectedClient->business_name }}</p>
+                    <span class="mx-3 text-gray-300 hidden md:inline">•</span>
+                    <span class="px-3 py-1 {{ $selectedClient->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }} text-xs font-medium rounded-full whitespace-nowrap mt-1 md:mt-0">
                         <i class="fas fa-circle text-xs mr-1"></i>
                         {{ ucfirst($selectedClient->status) }}
                     </span>
-                    <span class="ml-3 text-gray-600 text-sm">
+                    <span class="ml-3 text-gray-600 text-sm whitespace-nowrap mt-1 md:mt-0 hidden md:inline-block">
                         <i class="fas fa-calendar-alt mr-1"></i>
                         @php $joinedBs = $dateHelpers->adToBs($selectedClient->created_at); @endphp
                         Joined {{ $nepaliTranslate($joinedBs['month'], 'month') }} {{ $joinedBs['year'] }}

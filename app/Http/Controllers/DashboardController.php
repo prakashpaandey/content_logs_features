@@ -243,10 +243,7 @@ class DashboardController extends Controller
                 ->get();
             
             // Charts Data
-            // 1. Content Type Distribution (Overall for the selected month?)
-            // Pie chart usually shows "Distribution". If dashboard is time-scoped, it should be for that month.
-            // But code originally used `->count()` on ALL contents (lines 109-110).
-            // Let's scope it to the view context (Month) to be consistent with "Overview Metrics".
+            // 1. Content Type Distribution (Scope to view context)
              $charts['totalBoostAmount'] = $metrics['total_boost_amount'];
              $charts['boostAmountGrowth'] = $metrics['boost_amount_growth'];
 

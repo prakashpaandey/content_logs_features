@@ -152,8 +152,8 @@
                                 {{ $data['client']->initials ?? strtoupper(substr($data['client']->name, 0, 2)) }}
                             </div>
                             <div class="ml-4">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $data['client']->name }}</h3>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $data['client']->business_name ?? 'Client' }}</p>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white truncate">{{ $data['client']->name }}</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[200px]" title="{{ $data['client']->business_name ?? 'Client' }}">{{ $data['client']->business_name ?? 'Client' }}</p>
                             </div>
                         </div>
                         @if($data['target'])

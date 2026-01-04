@@ -10,21 +10,7 @@
     <div class="mt-8">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Content Analytics</h2>
         <div class="grid grid-cols-1 gap-6">
-            <!-- Line Chart -->
-            <!-- <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-                <div id="line-chart"></div>
-            </div> -->
-            
-            <!-- Bar Chart -->
-            <!-- <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-                <div id="bar-chart"></div>
-            </div> -->
-            
-            <!-- Pie Chart -->
-            <!-- <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-                <div id="pie-chart"></div>
-            </div>
-             -->
+
             <!-- Progress Visualization -->
             <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
                 <div class="flex items-center justify-between mb-4">

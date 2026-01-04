@@ -11,9 +11,9 @@
      class="fixed inset-0 z-40 bg-gray-900/50 backdrop-blur-sm md:hidden"
      style="display: none;"></div>
 
-<aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:flex md:flex-shrink-0 border-r border-gray-200 dark:border-gray-700 shadow-xl md:shadow-none"
+<aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:flex md:flex-shrink-0 border-r border-gray-200 dark:border-gray-700 shadow-xl md:shadow-none overflow-x-hidden"
        :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}">
-    <div class="flex flex-col h-full">
+    <div class="flex flex-col h-full w-full">
         <!-- Client Panel Header -->
         <div class="px-4 py-5 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
@@ -78,22 +78,22 @@
             <div id="client-list" class="px-2 space-y-1">
                 @foreach($clients as $client)
                     <a href="{{ route('dashboard.index', ['client_id' => $client->id]) }}" 
-                       class="client-item block cursor-pointer p-3 rounded-lg border border-transparent hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 {{ isset($selectedClient) && $selectedClient->id == $client->id ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-500' : '' }}">
-                        <div class="flex items-center">
+                       class="client-item block cursor-pointer p-3 rounded-lg border border-transparent hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 {{ isset($selectedClient) && $selectedClient->id == $client->id ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-500' : '' }} overflow-hidden">
+                        <div class="flex items-center w-full">
                             <div class="flex-shrink-0">
                                 <div class="w-10 h-10 rounded-full bg-gradient-to-r from-{{ $client->status == 'active' ? 'green' : 'gray' }}-500 to-{{ $client->status == 'active' ? 'emerald' : 'slate' }}-500 flex items-center justify-center text-white font-semibold text-sm">
                                     {{ $client->initials }}
                                 </div>
                             </div>
                             <div class="ml-3 flex-1 min-w-0">
-                                <p class="client-name text-sm font-medium text-gray-900 dark:text-white truncate">
+                                <p class="client-name text-sm font-medium text-gray-900 dark:text-white truncate" title="{{ $client->name }}">
                                     {{ $client->name }}
                                 </p>
-                                <p class="client-business text-xs text-gray-500 dark:text-gray-400 truncate">
+                                <p class="client-business text-xs text-gray-500 dark:text-gray-400 truncate" title="{{ $client->business_name }}">
                                     {{ $client->business_name }}
                                 </p>
                             </div>
-                            <div class="ml-2">
+                            <div class="ml-2 flex-shrink-0">
                                 <span class="px-2 py-1 text-xs font-medium rounded-full {{ $client->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
                                     {{ ucfirst($client->status) }}
                                 </span>
@@ -110,10 +110,7 @@
                 <div class="text-sm text-gray-500">
                     <p>{{ count($clients) }} clients</p>
                 </div>
-                <!-- <button class="text-primary-600 hover:text-primary-800 text-sm font-medium">
-                    <i class="fas fa-cog mr-1"></i>
-                    Settings
-                </button> -->
+
             </div>
         </div>
     </div>
