@@ -9,9 +9,8 @@
                 </button>
                 
                 <div class="flex-shrink-0 flex items-center">
-                    <i class="fas fa-stream text-primary-600 text-xl mr-3"></i>
-                    <h1 class="text-xl font-bold text-gray-900 dark:text-white hidden sm:block">Content Management Dashboard</h1>
-                    <h1 class="text-xl font-bold text-gray-900 dark:text-white sm:hidden">CMD</h1>
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-white hidden sm:block">Social Media Management Dashboard</h1>
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-white sm:hidden">SMMD</h1>
                 </div>
             </div>
             

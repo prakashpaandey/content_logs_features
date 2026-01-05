@@ -295,7 +295,7 @@
         }
     }
 
-    // Script removed - Inlined in x-data
+   
 </script>
 
 <!-- Content Contributors Modal -->
