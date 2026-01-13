@@ -59,6 +59,7 @@
                             <i class="fas fa-lock text-sm"></i>
                         </div>
                         <input id="password" 
+                               type="password"
                                :type="show ? 'text' : 'password'"
                                name="password"
                                required 

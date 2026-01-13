@@ -31,6 +31,8 @@
                 }
             }
         </script>
+        <!-- Alpine.js -->
+        <script src="https://unpkg.com/alpinejs@3.12.0/dist/cdn.min.js" defer></script>
     </head>
     <body class="font-sans text-gray-900 antialiased overflow-x-hidden bg-[#F8FAFC]">
         <div class="min-h-screen flex flex-col items-center justify-center p-6">

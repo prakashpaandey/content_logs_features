@@ -133,7 +133,7 @@
             
             <!-- Modal Body -->
             <div class="px-6 py-4">
-                <form id="create-client-form" action="{{ route('clients.store') }}" method="POST">
+                <form id="create-client-form" action="{{ route('clients.store') }}" method="POST" onsubmit="event.preventDefault(); submitFormAjax('create-client-form', 'create-client-modal')">
                     @csrf
                     <div class="space-y-4">
                         <div>

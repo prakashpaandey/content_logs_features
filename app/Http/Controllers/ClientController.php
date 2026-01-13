@@ -45,6 +45,13 @@ class ClientController extends Controller
             'user_id' => auth()->id(),
         ]);
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Client created successfully.'
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Client created successfully.');
     }
 

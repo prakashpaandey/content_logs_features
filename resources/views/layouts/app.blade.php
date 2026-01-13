@@ -448,7 +448,7 @@
                     </div>
                 </div>
                 <div class="bg-gray-50 dark:bg-gray-700/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <form id="delete-item-form" :action="actionUrl" method="POST" class="inline-block" onsubmit="event.preventDefault(); submitFormAjax('delete-item-form', null); open = false;">
+                    <form id="delete-item-form" :action="actionUrl" method="POST" class="inline-block" @submit.prevent="submitFormAjax('delete-item-form', null).then(success => { if (success) open = false; })">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
@@ -818,25 +818,32 @@
                 const oldContent = document.querySelector('#dashboard-content');
                 if (newContent && oldContent) {
                     oldContent.innerHTML = newContent.innerHTML;
-                    
-                    // 2. Extract and update Chart Data script
-                    const scripts = doc.querySelectorAll('script');
-                    scripts.forEach(script => {
-                        if (script.textContent.includes('window.dashboardChartData')) {
-                            eval(script.textContent);
-                        }
-                    });
-
-                    // 3. Re-initialize components
-                    setTimeout(() => {
-                        if (typeof initializeCharts === 'function') initializeCharts();
-                        if (typeof initializeProgressBars === 'function') initializeProgressBars();
-                        if (typeof initializeNepaliDatePicker === 'function') initializeNepaliDatePicker();
-                        if (typeof initializeNepaliMonthPicker === 'function') initializeNepaliMonthPicker();
-                    }, 50);
-                    
-                    console.log('Dashboard Refreshed Successfully');
                 }
+
+                // 2. Refresh Sidebar Client List (if it exists)
+                const newClientList = doc.querySelector('#client-list');
+                const oldClientList = document.querySelector('#client-list');
+                if (newClientList && oldClientList) {
+                    oldClientList.innerHTML = newClientList.innerHTML;
+                }
+                
+                // 3. Extract and update Chart Data script
+                const scripts = doc.querySelectorAll('script');
+                scripts.forEach(script => {
+                    if (script.textContent.includes('window.dashboardChartData')) {
+                        eval(script.textContent);
+                    }
+                });
+
+                // 4. Re-initialize components
+                setTimeout(() => {
+                    if (typeof initializeCharts === 'function') initializeCharts();
+                    if (typeof initializeProgressBars === 'function') initializeProgressBars();
+                    if (typeof initializeNepaliDatePicker === 'function') initializeNepaliDatePicker();
+                    if (typeof initializeNepaliMonthPicker === 'function') initializeNepaliMonthPicker();
+                }, 50);
+                
+                console.log('Dashboard Refreshed Successfully');
             } catch (e) {
                 console.error('Error refreshing dashboard:', e);
             }
@@ -845,6 +852,10 @@
         async function submitFormAjax(formId, modalId) {
             const form = document.getElementById(formId);
             if (!form) return;
+
+            // Simple lock to prevent double-submits
+            if (form.getAttribute('data-submitting') === 'true') return false;
+            form.setAttribute('data-submitting', 'true');
 
             const formData = new FormData(form);
             const submitBtn = form.querySelector('[type="submit"]');
@@ -873,24 +884,33 @@
                         else document.getElementById(modalId).classList.add('hidden');
                     }
                     
-                    window.dispatchEvent(new CustomEvent('show-toast', { 
-                        detail: { message: data.message, type: 'success' } 
-                    }));
-
                     form.reset();
                     await refreshDashboard();
+
+                    // Dispatch toast AFTER refresh to ensure no UI interference
+                    window.dispatchEvent(new CustomEvent('show-toast', { 
+                        detail: { 
+                            message: data.message || 'Action completed successfully.', 
+                            type: 'success' 
+                        } 
+                    }));
+
+                    return true;
                 } else {
                     const errorMsg = data.message || (data.errors ? Object.values(data.errors)[0][0] : 'Validation failed');
                     window.dispatchEvent(new CustomEvent('show-toast', { 
                         detail: { message: errorMsg, type: 'error' } 
                     }));
+                    return false;
                 }
             } catch (e) {
                 console.error('AJAX Submit Error:', e);
                 window.dispatchEvent(new CustomEvent('show-toast', { 
                     detail: { message: 'Failed to process request', type: 'error' } 
                 }));
+                return false;
             } finally {
+                form.removeAttribute('data-submitting');
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = originalBtnText;
