@@ -100,6 +100,10 @@ class BoostController extends Controller
 
     public function update(Request $request, Boost $boost)
     {
+        if ($boost->user_id !== Auth::id()) {
+            return redirect()->back()->with('error', 'You are not authorized to edit this boost record.');
+        }
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'platform' => 'required|in:Instagram,TikTok,Facebook',
@@ -163,6 +167,10 @@ class BoostController extends Controller
 
     public function destroy(Boost $boost)
     {
+        if ($boost->user_id !== Auth::id()) {
+            return redirect()->back()->with('error', 'You are not authorized to delete this boost record.');
+        }
+
         $clientId = $boost->client_id;
         $date = $boost->date;
         

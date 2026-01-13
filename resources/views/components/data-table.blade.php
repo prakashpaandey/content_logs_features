@@ -77,12 +77,17 @@
                                 @php
                                     $bsDateStr = $bsDate['year'] . '-' . sprintf('%02d', $bsDate['month']) . '-' . sprintf('%02d', $bsDate['day']);
                                 @endphp
-                                <button onclick='openEditContentModal(@json($content), "{{ $bsDateStr }}")' class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button onclick="openDeleteModal('{{ route('contents.destroy', $content->id) }}')" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+
+                                @if($content->user_id === auth()->id())
+                                    <button onclick='openEditContentModal(@json($content), "{{ $bsDateStr }}")' class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="openDeleteModal('{{ route('contents.destroy', $content->id) }}')" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                @else
+                                    <span class="text-gray-400 italic text-xs">ReadOnly</span>
+                                @endif
                             </td>
                         </tr>
                     @endforeach

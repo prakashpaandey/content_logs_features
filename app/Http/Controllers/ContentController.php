@@ -131,6 +131,10 @@ class ContentController extends Controller
      */
     public function update(Request $request, Content $content)
     {
+        if ($content->user_id !== auth()->id()) {
+            return redirect()->back()->with('error', 'You are not authorized to edit this content.');
+        }
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'platform' => 'required|in:Instagram,TikTok,Facebook',
@@ -197,6 +201,10 @@ class ContentController extends Controller
 
     public function destroy(Content $content)
     {
+        if ($content->user_id !== auth()->id()) {
+            return redirect()->back()->with('error', 'You are not authorized to delete this content.');
+        }
+
         $clientId = $content->client_id;
         $date = \Carbon\Carbon::parse($content->date);
 

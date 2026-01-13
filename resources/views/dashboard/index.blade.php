@@ -92,18 +92,24 @@
                     </div>
                     
                     <!-- Stats Summary -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <div class="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $metrics['total_posts'] + $metrics['total_reels'] + $metrics['total_boosts'] }}</div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">Total Done</div>
+                    <div class="grid grid-cols-3 gap-2 md:gap-4 pt-6 border-t border-gray-100 dark:border-gray-700/50">
+                        <div class="text-center p-2 md:p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700/30">
+                            <div class="text-base md:text-2xl font-black text-gray-900 dark:text-white leading-none">
+                                {{ $metrics['total_posts'] + $metrics['total_reels'] + $metrics['total_boosts'] }}
+                            </div>
+                            <div class="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 mt-1 uppercase font-bold tracking-tighter">Done</div>
                         </div>
-                        <div class="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $metrics['total_left'] ?? 0 }}</div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">Total Left</div>
+                        <div class="text-center p-2 md:p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700/30">
+                            <div class="text-base md:text-2xl font-black text-gray-900 dark:text-white leading-none">
+                                {{ $metrics['total_left'] ?? 0 }}
+                            </div>
+                            <div class="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 mt-1 uppercase font-bold tracking-tighter">Left</div>
                         </div>
-                        <div class="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">$ {{ number_format($metrics['total_boost_amount'], 0) }}</div>
-                            <div class="text-sm text-blue-500 dark:text-blue-300">Boost Amount</div>
+                        <div class="text-center p-2 md:p-3 bg-primary-50 dark:bg-primary-900/10 rounded-xl border border-primary-100/50 dark:border-primary-900/20">
+                            <div class="text-base md:text-2xl font-black text-primary-600 dark:text-primary-400 leading-none">
+                                ${{ number_format($metrics['total_boost_amount'], 0) }}
+                            </div>
+                            <div class="text-[10px] md:text-xs text-primary-500/70 dark:text-primary-400/50 mt-1 uppercase font-bold tracking-tighter">Boost</div>
                         </div>
                     </div>
                 </div>
@@ -116,26 +122,26 @@
     
     <!-- Content & Boosts Section -->
     <div class="mt-8" x-data="{ activeTab: 'content' }">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4 sm:gap-0">
-            <div class="flex items-center space-x-1 p-1 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4">
+            <div class="flex items-center space-x-1 p-1 bg-gray-100 dark:bg-gray-700/50 rounded-xl w-full lg:w-auto">
                 <button @click="activeTab = 'content'" 
-                        :class="activeTab === 'content' ? 'bg-white dark:bg-gray-800 shadow-sm text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
-                        class="px-4 py-1.5 text-sm font-medium rounded-md transition-all duration-200">
+                        :class="activeTab === 'content' ? 'bg-white dark:bg-gray-800 shadow-md text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
+                        class="flex-1 lg:flex-none px-6 py-2.5 text-sm font-bold rounded-lg transition-all duration-200 uppercase tracking-tight">
                     Social Content
                 </button>
                 <button @click="activeTab = 'boosts'" 
-                        :class="activeTab === 'boosts' ? 'bg-white dark:bg-gray-800 shadow-sm text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
-                        class="px-4 py-1.5 text-sm font-medium rounded-md transition-all duration-200">
+                        :class="activeTab === 'boosts' ? 'bg-white dark:bg-gray-800 shadow-md text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
+                        class="flex-1 lg:flex-none px-6 py-2.5 text-sm font-bold rounded-lg transition-all duration-200 uppercase tracking-tight">
                     Boost Tracking
                 </button>
             </div>
             
-            <div class="flex items-center space-x-3">
-                <button x-show="activeTab === 'content'" @click="openModal('add-content-modal')" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
+            <div class="flex items-center space-x-3 w-full lg:w-auto">
+                <button x-show="activeTab === 'content'" @click="openModal('add-content-modal')" class="flex-1 lg:flex-none px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-primary-600/20 transition-all active:scale-95 flex items-center justify-center">
                     <i class="fas fa-plus mr-2"></i>
                     Add Content
                 </button>
-                <button x-show="activeTab === 'boosts'" @click="openModal('add-boost-modal')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
+                <button x-show="activeTab === 'boosts'" @click="openModal('add-boost-modal')" class="flex-1 lg:flex-none px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-600/20 transition-all active:scale-95 flex items-center justify-center">
                     <i class="fas fa-rocket mr-2"></i>
                     Add Boost Record
                 </button>
