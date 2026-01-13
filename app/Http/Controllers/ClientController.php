@@ -85,6 +85,13 @@ class ClientController extends Controller
             'initials' => $visuals,
         ]);
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Client updated successfully.'
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Client updated successfully.');
     }
 
@@ -94,6 +101,13 @@ class ClientController extends Controller
     public function destroy(Client $client)
     {
         $client->delete();
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Client deleted successfully.'
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Client deleted successfully.');
     }
 }

@@ -448,7 +448,7 @@
                     </div>
                 </div>
                 <div class="bg-gray-50 dark:bg-gray-700/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <form :action="actionUrl" method="POST" class="inline-block">
+                    <form id="delete-item-form" :action="actionUrl" method="POST" class="inline-block" onsubmit="event.preventDefault(); submitFormAjax('delete-item-form', null); open = false;">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
@@ -486,9 +486,13 @@
                 setTimeout(() => {
                     this.show = false;
                 }, 3000);
+            },
+            handleToastEvent(event) {
+                this.showToast(event.detail.message, event.detail.type || 'success');
             }
          }" 
          x-init="init()"
+         @show-toast.window="handleToastEvent($event)"
          class="fixed top-20 right-4 z-50">
         <div x-show="show" x-cloak
              x-transition:enter="transition ease-out duration-300"
@@ -798,6 +802,100 @@
                 button.classList.toggle('bg-white', !isCurrent);
                 button.classList.toggle('text-gray-700', !isCurrent);
             });
+        }
+
+        // --- DASHBOARD AJAX HELPERS ---
+        async function refreshDashboard() {
+            try {
+                console.log('Refreshing Dashboard Data...');
+                const response = await fetch(window.location.href);
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // 1. Refresh Main Content
+                const newContent = doc.querySelector('#dashboard-content');
+                const oldContent = document.querySelector('#dashboard-content');
+                if (newContent && oldContent) {
+                    oldContent.innerHTML = newContent.innerHTML;
+                    
+                    // 2. Extract and update Chart Data script
+                    const scripts = doc.querySelectorAll('script');
+                    scripts.forEach(script => {
+                        if (script.textContent.includes('window.dashboardChartData')) {
+                            eval(script.textContent);
+                        }
+                    });
+
+                    // 3. Re-initialize components
+                    setTimeout(() => {
+                        if (typeof initializeCharts === 'function') initializeCharts();
+                        if (typeof initializeProgressBars === 'function') initializeProgressBars();
+                        if (typeof initializeNepaliDatePicker === 'function') initializeNepaliDatePicker();
+                        if (typeof initializeNepaliMonthPicker === 'function') initializeNepaliMonthPicker();
+                    }, 50);
+                    
+                    console.log('Dashboard Refreshed Successfully');
+                }
+            } catch (e) {
+                console.error('Error refreshing dashboard:', e);
+            }
+        }
+
+        async function submitFormAjax(formId, modalId) {
+            const form = document.getElementById(formId);
+            if (!form) return;
+
+            const formData = new FormData(form);
+            const submitBtn = form.querySelector('[type="submit"]');
+            const originalBtnText = submitBtn ? submitBtn.innerHTML : '';
+
+            try {
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+                }
+
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    if (modalId) {
+                        if (typeof closeModal === 'function') closeModal(modalId);
+                        else document.getElementById(modalId).classList.add('hidden');
+                    }
+                    
+                    window.dispatchEvent(new CustomEvent('show-toast', { 
+                        detail: { message: data.message, type: 'success' } 
+                    }));
+
+                    form.reset();
+                    await refreshDashboard();
+                } else {
+                    const errorMsg = data.message || (data.errors ? Object.values(data.errors)[0][0] : 'Validation failed');
+                    window.dispatchEvent(new CustomEvent('show-toast', { 
+                        detail: { message: errorMsg, type: 'error' } 
+                    }));
+                }
+            } catch (e) {
+                console.error('AJAX Submit Error:', e);
+                window.dispatchEvent(new CustomEvent('show-toast', { 
+                    detail: { message: 'Failed to process request', type: 'error' } 
+                }));
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
+            }
         }
     </script>
 

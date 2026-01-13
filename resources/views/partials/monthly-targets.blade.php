@@ -162,7 +162,7 @@
             </div>
             
             <div class="px-6 py-4">
-                <form id="bulk-target-form" action="{{ route('monthly-targets.bulk') }}" method="POST">
+                <form id="bulk-target-form" action="{{ route('monthly-targets.bulk') }}" method="POST" onsubmit="event.preventDefault(); submitFormAjax('bulk-target-form', 'bulk-target-modal')">
                     @csrf
                     <div class="space-y-4">
                         <div>
@@ -228,7 +228,7 @@
             
             <!-- Modal Body -->
             <div class="px-6 py-4">
-                <form id="create-target-form" action="{{ route('monthly-targets.store') }}" method="POST">
+                <form id="create-target-form" action="{{ route('monthly-targets.store') }}" method="POST" onsubmit="event.preventDefault(); submitFormAjax('create-target-form', 'create-target-modal')">
                     @csrf
                     @if(isset($selectedClient))
                         <input type="hidden" name="client_id" value="{{ $selectedClient->id }}">
@@ -332,7 +332,7 @@
             
             <!-- Modal Body -->
             <div class="px-6 py-4">
-                <form id="edit-target-form" method="POST">
+                <form id="edit-target-form" method="POST" onsubmit="event.preventDefault(); submitFormAjax('edit-target-form', 'edit-target-modal')">
                     @csrf
                     @method('PUT')
                     
@@ -556,7 +556,7 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             @if($target->status === 'archived')
-                                                <form action="{{ route('monthly-targets.update', $target->id) }}" method="POST" class="inline-block">
+                                                <form id="restore-target-form-{{ $target->id }}" action="{{ route('monthly-targets.update', $target->id) }}" method="POST" class="inline-block" onsubmit="event.preventDefault(); submitFormAjax('restore-target-form-{{ $target->id }}', 'history-modal')">
                                                     @csrf
                                                     @method('PUT')
                                                     <input type="hidden" name="month" value="{{ date('Y-m', strtotime($target->month)) }}">

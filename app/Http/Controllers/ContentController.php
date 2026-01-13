@@ -107,6 +107,13 @@ class ContentController extends Controller
            
         }
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Content added successfully.'
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Content added successfully.');
     }
 
@@ -196,6 +203,13 @@ class ContentController extends Controller
             
         }
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Content updated successfully.'
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Content updated successfully.');
     }
 
@@ -225,6 +239,13 @@ class ContentController extends Controller
             }
         } catch (\Exception $e) {
             
+        }
+
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Content deleted successfully.'
+            ]);
         }
 
         return redirect()->back()->with('success', 'Content deleted successfully.');

@@ -95,6 +95,13 @@ class BoostController extends Controller
             $target->checkCompletionStatus();
         }
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Boost record added successfully.'
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Boost record added successfully.');
     }
 
@@ -162,6 +169,13 @@ class BoostController extends Controller
             $target->checkCompletionStatus();
         }
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Boost record updated successfully.'
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Boost record updated successfully.');
     }
 
@@ -187,6 +201,13 @@ class BoostController extends Controller
 
         if ($target) {
             $target->checkCompletionStatus();
+        }
+
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Boost record deleted successfully.'
+            ]);
         }
 
         return redirect()->back()->with('success', 'Boost record deleted successfully.');

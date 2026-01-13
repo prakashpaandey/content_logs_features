@@ -45,6 +45,13 @@ class MonthlyTargetController extends Controller
             'user_id' => auth()->id(),
         ]);
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Target set successfully.'
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Target set successfully.');
     }
 
@@ -89,6 +96,13 @@ class MonthlyTargetController extends Controller
         // Re-check completion status in case targets were LOWERED to meet actuals
         $monthlyTarget->checkCompletionStatus();
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Target updated successfully.'
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Target updated successfully.');
     }
 
@@ -98,6 +112,13 @@ class MonthlyTargetController extends Controller
     public function destroy(MonthlyTarget $monthlyTarget)
     {
         $monthlyTarget->delete();
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Target deleted successfully.'
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Target deleted successfully.');
     }
     public function bulkStore(Request $request)
@@ -134,6 +155,13 @@ class MonthlyTargetController extends Controller
                     'notes' => $validated['notes'],
                 ]
             );
+        }
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Targets updated for all clients.'
+            ]);
         }
 
         return redirect()->back()->with('success', 'Targets updated for all clients.');

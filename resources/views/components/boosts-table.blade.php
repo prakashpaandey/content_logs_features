@@ -154,7 +154,7 @@
             
             <!-- Modal Body -->
             <div class="px-6 py-4">
-                <form id="add-boost-form" action="{{ route('boosts.store') }}" method="POST">
+                <form id="add-boost-form" action="{{ route('boosts.store') }}" method="POST" onsubmit="event.preventDefault(); submitFormAjax('add-boost-form', 'add-boost-modal')">
                     @csrf
                     @if(isset($selectedClient))
                         <input type="hidden" name="client_id" value="{{ $selectedClient->id }}">
@@ -256,7 +256,7 @@
             
             <!-- Modal Body -->
             <div class="px-6 py-4">
-                <form id="edit-boost-form" method="POST">
+                <form id="edit-boost-form" method="POST" onsubmit="event.preventDefault(); submitFormAjax('edit-boost-form', 'edit-boost-modal')">
                     @csrf
                     @method('PUT')
                     <input type="hidden" name="manual_bs_date" id="edit-boost-manual-bs-date">

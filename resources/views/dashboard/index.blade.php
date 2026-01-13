@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="animate-fade-in">
+<div id="dashboard-content" class="animate-fade-in">
     <!-- Client Header -->
     @include('partials.client-header')
     

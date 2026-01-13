@@ -126,7 +126,7 @@
             
             <!-- Modal Body -->
             <div class="px-6 py-4">
-                <form id="edit-client-form" action="{{ route('clients.update', $selectedClient->id) }}" method="POST">
+                <form id="edit-client-form" action="{{ route('clients.update', $selectedClient->id) }}" method="POST" onsubmit="event.preventDefault(); submitFormAjax('edit-client-form', 'edit-client-modal')">
                     @csrf
                     @method('PUT')
                     

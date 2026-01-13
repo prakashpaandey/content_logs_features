@@ -148,7 +148,7 @@
             
             <!-- Modal Body -->
             <div class="px-6 py-4">
-                <form id="add-content-form" action="{{ route('contents.store') }}" method="POST">
+                <form id="add-content-form" action="{{ route('contents.store') }}" method="POST" onsubmit="event.preventDefault(); submitFormAjax('add-content-form', 'add-content-modal')">
                     @csrf
                     @if(isset($selectedClient))
                         <input type="hidden" name="client_id" value="{{ $selectedClient->id }}">
@@ -244,7 +244,7 @@
             
             <!-- Modal Body -->
             <div class="px-6 py-4">
-                <form id="edit-content-form" method="POST">
+                <form id="edit-content-form" method="POST" onsubmit="event.preventDefault(); submitFormAjax('edit-content-form', 'edit-content-modal')">
                     @csrf
                     @method('PUT')
                     <input type="hidden" name="manual_bs_date" id="edit-content-manual-bs-date">
