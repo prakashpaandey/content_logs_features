@@ -63,15 +63,19 @@ class ContentController extends Controller
         $contentBs = \App\Helpers\NepaliDateHelper::adToBs($date);
         $nowBs = \App\Helpers\NepaliDateHelper::adToBs($now);
 
+        /* 
         // Prevent future dates
         if ($date->startOfDay()->gt(\Carbon\Carbon::today())) {
             return redirect()->back()->withInput()->with('error', 'Cannot create content for upcoming dates!');
         }
+        */
 
+        /*
         //Prevent creating content for months ahead of the current real Nepali month
         if ($contentBs['year'] > $nowBs['year'] || ($contentBs['year'] == $nowBs['year'] && $contentBs['month'] > $nowBs['month'])) {
             return redirect()->back()->withInput()->with('error', 'Cannot create content for future months.');
         }
+        */
 
         //Context-based validation: Date must match the dashboard context
         if ($request->has('context_bs_month') && $request->has('context_bs_year')) {
@@ -155,15 +159,19 @@ class ContentController extends Controller
         $date = \Carbon\Carbon::parse($validated['date']);
         $now = \Carbon\Carbon::now();
 
+        /*
         //Prevent future dates
         if ($date->startOfDay()->gt($now->startOfDay())) {
             return redirect()->back()->withInput()->with('error', 'Cannot update content to upcoming dates.');
         }
+        */
 
+        /*
         //Prevent updating content to future months
         if ($date->year > $now->year || ($date->year == $now->year && $date->month > $now->month)) {
             return redirect()->back()->withInput()->with('error', 'Cannot update content to future months.');
         }
+        */
 
         $content->update($validated);
 

@@ -44,17 +44,21 @@ class BoostController extends Controller
         $contentBs = \App\Helpers\NepaliDateHelper::adToBs($date);
         $nowBs = \App\Helpers\NepaliDateHelper::adToBs($now);
 
+        /*
         //Prevent future dates
         if ($date->startOfDay()->gt(\Carbon\Carbon::today())) {
             return redirect()->back()->withInput()->with('error', 'Cannot create boost records for upcoming dates.');
         }
+        */
 
         
 
+        /*
         //Prevent creating boosts for months ahead of the current month
         if ($contentBs['year'] > $nowBs['year'] || ($contentBs['year'] == $nowBs['year'] && $contentBs['month'] > $nowBs['month'])) {
             return redirect()->back()->withInput()->with('error', 'Cannot create boost records for future  months.');
         }
+        */
 
         //Context-based validation: Date must match the dashboard context
         if ($request->has('context_bs_month') && $request->has('context_bs_year')) {
@@ -125,15 +129,19 @@ class BoostController extends Controller
         $date = \Carbon\Carbon::parse($validated['date']);
         $now = \Carbon\Carbon::now();
 
+        /*
         //Prevent future dates
         if ($date->startOfDay()->gt(\Carbon\Carbon::today())) {
             return redirect()->back()->withInput()->with('error', 'Cannot update boost records to upcoming dates.');
         }
+        */
 
+        /*
         //Prevent updating boosts to future months
         if ($date->year > $now->year || ($date->year == $now->year && $date->month > $now->month)) {
             return redirect()->back()->withInput()->with('error', 'Cannot update boost records to future months.');
         }
+        */
 
         $boost->update($validated);
 
