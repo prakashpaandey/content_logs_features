@@ -13,99 +13,123 @@
 
 <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
     <!-- Table -->
-    <div class="overflow-x-auto">
+    <!-- Desktop Table View -->
+    <div class="hidden md:block overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-700/50">
                 <tr>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Date
-                    </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Content Type
-                    </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Platform
-                    </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Title
-                    </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Amount
-                    </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        URL
-                    </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Actions
-                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Content Type</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Platform</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Title</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">URL</th>
+                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                @if($boostData->count() > 0)
-                    @foreach($boostData as $boost)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" title="Added by: {{ $boost->user->name ?? ($boost->user_id ? 'User ID: '.$boost->user_id : 'Unknown') }}">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                @php 
-                                    $boostDate = \Carbon\Carbon::parse($boost->date);
-                                    $bsDate = $dateHelpers->adToBs($boostDate);
-                                @endphp
-                                {{ $nepaliTranslate($bsDate['month'], 'month') }} {{ $bsDate['day'] }}, {{ $bsDate['year'] }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 py-1 text-xs font-medium rounded-full {{ $typeColors[$boost->boosted_content_type] ?? 'bg-gray-100' }}">
-                                    {{ ucfirst($boost->boosted_content_type) }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 py-1 text-xs font-medium rounded-full {{ $platformColors[$boost->platform] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' }}">
-                                    {{ $boost->platform }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                {{ $boost->title }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white font-semibold">
-                                $ {{ number_format($boost->amount, 2) }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                @if($boost->url)
-                                    <a href="{{ $boost->url }}" target="_blank" 
-                                       class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 flex items-center">
-                                        <i class="fas fa-external-link-alt mr-1 text-xs"></i>
-                                        View
-                                    </a>
-                                @else
-                                    <span class="text-gray-400">-</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right space-x-2">
-                                @php
-                                    $bsDateStr = $bsDate['year'] . '-' . sprintf('%02d', $bsDate['month']) . '-' . sprintf('%02d', $bsDate['day']);
-                                @endphp
-
-                                @if($boost->user_id === auth()->id())
-                                    <button onclick='openEditBoostModal(@json($boost), "{{ $bsDateStr }}")' class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button onclick="openDeleteModal('{{ route('boosts.destroy', $boost->id) }}')" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                @else
-                                    <span class="text-gray-400 italic text-xs">ReadOnly</span>
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
-                @else
-                    <tr>
-                        <td colspan="7" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                            No boost records found.
+                @forelse($boostData as $boost)
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" title="Added by: {{ $boost->user->name ?? 'Unknown' }}">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                            @php 
+                                $boostDate = \Carbon\Carbon::parse($boost->date);
+                                $bsDate = $dateHelpers->adToBs($boostDate);
+                            @endphp
+                            {{ $nepaliTranslate($bsDate['month'], 'month') }} {{ $bsDate['day'] }}, {{ $bsDate['year'] }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full {{ $typeColors[$boost->boosted_content_type] ?? 'bg-gray-100' }}">
+                                {{ ucfirst($boost->boosted_content_type) }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full {{ $platformColors[$boost->platform] ?? 'bg-gray-100' }}">
+                                {{ $boost->platform }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white truncate max-w-xs">
+                            {{ $boost->title }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white font-bold">
+                            $ {{ number_format($boost->amount, 2) }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            @if($boost->url)
+                                <a href="{{ $boost->url }}" target="_blank" class="text-primary-600 hover:text-primary-900 dark:text-primary-400 flex items-center">
+                                    <i class="fas fa-external-link-alt mr-1 text-xs"></i> View
+                                </a>
+                            @else
+                                <span class="text-gray-400">-</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right space-x-2">
+                            @php $bsDateStr = $bsDate['year'] . '-' . sprintf('%02d', $bsDate['month']) . '-' . sprintf('%02d', $bsDate['day']); @endphp
+                            @if($boost->user_id === auth()->id())
+                                <button onclick='openEditBoostModal(@json($boost), "{{ $bsDateStr }}")' class="text-primary-600 hover:text-primary-900 dark:text-primary-400"><i class="fas fa-edit"></i></button>
+                                <button onclick="openDeleteModal('{{ route('boosts.destroy', $boost->id) }}')" class="text-red-600 hover:text-red-900 dark:text-red-400"><i class="fas fa-trash"></i></button>
+                            @else
+                                <span class="text-gray-400 italic text-xs">ReadOnly</span>
+                            @endif
                         </td>
                     </tr>
-                @endif
+                @empty
+                    <tr><td colspan="7" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">No records found.</td></tr>
+                @endforelse
             </tbody>
         </table>
     </div>
+
+    <!-- Mobile Card View -->
+    <div class="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
+        @forelse($boostData as $boost)
+            <div class="p-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 text-[10px] font-bold rounded-full {{ $platformColors[$boost->platform] ?? 'bg-gray-100' }}">
+                            {{ strtoupper($boost->platform) }}
+                        </span>
+                        <span class="px-2 py-0.5 text-[10px] font-bold rounded-full {{ $typeColors[$boost->boosted_content_type] ?? 'bg-gray-100' }}">
+                            {{ strtoupper($boost->boosted_content_type) }}
+                        </span>
+                    </div>
+                    <div class="text-[10px] text-gray-400 font-medium">
+                        @php 
+                            $boostDate = \Carbon\Carbon::parse($boost->date);
+                            $bsDate = $dateHelpers->adToBs($boostDate);
+                        @endphp
+                        {{ $nepaliTranslate($bsDate['month'], 'month') }} {{ $bsDate['day'] }}
+                    </div>
+                </div>
+                <div class="flex items-start justify-between gap-4">
+                    <div class="text-sm font-bold text-gray-900 dark:text-white leading-tight">
+                        {{ $boost->title }}
+                    </div>
+                    <div class="text-sm font-black text-primary-600 dark:text-primary-400 shrink-0">
+                        ${{ number_format($boost->amount, 0) }}
+                    </div>
+                </div>
+                <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700/50">
+                    <div class="flex items-center gap-2">
+                        @if($boost->url)
+                            <a href="{{ $boost->url }}" target="_blank" class="text-xs text-primary-600 dark:text-primary-400 font-bold flex items-center">
+                                <i class="fas fa-link mr-1"></i> LINK
+                            </a>
+                        @endif
+                    </div>
+                    <div class="flex items-center gap-3">
+                        @php $bsDateStr = $bsDate['year'] . '-' . sprintf('%02d', $bsDate['month']) . '-' . sprintf('%02d', $bsDate['day']); @endphp
+                        @if($boost->user_id === auth()->id())
+                            <button onclick='openEditBoostModal(@json($boost), "{{ $bsDateStr }}")' class="p-2 text-primary-600 dark:text-primary-400"><i class="fas fa-edit"></i></button>
+                            <button onclick="openDeleteModal('{{ route('boosts.destroy', $boost->id) }}')" class="p-2 text-red-500"><i class="fas fa-trash"></i></button>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">No boost records found.</div>
+        @endforelse
+    </div>
+
     
     <!-- Pagination -->
     <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">

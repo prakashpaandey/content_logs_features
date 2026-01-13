@@ -44,50 +44,47 @@
                     </div>
                     
                     <!-- Posts Progress -->
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
+                    <div class="group">
+                        <div class="flex items-center justify-between mb-1.5">
                             <div class="flex items-center">
-                                <div class="w-3 h-3 rounded-full bg-primary-500 mr-2"></div>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Posts</span>
+                                <span class="text-xs md:text-sm font-semibold text-gray-600 dark:text-gray-400">Posts</span>
                             </div>
-                            <span class="text-sm font-medium text-gray-900 dark:text-white">
-                                {{ $postProgress }}% ({{ $metrics['total_posts'] }}/{{ $currentTarget ? $currentTarget->target_posts : 0 }})
+                            <span class="text-xs md:text-sm font-bold text-gray-900 dark:text-white">
+                                {{ $postProgress }}% <span class="text-gray-400 font-medium ml-1">({{ $metrics['total_posts'] }}/{{ $currentTarget ? $currentTarget->target_posts : 0 }})</span>
                             </span>
                         </div>
-                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                            <div class="bg-primary-500 h-2.5 rounded-full" style="width: {{ $postProgress }}%"></div>
+                        <div class="w-full bg-gray-100 dark:bg-gray-700/50 rounded-full h-2 md:h-2.5 overflow-hidden">
+                            <div class="bg-primary-500 h-full rounded-full transition-all duration-1000 ease-out" style="width: {{ $postProgress }}%"></div>
                         </div>
                     </div>
                     
                     <!-- Reels Progress -->
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
+                    <div class="group">
+                        <div class="flex items-center justify-between mb-1.5">
                             <div class="flex items-center">
-                                <div class="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Reels</span>
+                                <span class="text-xs md:text-sm font-semibold text-gray-600 dark:text-gray-400">Reels</span>
                             </div>
-                            <span class="text-sm font-medium text-gray-900 dark:text-white">
-                                {{ $reelProgress }}% ({{ $metrics['total_reels'] }}/{{ $currentTarget ? $currentTarget->target_reels : 0 }})
+                            <span class="text-xs md:text-sm font-bold text-gray-900 dark:text-white">
+                                {{ $reelProgress }}% <span class="text-gray-400 font-medium ml-1">({{ $metrics['total_reels'] }}/{{ $currentTarget ? $currentTarget->target_reels : 0 }})</span>
                             </span>
                         </div>
-                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                            <div class="bg-green-500 h-2.5 rounded-full" style="width: {{ $reelProgress }}%"></div>
+                        <div class="w-full bg-gray-100 dark:bg-gray-700/50 rounded-full h-2 md:h-2.5 overflow-hidden">
+                            <div class="bg-green-500 h-full rounded-full transition-all duration-1000 ease-out" style="width: {{ $reelProgress }}%"></div>
                         </div>
                     </div>
 
                     <!-- Boosts Progress -->
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
+                    <div class="group">
+                        <div class="flex items-center justify-between mb-1.5">
                             <div class="flex items-center">
-                                <div class="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Boosts</span>
+                                <span class="text-xs md:text-sm font-semibold text-gray-600 dark:text-gray-400">Boosts</span>
                             </div>
-                            <span class="text-sm font-medium text-gray-900 dark:text-white">
-                                {{ $boostProgress }}% ($ {{ number_format($metrics['total_boost_amount']) }} / $ {{ number_format($currentTarget ? $currentTarget->target_boost_budget : 0) }})
+                            <span class="text-xs md:text-sm font-bold text-gray-900 dark:text-white">
+                                {{ $boostProgress }}% <span class="text-gray-400 font-medium ml-1">($ {{ number_format($metrics['total_boost_amount']) }} / $ {{ number_format($currentTarget ? $currentTarget->target_boost_budget : 0) }})</span>
                             </span>
                         </div>
-                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                            <div class="bg-blue-500 h-2.5 rounded-full" style="width: {{ $boostProgress }}%"></div>
+                        <div class="w-full bg-gray-100 dark:bg-gray-700/50 rounded-full h-2 md:h-2.5 overflow-hidden">
+                            <div class="bg-blue-500 h-full rounded-full transition-all duration-1000 ease-out" style="width: {{ $boostProgress }}%"></div>
                         </div>
                     </div>
                     

@@ -23,31 +23,18 @@
     </div>
     
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div class="overflow-x-auto">
+        <!-- Desktop Table View -->
+        <div class="hidden md:block overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700/50">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Month
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Target Posts
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Target Reels
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Boost Budget
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Created Date
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Status
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Actions
-                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Month</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Target Posts</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Target Reels</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Boost Budget</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Created Date</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="targets-table-body" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -57,72 +44,106 @@
                             'completed' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
                             'archived' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
                         ];
+                        
+                        $activeTargets = $displayedTargets->filter(fn($t) => !in_array($t->status, ['completed', 'archived']));
                     @endphp
                     
-                    @php
-                        // Filter active targets for the main list
-                        $activeTargets = $displayedTargets->filter(function($target) {
-                            return !in_array($target->status, ['completed', 'archived']);
-                        });
-                    @endphp
-                    
-                    @if($activeTargets->count() > 0)
-                        @foreach($activeTargets as $target)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                    @php 
-                                        $m = $target->bs_month ?? $dateHelpers->representativeAdToBs($target->month)['month'];
-                                        $y = $target->bs_year ?? $dateHelpers->representativeAdToBs($target->month)['year'];
-                                    @endphp
-                                    {{ $nepaliTranslate($m, 'month') }} {{ $y }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                    {{ $target->target_posts }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                    {{ $target->target_reels }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                    $ {{ number_format($target->target_boost_budget, 2) }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                    @php $createdBs = $dateHelpers->adToBs($target->created_at); @endphp
-                                    {{ $nepaliTranslate($createdBs['month'], 'month') }} {{ $createdBs['year'] }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusColors[$target->status] }}">
-                                        {{ ucfirst($target->status) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right space-x-2">
-                                    @php
-                                        // Attach actuals for JS validation
-                                        $target->actual_posts = $target->getActualPosts();
-                                        $target->actual_reels = $target->getActualReels();
-                                        $target->actual_boost_amount = $target->getActualBoostAmount();
-                                    @endphp
-                                    <button type="button" class="btn-view-target text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300" data-target='@json($target)'>
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    @if($target->status !== 'completed' && $target->status !== 'archived')
-                                        <button type="button" class="btn-edit-target text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300" data-target='@json($target)'>
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    @else
-                        <tr>
-                            <td colspan="7" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                                No monthly targets found. Create one to get started.
+                    @forelse($activeTargets as $target)
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                @php 
+                                    $m = $target->bs_month ?? $dateHelpers->representativeAdToBs($target->month)['month'];
+                                    $y = $target->bs_year ?? $dateHelpers->representativeAdToBs($target->month)['year'];
+                                @endphp
+                                {{ $nepaliTranslate($m, 'month') }} {{ $y }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ $target->target_posts }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ $target->target_reels }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">$ {{ number_format($target->target_boost_budget, 2) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                @php $createdBs = $dateHelpers->adToBs($target->created_at); @endphp
+                                {{ $nepaliTranslate($createdBs['month'], 'month') }} {{ $createdBs['year'] }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusColors[$target->status] }}">
+                                    {{ ucfirst($target->status) }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right space-x-2">
+                                @php
+                                    $target->actual_posts = $target->getActualPosts();
+                                    $target->actual_reels = $target->getActualReels();
+                                    $target->actual_boost_amount = $target->getActualBoostAmount();
+                                @endphp
+                                <button type="button" class="btn-view-target text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300" data-target='@json($target)'>
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button type="button" class="btn-edit-target text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300" data-target='@json($target)'>
+                                    <i class="fas fa-edit"></i>
+                                </button>
                             </td>
                         </tr>
-                    @endif
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">No active targets found.</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
+
+        <!-- Mobile Card View -->
+        <div class="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
+            @forelse($activeTargets as $target)
+                <div class="p-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm font-bold text-gray-900 dark:text-white">
+                            @php 
+                                $m = $target->bs_month ?? $dateHelpers->representativeAdToBs($target->month)['month'];
+                                $y = $target->bs_year ?? $dateHelpers->representativeAdToBs($target->month)['year'];
+                            @endphp
+                            {{ $nepaliTranslate($m, 'month') }} {{ $y }}
+                        </div>
+                        <span class="px-2 py-0.5 text-[10px] font-bold rounded-full {{ $statusColors[$target->status] }}">
+                            {{ strtoupper($target->status) }}
+                        </span>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="bg-gray-50 dark:bg-gray-700/30 p-2 rounded-lg text-center">
+                            <div class="text-xs text-gray-400 uppercase font-black tracking-tighter mb-1">Posts</div>
+                            <div class="text-sm font-bold text-gray-900 dark:text-white">{{ $target->target_posts }}</div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700/30 p-2 rounded-lg text-center">
+                            <div class="text-xs text-gray-400 uppercase font-black tracking-tighter mb-1">Reels</div>
+                            <div class="text-sm font-bold text-gray-900 dark:text-white">{{ $target->target_reels }}</div>
+                        </div>
+                        <div class="bg-primary-50 dark:bg-primary-900/10 p-2 rounded-lg text-center">
+                            <div class="text-xs text-primary-400 uppercase font-black tracking-tighter mb-1">Budget</div>
+                            <div class="text-sm font-bold text-primary-600 dark:text-primary-400">${{ number_format($target->target_boost_budget, 0) }}</div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700/50">
+                        <div class="text-[10px] text-gray-400">
+                            Created: {{ $nepaliTranslate($createdBs['month'], 'month') }} {{ $createdBs['year'] }}
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button type="button" class="btn-view-target p-2 text-primary-600 dark:text-primary-400" data-target='@json($target)'>
+                                <i class="fas fa-eye text-sm"></i>
+                            </button>
+                            <button type="button" class="btn-edit-target p-2 text-yellow-500" data-target='@json($target)'>
+                                <i class="fas fa-edit text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">No active targets found.</div>
+            @endforelse
+        </div>
     </div>
+
 </div>
 
 <!-- Bulk Target Modal -->

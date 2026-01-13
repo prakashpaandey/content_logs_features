@@ -14,19 +14,19 @@
                 </p>
             </div>
             
-            <div class="flex items-center gap-3">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full md:w-auto">
                 <!-- Search Input -->
-                <div class="relative">
+                <div class="relative flex-1">
                     <input 
                         type="text" 
                         x-model="searchQuery"
                         placeholder="Search clients..."
-                        class="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        class="pl-10 pr-4 py-2 w-full border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                     >
                     <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                 </div>
                 
-                <div class="flex items-center space-x-2 min-w-[220px]">
+                <div class="flex items-center space-x-2 min-w-0 sm:min-w-[220px]">
                     <x-nepali-month-picker 
                         id="overview-month-nav" 
                         value="{{ $bsYear . '-' . str_pad($bsMonth, 2, '0', STR_PAD_LEFT) }}"
@@ -41,8 +41,8 @@
         @php
             $statusFilter = request()->query('status', 'all');
         @endphp
-        <div class="mt-6 border-b border-gray-200 dark:border-gray-700">
-            <nav class="flex space-x-1" aria-label="Tabs">
+        <div class="mt-6 border-b border-gray-200 dark:border-gray-700 overflow-x-auto hide-scrollbar">
+            <nav class="flex space-x-2 min-w-max pb-px" aria-label="Tabs">
                 <a href="{{ route('clients.overview', ['month' => $bsMonth, 'year' => $bsYear, 'status' => 'all']) }}" 
                    class="px-4 py-3 text-sm font-medium rounded-t-lg transition-colors {{ $statusFilter === 'all' 
                        ? 'bg-primary-50 text-primary-700 border-b-2 border-primary-600 dark:bg-primary-900/30 dark:text-primary-400' 
@@ -71,7 +71,7 @@
         </div>
 
         <!-- Portfolio Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
             <div class="bg-purple-50 dark:bg-purple-900/10 p-4 rounded-xl border border-purple-100 dark:border-purple-900/20">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Total Posts</span>
@@ -146,18 +146,18 @@
                  x-transition:leave-end="opacity-0 transform scale-95">
                 <!-- Card Header -->
                 <div class="bg-gradient-to-r from-primary-50 to-purple-50 dark:from-primary-900/20 dark:to-purple-900/20 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                         <div class="flex items-center">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-r from-primary-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-r from-primary-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shrink-0">
                                 {{ $data['client']->initials ?? strtoupper(substr($data['client']->name, 0, 2)) }}
                             </div>
-                            <div class="ml-4">
+                            <div class="ml-4 min-w-0">
                                 <h3 class="text-lg font-bold text-gray-900 dark:text-white truncate">{{ $data['client']->name }}</h3>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[200px]" title="{{ $data['client']->business_name ?? 'Client' }}">{{ $data['client']->business_name ?? 'Client' }}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 truncate" title="{{ $data['client']->business_name ?? 'Client' }}">{{ $data['client']->business_name ?? 'Client' }}</p>
                             </div>
                         </div>
                         @if($data['target'])
-                            <span class="px-3 py-1 text-xs font-bold rounded-full uppercase tracking-widest
+                            <span class="px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-widest self-start sm:self-center
                                 {{ $data['target']->status === 'completed' 
                                     ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
                                     : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' }}">
@@ -194,10 +194,11 @@
                                 <div class="w-3 h-3 rounded-full bg-primary-500 mr-2"></div>
                                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Posts</span>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-sm font-medium text-gray-900 dark:text-white cursor-pointer hover:text-primary-600 transition-colors" @click="$dispatch('open-contributors-modal', { clientId: {{ $data['client']->id }}, type: 'Post' })" title="View Contributors">
-                                    {{ $postProgress }}% ({{ $data['actual_posts'] }}/{{ $data['target_posts'] }})
+                            <div class="flex flex-col items-end text-right">
+                                <span class="text-xs font-bold text-gray-900 dark:text-white cursor-pointer hover:text-primary-600 transition-colors" @click="$dispatch('open-contributors-modal', { clientId: {{ $data['client']->id }}, type: 'Post' })">
+                                    {{ $postProgress }}%
                                 </span>
+                                <span class="text-[10px] text-gray-500">{{ $data['actual_posts'] }}/{{ $data['target_posts'] }} Posts</span>
                             </div>
                         </div>
                         <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
@@ -213,10 +214,11 @@
                                 <div class="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
                                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Reels</span>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-sm font-medium text-gray-900 dark:text-white cursor-pointer hover:text-green-600 transition-colors" @click="$dispatch('open-contributors-modal', { clientId: {{ $data['client']->id }}, type: 'Reel' })" title="View Contributors">
-                                    {{ $reelProgress }}% ({{ $data['actual_reels'] }}/{{ $data['target_reels'] }})
+                            <div class="flex flex-col items-end text-right">
+                                <span class="text-xs font-bold text-gray-900 dark:text-white cursor-pointer hover:text-green-600 transition-colors" @click="$dispatch('open-contributors-modal', { clientId: {{ $data['client']->id }}, type: 'Reel' })">
+                                    {{ $reelProgress }}%
                                 </span>
+                                <span class="text-[10px] text-gray-500">{{ $data['actual_reels'] }}/{{ $data['target_reels'] }} Reels</span>
                             </div>
                         </div>
                         <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
@@ -232,10 +234,11 @@
                                 <div class="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
                                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Boosts</span>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-sm font-medium text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 transition-colors" @click="$dispatch('open-contributors-modal', { clientId: {{ $data['client']->id }}, type: 'Boost' })" title="View Contributors">
-                                    {{ $boostProgress }}% ($ {{ number_format($data['boost_amount']) }} / $ {{ number_format($data['target_boost_budget'] ?? 0) }})
+                            <div class="flex flex-col items-end text-right">
+                                <span class="text-xs font-bold text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 transition-colors" @click="$dispatch('open-contributors-modal', { clientId: {{ $data['client']->id }}, type: 'Boost' })">
+                                    {{ $boostProgress }}%
                                 </span>
+                                <span class="text-[10px] text-gray-500">${{ $data['boost_amount'] }}/${{ $data['target_boost_budget'] ?? 0 }}</span>
                             </div>
                         </div>
                         <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">

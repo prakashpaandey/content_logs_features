@@ -54,7 +54,8 @@
 
                 <template x-if="filteredItems.length > 0">
                     <div class="overflow-hidden ring-1 ring-black ring-opacity-5 rounded-lg">
-                        <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+                        <!-- Desktop Table View -->
+                        <table class="hidden md:table min-w-full divide-y divide-gray-300 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-700/50">
                                 <tr>
                                     <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Date</th>
@@ -82,6 +83,26 @@
                                 </template>
                             </tbody>
                         </table>
+
+                        <!-- Mobile Card View -->
+                        <div class="md:hidden divide-y divide-gray-100 dark:divide-gray-700/50">
+                            <template x-for="item in filteredItems" :key="item.title + item.date">
+                                <div class="p-4 space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter" x-text="item.date"></span>
+                                        <div class="flex items-center bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded-full">
+                                            <div class="h-4 w-4 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center text-[8px] font-bold text-primary-600 dark:text-primary-400 mr-1.5" x-text="item.avatar"></div>
+                                            <span class="text-[10px] font-bold text-gray-700 dark:text-gray-300" x-text="item.user"></span>
+                                        </div>
+                                    </div>
+                                    <div class="text-sm font-black text-gray-900 dark:text-white leading-tight" x-text="item.title"></div>
+                                    <div class="flex items-center justify-between pt-2 border-t border-gray-50 dark:border-gray-700/50">
+                                        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter" x-text="item.type"></span>
+                                        <div x-show="item.amount" class="text-xs font-black text-green-600 dark:text-green-400" x-text="item.amount"></div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </template>
             </div>
