@@ -105,7 +105,7 @@
         </div>
         
         <!-- Sidebar Footer -->
-        <div class="border-t border-gray-200 p-4">
+        <div id="sidebar-footer" class="border-t border-gray-200 p-4">
             <div class="flex items-center justify-between">
                 <div class="text-sm text-gray-500">
                     <p>{{ count($clients) }} clients</p>

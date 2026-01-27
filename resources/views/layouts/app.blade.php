@@ -826,6 +826,13 @@
                 if (newClientList && oldClientList) {
                     oldClientList.innerHTML = newClientList.innerHTML;
                 }
+
+                // 2.1 Refresh Sidebar Footer (Client Count)
+                const newSidebarFooter = doc.querySelector('#sidebar-footer');
+                const oldSidebarFooter = document.querySelector('#sidebar-footer');
+                if (newSidebarFooter && oldSidebarFooter) {
+                    oldSidebarFooter.innerHTML = newSidebarFooter.innerHTML;
+                }
                 
                 // 3. Extract and update Chart Data script
                 const scripts = doc.querySelectorAll('script');
