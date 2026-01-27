@@ -144,26 +144,26 @@
                  x-transition:leave-start="opacity-100 transform scale-100"
                  x-transition:leave-end="opacity-0 transform scale-95">
                 <!-- Card Header -->
-                <div class="bg-gradient-to-r from-primary-50 to-purple-50 dark:from-primary-900/20 dark:to-purple-900/20 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="bg-gradient-to-r from-primary-50 to-purple-50 dark:from-primary-900/20 dark:to-purple-900/20 px-4 py-3 sm:px-6 sm:py-4 border-b border-gray-200 dark:border-gray-700">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                         <div class="flex items-center">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-r from-primary-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shrink-0">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-primary-500 to-purple-500 flex items-center justify-center text-white font-bold text-base sm:text-lg shadow-lg shrink-0">
                                 {{ $data['client']->initials ?? strtoupper(substr($data['client']->name, 0, 2)) }}
                             </div>
-                            <div class="ml-4 min-w-0">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white truncate">{{ $data['client']->name }}</h3>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 truncate" title="{{ $data['client']->business_name ?? 'Client' }}">{{ $data['client']->business_name ?? 'Client' }}</p>
+                            <div class="ml-3 sm:ml-4 min-w-0">
+                                <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">{{ $data['client']->name }}</h3>
+                                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate" title="{{ $data['client']->business_name ?? 'Client' }}">{{ $data['client']->business_name ?? 'Client' }}</p>
                             </div>
                         </div>
                         @if($data['target'])
-                            <span class="px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-widest self-start sm:self-center
+                            <span class="px-2 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-bold rounded-full uppercase tracking-widest self-start sm:self-center
                                 {{ $data['target']->status === 'completed' 
                                     ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' 
                                     : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' }}">
                                 {{ ucfirst($data['target']->status) }}
                             </span>
                         @else
-                            <span class="px-3 py-1 text-xs font-bold rounded-full bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400 uppercase tracking-widest">
+                            <span class="px-2 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-bold rounded-full bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400 uppercase tracking-widest">
                                 No Target
                             </span>
                         @endif
@@ -171,27 +171,27 @@
                 </div>
 
                 <!-- Progress Section -->
-                <div class="p-6">
-                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Monthly Progress</h4>
+                <div class="p-4 sm:p-6">
+                    <h4 class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 sm:mb-4">Monthly Progress</h4>
                     
                     <!-- Overall Completion -->
-                    <div class="mb-6">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Overall Completion</span>
-                            <span class="text-lg font-bold text-primary-600">{{ $data['completion'] }}%</span>
+                    <div class="mb-4 sm:mb-6">
+                        <div class="flex items-center justify-between mb-1 sm:mb-2">
+                            <span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Overall Completion</span>
+                            <span class="text-base sm:text-lg font-bold text-primary-600">{{ $data['completion'] }}%</span>
                         </div>
-                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                            <div class="bg-gradient-to-r from-primary-500 to-purple-500 h-3 rounded-full transition-all duration-500" 
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 sm:h-3">
+                            <div class="bg-gradient-to-r from-primary-500 to-purple-500 h-2 sm:h-3 rounded-full transition-all duration-500" 
                                  style="width: {{ $data['completion'] }}%"></div>
                         </div>
                     </div>
 
                     <!-- Posts Progress -->
-                    <div class="mb-4">
-                        <div class="flex items-center justify-between mb-2">
+                    <div class="mb-3 sm:mb-4">
+                        <div class="flex items-center justify-between mb-1 sm:mb-2">
                             <div class="flex items-center">
-                                <div class="w-3 h-3 rounded-full bg-primary-500 mr-2"></div>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Posts</span>
+                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-primary-500 mr-1.5 sm:mr-2"></div>
+                                <span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Posts</span>
                             </div>
                             <div class="flex flex-col items-end text-right">
                                 <span class="text-xs font-bold text-gray-900 dark:text-white cursor-pointer hover:text-primary-600 transition-colors" @click="$dispatch('open-contributors-modal', { clientId: {{ $data['client']->id }}, type: 'Post' })">
@@ -200,18 +200,18 @@
                                 <span class="text-[10px] text-gray-500">{{ $data['actual_posts'] }}/{{ $data['target_posts'] }} Posts</span>
                             </div>
                         </div>
-                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                            <div class="bg-primary-500 h-2.5 rounded-full transition-all duration-500" 
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 sm:h-2.5">
+                            <div class="bg-primary-500 h-2 sm:h-2.5 rounded-full transition-all duration-500" 
                                  style="width: {{ $postProgress }}%"></div>
                         </div>
                     </div>
 
                     <!-- Reels Progress -->
-                    <div class="mb-4">
-                        <div class="flex items-center justify-between mb-2">
+                    <div class="mb-3 sm:mb-4">
+                        <div class="flex items-center justify-between mb-1 sm:mb-2">
                             <div class="flex items-center">
-                                <div class="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Reels</span>
+                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500 mr-1.5 sm:mr-2"></div>
+                                <span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Reels</span>
                             </div>
                             <div class="flex flex-col items-end text-right">
                                 <span class="text-xs font-bold text-gray-900 dark:text-white cursor-pointer hover:text-green-600 transition-colors" @click="$dispatch('open-contributors-modal', { clientId: {{ $data['client']->id }}, type: 'Reel' })">
@@ -220,18 +220,18 @@
                                 <span class="text-[10px] text-gray-500">{{ $data['actual_reels'] }}/{{ $data['target_reels'] }} Reels</span>
                             </div>
                         </div>
-                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                            <div class="bg-green-500 h-2.5 rounded-full transition-all duration-500" 
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 sm:h-2.5">
+                            <div class="bg-green-500 h-2 sm:h-2.5 rounded-full transition-all duration-500" 
                                  style="width: {{ $reelProgress }}%"></div>
                         </div>
                     </div>
 
                     <!-- Boosts Progress -->
-                    <div class="mb-6">
-                        <div class="flex items-center justify-between mb-2">
+                    <div class="mb-4 sm:mb-6">
+                        <div class="flex items-center justify-between mb-1 sm:mb-2">
                             <div class="flex items-center">
-                                <div class="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Boosts</span>
+                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-blue-500 mr-1.5 sm:mr-2"></div>
+                                <span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Boosts</span>
                             </div>
                             <div class="flex flex-col items-end text-right">
                                 <span class="text-xs font-bold text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 transition-colors" @click="$dispatch('open-contributors-modal', { clientId: {{ $data['client']->id }}, type: 'Boost' })">
@@ -240,33 +240,33 @@
                                 <span class="text-[10px] text-gray-500">${{ $data['boost_amount'] }}/${{ $data['target_boost_budget'] ?? 0 }}</span>
                             </div>
                         </div>
-                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                            <div class="bg-blue-500 h-2.5 rounded-full transition-all duration-500" 
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 sm:h-2.5">
+                            <div class="bg-blue-500 h-2 sm:h-2.5 rounded-full transition-all duration-500" 
                                  style="width: {{ $boostProgress }}%"></div>
                         </div>
                     </div>
 
                     <!-- Stats Summary -->
-                    <div class="grid grid-cols-3 gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <div class="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <div class="text-xl font-bold text-gray-900 dark:text-white">{{ $data['total_actual'] }}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">Total Done</div>
+                    <div class="grid grid-cols-3 gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div class="text-center p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">{{ $data['total_actual'] }}</div>
+                            <div class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Total Done</div>
                         </div>
-                        <div class="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <div class="text-xl font-bold text-gray-900 dark:text-white">{{ $data['total_left'] }}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">Total Left</div>
+                        <div class="text-center p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">{{ $data['total_left'] }}</div>
+                            <div class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Total Left</div>
                         </div>
-                        <div class="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                            <div class="text-xl font-bold text-blue-600 dark:text-blue-400">$ {{ number_format($data['boost_amount'], 0) }}</div>
-                            <div class="text-xs text-blue-500 dark:text-blue-300">Boost Amount</div>
+                        <div class="text-center p-2 sm:p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <div class="text-lg sm:text-xl font-bold text-blue-600 dark:text-blue-400">$ {{ number_format($data['boost_amount'], 0) }}</div>
+                            <div class="text-[10px] sm:text-xs text-blue-500 dark:text-blue-300">Boost Amount</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Card Footer -->
-                <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-200 dark:border-gray-700">
+                <div class="px-4 py-3 sm:px-6 sm:py-4 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-200 dark:border-gray-700">
                     <a href="{{ route('dashboard.index', ['client_id' => $data['client']->id, 'month' => $bsMonth, 'year' => $bsYear]) }}" 
-                       class="flex items-center justify-center w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                       class="flex items-center justify-center w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm sm:text-base font-medium rounded-lg transition-colors">
                         <i class="fas fa-external-link-alt mr-2"></i>
                         View Full Dashboard
                     </a>
