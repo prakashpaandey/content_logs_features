@@ -56,13 +56,13 @@
                 </a>
                 <a href="{{ route('clients.overview', ['month' => $bsMonth, 'year' => $bsYear, 'status' => 'active']) }}" 
                    class="px-4 py-3 text-sm font-medium rounded-t-lg transition-colors {{ $statusFilter === 'active' 
-                       ? 'bg-yellow-50 text-yellow-700 border-b-2 border-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' 
+                       ? 'bg-emerald-50 text-emerald-700 border-b-2 border-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' 
                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700/50' }}">
                     <i class="fas fa-play-circle mr-2"></i>Active
                 </a>
                 <a href="{{ route('clients.overview', ['month' => $bsMonth, 'year' => $bsYear, 'status' => 'completed']) }}" 
                    class="px-4 py-3 text-sm font-medium rounded-t-lg transition-colors {{ $statusFilter === 'completed' 
-                       ? 'bg-green-50 text-green-700 border-b-2 border-green-600 dark:bg-green-900/30 dark:text-green-400' 
+                       ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-600 dark:bg-blue-900/30 dark:text-blue-400' 
                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700/50' }}">
                     <i class="fas fa-check-circle mr-2"></i>Completed
                 </a>
@@ -158,8 +158,8 @@
                         @if($data['target'])
                             <span class="px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-widest self-start sm:self-center
                                 {{ $data['target']->status === 'completed' 
-                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
-                                    : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' }}">
+                                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' 
+                                    : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' }}">
                                 {{ ucfirst($data['target']->status) }}
                             </span>
                         @else
