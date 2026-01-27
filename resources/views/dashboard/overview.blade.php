@@ -40,77 +40,77 @@
         @php
             $statusFilter = request()->query('status', 'all');
         @endphp
-        <div class="mt-6 border-b border-gray-200 dark:border-gray-700 overflow-x-auto hide-scrollbar">
-            <nav class="flex space-x-2 min-w-max pb-px" aria-label="Tabs">
+        <div class="mt-6 border-b border-gray-200 dark:border-gray-700 overflow-x-auto hide-scrollbar -mx-6 px-6 md:mx-0 md:px-0">
+            <nav class="flex space-x-4 min-w-max pb-px" aria-label="Tabs">
                 <a href="{{ route('clients.overview', ['month' => $bsMonth, 'year' => $bsYear, 'status' => 'all']) }}" 
-                   class="px-4 py-3 text-sm font-medium rounded-t-lg transition-colors {{ $statusFilter === 'all' 
-                       ? 'bg-primary-50 text-primary-700 border-b-2 border-primary-600 dark:bg-primary-900/30 dark:text-primary-400' 
-                       : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700/50' }}">
-                    <i class="fas fa-th mr-2"></i>All
+                   class="px-2 py-3 text-sm font-medium border-b-2 transition-colors {{ $statusFilter === 'all' 
+                       ? 'border-primary-600 text-primary-600 dark:text-primary-400' 
+                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300' }}">
+                    <i class="fas fa-th mr-1.5"></i>All
                 </a>
                 <a href="{{ route('clients.overview', ['month' => $bsMonth, 'year' => $bsYear, 'status' => 'no-target']) }}" 
-                   class="px-4 py-3 text-sm font-medium rounded-t-lg transition-colors {{ $statusFilter === 'no-target' 
-                       ? 'bg-gray-50 text-gray-700 border-b-2 border-gray-600 dark:bg-gray-700/50 dark:text-gray-300' 
-                       : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700/50' }}">
-                    <i class="fas fa-minus-circle mr-2"></i>No Target
+                   class="px-2 py-3 text-sm font-medium border-b-2 transition-colors {{ $statusFilter === 'no-target' 
+                       ? 'border-gray-600 text-gray-700 dark:text-gray-300' 
+                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300' }}">
+                    <i class="fas fa-minus-circle mr-1.5"></i>No Target
                 </a>
                 <a href="{{ route('clients.overview', ['month' => $bsMonth, 'year' => $bsYear, 'status' => 'active']) }}" 
-                   class="px-4 py-3 text-sm font-medium rounded-t-lg transition-colors {{ $statusFilter === 'active' 
-                       ? 'bg-emerald-50 text-emerald-700 border-b-2 border-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' 
-                       : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700/50' }}">
-                    <i class="fas fa-play-circle mr-2"></i>Active
+                   class="px-2 py-3 text-sm font-medium border-b-2 transition-colors {{ $statusFilter === 'active' 
+                       ? 'border-emerald-600 text-emerald-600 dark:text-emerald-400' 
+                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300' }}">
+                    <i class="fas fa-play-circle mr-1.5"></i>Active
                 </a>
                 <a href="{{ route('clients.overview', ['month' => $bsMonth, 'year' => $bsYear, 'status' => 'completed']) }}" 
-                   class="px-4 py-3 text-sm font-medium rounded-t-lg transition-colors {{ $statusFilter === 'completed' 
-                       ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-600 dark:bg-blue-900/30 dark:text-blue-400' 
-                       : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700/50' }}">
-                    <i class="fas fa-check-circle mr-2"></i>Completed
+                   class="px-2 py-3 text-sm font-medium border-b-2 transition-colors {{ $statusFilter === 'completed' 
+                       ? 'border-blue-600 text-blue-600 dark:text-blue-400' 
+                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300' }}">
+                    <i class="fas fa-check-circle mr-1.5"></i>Completed
                 </a>
             </nav>
         </div>
 
         <!-- Portfolio Stats -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-            <div class="bg-purple-50 dark:bg-purple-900/10 p-4 rounded-xl border border-purple-100 dark:border-purple-900/20">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Total Posts</span>
-                    <i class="fas fa-file-alt text-purple-500"></i>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-6">
+            <div class="bg-purple-50 dark:bg-purple-900/10 p-3 sm:p-4 rounded-xl border border-purple-100 dark:border-purple-900/20">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] sm:text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Posts</span>
+                    <i class="fas fa-file-alt text-purple-500 text-sm sm:text-base"></i>
                 </div>
-                <div class="mt-2 flex items-baseline gap-2">
-                    <span class="text-2xl font-black text-gray-900 dark:text-white">{{ $totalAgencyMetrics['posts'] }}</span>
-                    <span class="text-sm text-gray-500">/ {{ $totalAgencyMetrics['target_posts'] }}</span>
+                <div class="flex items-baseline gap-1 sm:gap-2">
+                    <span class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">{{ $totalAgencyMetrics['posts'] }}</span>
+                    <span class="text-xs sm:text-sm text-gray-500">/ {{ $totalAgencyMetrics['target_posts'] }}</span>
                 </div>
             </div>
             
-            <div class="bg-green-50 dark:bg-green-900/10 p-4 rounded-xl border border-green-100 dark:border-green-900/20">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-green-600 dark:text-green-400 uppercase tracking-wider">Total Reels</span>
-                    <i class="fas fa-video text-green-500"></i>
+            <div class="bg-emerald-50 dark:bg-emerald-900/10 p-3 sm:p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/20">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Reels</span>
+                    <i class="fas fa-video text-emerald-500 text-sm sm:text-base"></i>
                 </div>
-                <div class="mt-2 flex items-baseline gap-2">
-                    <span class="text-2xl font-black text-gray-900 dark:text-white">{{ $totalAgencyMetrics['reels'] }}</span>
-                    <span class="text-sm text-gray-500">/ {{ $totalAgencyMetrics['target_reels'] }}</span>
-                </div>
-            </div>
-
-            <div class="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-900/20">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Total Boosts</span>
-                    <i class="fas fa-rocket text-blue-500"></i>
-                </div>
-                <div class="mt-2 flex items-baseline gap-2">
-                    <span class="text-2xl font-black text-gray-900 dark:text-white">{{ $totalAgencyMetrics['boosts'] }}</span>
-                    <span class="text-sm text-gray-500">of Budget $ {{ number_format($totalAgencyMetrics['target_boost_budget']) }}</span>
+                <div class="flex items-baseline gap-1 sm:gap-2">
+                    <span class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">{{ $totalAgencyMetrics['reels'] }}</span>
+                    <span class="text-xs sm:text-sm text-gray-500">/ {{ $totalAgencyMetrics['target_reels'] }}</span>
                 </div>
             </div>
 
-            <div class="bg-yellow-50 dark:bg-yellow-900/10 p-4 rounded-xl border border-yellow-100 dark:border-yellow-900/20">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-yellow-600 dark:text-yellow-400 uppercase tracking-wider">Boost Amount</span>
-                    <i class="fas fa-hand-holding-usd text-yellow-500"></i>
+            <div class="bg-blue-50 dark:bg-blue-900/10 p-3 sm:p-4 rounded-xl border border-blue-100 dark:border-blue-900/20">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] sm:text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Boosts</span>
+                    <i class="fas fa-rocket text-blue-500 text-sm sm:text-base"></i>
                 </div>
-                <div class="mt-2 flex items-baseline gap-2">
-                    <span class="text-2xl font-black text-gray-900 dark:text-white">$ {{ number_format($totalAgencyMetrics['boost_amount'], 0) }}</span>
+                <div class="flex items-baseline gap-1 sm:gap-2">
+                    <span class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">{{ $totalAgencyMetrics['boosts'] }}</span>
+                    <span class="text-xs sm:text-sm text-gray-500 tracking-tighter">/ ${{number_format($totalAgencyMetrics['target_boost_budget'])}}</span>
+                </div>
+            </div>
+
+            <div class="bg-yellow-50 dark:bg-yellow-900/10 p-3 sm:p-4 rounded-xl border border-yellow-100 dark:border-yellow-900/20">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] sm:text-xs font-bold text-yellow-600 dark:text-yellow-400 uppercase tracking-wider">Amount</span>
+                    <i class="fas fa-hand-holding-usd text-yellow-500 text-sm sm:text-base"></i>
+                </div>
+                <div class="flex items-baseline gap-1 sm:gap-2">
+                    <span class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">$ {{ number_format($totalAgencyMetrics['boost_amount'], 0) }}</span>
                 </div>
             </div>
         </div>

@@ -305,6 +305,15 @@
         .dark .apexcharts-menu-item:hover {
             background: #374151 !important;
         }
+
+        /* Hide Scrollbar but keep functionality */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans antialiased" x-data="{ sidebarOpen: false }">
