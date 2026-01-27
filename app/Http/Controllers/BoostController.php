@@ -96,13 +96,14 @@ class BoostController extends Controller
         }
 
         if ($request->ajax()) {
+            session()->flash('active_tab', 'boosts');
             return response()->json([
                 'success' => true,
                 'message' => 'Boost record added successfully.'
             ]);
         }
 
-        return redirect()->back()->with('success', 'Boost record added successfully.');
+        return redirect()->back()->with('success', 'Boost record added successfully.')->with('active_tab', 'boosts');
     }
 
     public function update(Request $request, Boost $boost)
@@ -170,13 +171,14 @@ class BoostController extends Controller
         }
 
         if ($request->ajax()) {
+            session()->flash('active_tab', 'boosts');
             return response()->json([
                 'success' => true,
                 'message' => 'Boost record updated successfully.'
             ]);
         }
 
-        return redirect()->back()->with('success', 'Boost record updated successfully.');
+        return redirect()->back()->with('success', 'Boost record updated successfully.')->with('active_tab', 'boosts');
     }
 
     public function destroy(Boost $boost)
@@ -204,12 +206,13 @@ class BoostController extends Controller
         }
 
         if (request()->ajax()) {
+            session()->flash('active_tab', 'boosts');
             return response()->json([
                 'success' => true,
                 'message' => 'Boost record deleted successfully.'
             ]);
         }
 
-        return redirect()->back()->with('success', 'Boost record deleted successfully.');
+        return redirect()->back()->with('success', 'Boost record deleted successfully.')->with('active_tab', 'boosts');
     }
 }
