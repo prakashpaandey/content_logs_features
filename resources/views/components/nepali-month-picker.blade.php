@@ -25,12 +25,26 @@ class="relative w-full" id="{{ $id }}">
     <input type="hidden" name="{{ $name }}" :value="selectedYear && selectedMonth !== null ? `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}` : ''">
     @endif
 
+    <!-- Mobile Backdrop -->
+    <div x-show="open" x-cloak
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-[90] bg-gray-900/50 backdrop-blur-sm sm:hidden"
+         @click="open = false"></div>
+
     <!-- Dropdown Picker -->
     <div x-show="open" @click.away="open = false" x-cloak
         x-transition:enter="transition ease-out duration-100"
         x-transition:enter-start="transform opacity-0 scale-95"
         x-transition:enter-end="transform opacity-100 scale-100"
-        class="absolute z-[100] mt-2 w-full bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden min-w-[280px]">
+        x-transition:leave="transition ease-in duration-75"
+        x-transition:leave-start="transform opacity-100 scale-100"
+        x-transition:leave-end="transform opacity-0 scale-95"
+        class="fixed left-4 right-4 top-[15vh] z-[100] max-h-[80vh] overflow-y-auto sm:absolute sm:inset-auto sm:top-full sm:mt-2 w-auto sm:w-full bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 sm:min-w-[280px]">
         
         <!-- Year Selector -->
         <div class="bg-primary-600 dark:bg-primary-700 text-white p-3 flex items-center justify-between">

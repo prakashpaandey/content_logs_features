@@ -265,7 +265,7 @@
 
                 <!-- Card Footer -->
                 <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-200 dark:border-gray-700">
-                    <a href="{{ route('dashboard.index', ['client_id' => $data['client']->id]) }}" 
+                    <a href="{{ route('dashboard.index', ['client_id' => $data['client']->id, 'month' => $bsMonth, 'year' => $bsYear]) }}" 
                        class="flex items-center justify-center w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
                         <i class="fas fa-external-link-alt mr-2"></i>
                         View Full Dashboard
