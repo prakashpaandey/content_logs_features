@@ -66,6 +66,12 @@ class ContentController extends Controller
         /* 
         // Prevent future dates
         if ($date->startOfDay()->gt(\Carbon\Carbon::today())) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot create content for upcoming dates!'
+                ], 422);
+            }
             return redirect()->back()->withInput()->with('error', 'Cannot create content for upcoming dates!');
         }
         */
@@ -73,6 +79,12 @@ class ContentController extends Controller
         /*
         //Prevent creating content for months ahead of the current real Nepali month
         if ($contentBs['year'] > $nowBs['year'] || ($contentBs['year'] == $nowBs['year'] && $contentBs['month'] > $nowBs['month'])) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot create content for future months.'
+                ], 422);
+            }
             return redirect()->back()->withInput()->with('error', 'Cannot create content for future months.');
         }
         */
@@ -83,6 +95,12 @@ class ContentController extends Controller
             $contextBsYear = (int) $request->context_bs_year;
             
             if ($contentBs['month'] !== $contextBsMonth || $contentBs['year'] !== $contextBsYear) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Selected date must match the dashboard month'
+                    ], 422);
+                }
                 return redirect()->back()->withInput()->with('error', 'Selected date must match the dashboard month');
             }
         }
@@ -139,6 +157,12 @@ class ContentController extends Controller
     public function update(Request $request, Content $content)
     {
         if ($content->user_id !== auth()->id()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not authorized to edit this content.'
+                ], 403);
+            }
             return redirect()->back()->with('error', 'You are not authorized to edit this content.');
         }
 
@@ -216,6 +240,12 @@ class ContentController extends Controller
     public function destroy(Content $content)
     {
         if ($content->user_id !== auth()->id()) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not authorized to delete this content.'
+                ], 403);
+            }
             return redirect()->back()->with('error', 'You are not authorized to delete this content.');
         }
 

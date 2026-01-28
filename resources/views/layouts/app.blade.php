@@ -317,6 +317,58 @@
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans antialiased" x-data="{ sidebarOpen: false }">
+    <!-- Toast Notification (Root Level) -->
+    <div x-data="{ 
+            show: false, 
+            message: '', 
+            type: 'success',
+            init() {
+                // Expose to window for direct access
+                window.showToast = (msg, type = 'success') => {
+                    console.log('Global showToast called:', msg, type);
+                    this.message = msg;
+                    this.type = type;
+                    this.show = true;
+                    setTimeout(() => { this.show = false; }, 4000);
+                };
+
+                @if(session('success'))
+                    window.showToast('{{ session('success') }}', 'success');
+                @endif
+                @if(session('error'))
+                    window.showToast('{{ session('error') }}', 'error');
+                @endif
+                @if($errors->any())
+                    window.showToast('{{ $errors->first() }}', 'error');
+                @endif
+
+                // Also listen for event for older code
+                window.addEventListener('show-toast', (e) => {
+                    window.showToast(e.detail.message, e.detail.type);
+                });
+            }
+         }" 
+         class="fixed top-20 right-4 z-[1000] pointer-events-none">
+        <div x-show="show" x-cloak
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="transform opacity-0 translate-y-[-20px]"
+             x-transition:enter-end="transform opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-300"
+             x-transition:leave-start="transform opacity-100 translate-y-0"
+             x-transition:leave-end="transform opacity-0 translate-y-[-20px]"
+             :class="{
+                'bg-emerald-600': type === 'success',
+                'bg-red-600': type === 'error'
+             }"
+             class="pointer-events-auto flex items-center text-white px-6 py-4 rounded-2xl shadow-2xl border border-white/20 backdrop-blur-md">
+            <i :class="{
+                'fas fa-check-circle': type === 'success',
+                'fas fa-exclamation-circle': type === 'error'
+            }" class="mr-3 text-2xl"></i>
+            <span x-text="message" class="font-bold text-sm tracking-wide"></span>
+        </div>
+    </div>
+
     <!-- Top Navigation -->
     @include('components.top-navigation')
     
@@ -392,7 +444,7 @@
                     </div>
                 </div>
                 <div class="bg-gray-50 dark:bg-gray-700/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <form :action="actionUrl" method="POST" class="inline-block w-full sm:w-auto">
+                    <form id="secure-delete-form" :action="actionUrl" method="POST" class="inline-block w-full sm:w-auto" @submit.prevent="submitFormAjax('secure-delete-form', null).then(success => { if (success) open = false; })">
                         @csrf
                         @method('DELETE')
                         <button type="submit" 
@@ -471,60 +523,6 @@
                     </button>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Toast Notification -->
-    <div x-data="{ 
-            show: false, 
-            message: '', 
-            type: 'success',
-            init() {
-                @if(session('success'))
-                    this.showToast('{{ session('success') }}', 'success');
-                @endif
-                @if(session('error'))
-                    this.showToast('{{ session('error') }}', 'error');
-                @endif
-                @if($errors->any())
-                    this.showToast('{{ $errors->first() }}', 'error');
-                @endif
-            },
-            showToast(msg, type = 'success') {
-                this.message = msg;
-                this.type = type;
-                this.show = true;
-                setTimeout(() => {
-                    this.show = false;
-                }, 3000);
-            },
-            handleToastEvent(event) {
-                this.showToast(event.detail.message, event.detail.type || 'success');
-            }
-         }" 
-         x-init="init()"
-         @show-toast.window="handleToastEvent($event)"
-         class="fixed top-20 right-4 z-50">
-        <div x-show="show" x-cloak
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="transform opacity-0 translate-y-2"
-             x-transition:enter-end="transform opacity-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-300"
-             x-transition:leave-start="transform opacity-100 translate-y-0"
-             x-transition:leave-end="transform opacity-0 translate-y-2"
-             :class="{
-                'bg-green-500': type === 'success',
-                'bg-red-500': type === 'error'
-             }"
-             class="flex items-center text-white px-6 py-3 rounded-lg shadow-lg">
-            <i :class="{
-                'fas fa-check-circle': type === 'success',
-                'fas fa-exclamation-circle': type === 'error'
-            }" class="mr-3 text-xl"></i>
-            <span x-text="message" class="font-medium"></span>
-            <button @click="show = false" class="ml-4 focus:outline-none hover:text-gray-200">
-                <i class="fas fa-times"></i>
-            </button>
         </div>
     </div>
     
@@ -903,22 +901,34 @@
                     }
                     
                     form.reset();
+                    
+                    // Show toast directly
+                    if (typeof window.showToast === 'function') {
+                        window.showToast(data.message || 'Action completed successfully.', 'success');
+                    } else {
+                        window.dispatchEvent(new CustomEvent('show-toast', { 
+                            detail: { message: data.message || 'Action completed successfully.', type: 'success' } 
+                        }));
+                    }
+
+                    if (data.redirect) {
+                        setTimeout(() => {
+                            window.location.href = data.redirect;
+                        }, 1000);
+                        return true;
+                    }
+
                     await refreshDashboard();
-
-                    // Dispatch toast AFTER refresh to ensure no UI interference
-                    window.dispatchEvent(new CustomEvent('show-toast', { 
-                        detail: { 
-                            message: data.message || 'Action completed successfully.', 
-                            type: 'success' 
-                        } 
-                    }));
-
                     return true;
                 } else {
-                    const errorMsg = data.message || (data.errors ? Object.values(data.errors)[0][0] : 'Validation failed');
-                    window.dispatchEvent(new CustomEvent('show-toast', { 
-                        detail: { message: errorMsg, type: 'error' } 
-                    }));
+                    const errorMsg = (data.errors ? Object.values(data.errors)[0][0] : null) || data.message || 'Validation failed';
+                    if (typeof window.showToast === 'function') {
+                        window.showToast(errorMsg, 'error');
+                    } else {
+                        window.dispatchEvent(new CustomEvent('show-toast', { 
+                            detail: { message: errorMsg, type: 'error' } 
+                        }));
+                    }
                     return false;
                 }
             } catch (e) {

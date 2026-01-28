@@ -47,6 +47,12 @@ class BoostController extends Controller
         /*
         //Prevent future dates
         if ($date->startOfDay()->gt(\Carbon\Carbon::today())) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot create boost records for upcoming dates.'
+                ], 422);
+            }
             return redirect()->back()->withInput()->with('error', 'Cannot create boost records for upcoming dates.');
         }
         */
@@ -56,6 +62,12 @@ class BoostController extends Controller
         /*
         //Prevent creating boosts for months ahead of the current month
         if ($contentBs['year'] > $nowBs['year'] || ($contentBs['year'] == $nowBs['year'] && $contentBs['month'] > $nowBs['month'])) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot create boost records for future months.'
+                ], 422);
+            }
             return redirect()->back()->withInput()->with('error', 'Cannot create boost records for future  months.');
         }
         */
@@ -66,6 +78,12 @@ class BoostController extends Controller
             $contextBsYear = (int) $request->context_bs_year;
             
             if ($contentBs['month'] !== $contextBsMonth || $contentBs['year'] !== $contextBsYear) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Selected date must match the dashboard month.'
+                    ], 422);
+                }
                 return redirect()->back()->withInput()->with('error', 'Selected date must match the dashboard month).');
             }
         }
@@ -109,6 +127,12 @@ class BoostController extends Controller
     public function update(Request $request, Boost $boost)
     {
         if ($boost->user_id !== Auth::id()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not authorized to edit this boost record.'
+                ], 403);
+            }
             return redirect()->back()->with('error', 'You are not authorized to edit this boost record.');
         }
 
@@ -184,6 +208,12 @@ class BoostController extends Controller
     public function destroy(Boost $boost)
     {
         if ($boost->user_id !== Auth::id()) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not authorized to delete this boost record.'
+                ], 403);
+            }
             return redirect()->back()->with('error', 'You are not authorized to delete this boost record.');
         }
 

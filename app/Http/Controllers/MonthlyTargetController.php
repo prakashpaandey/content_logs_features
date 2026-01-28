@@ -37,6 +37,14 @@ class MonthlyTargetController extends Controller
             ->where('bs_month', $validated['bs_month'])
             ->where('bs_year', $validated['bs_year'])
             ->exists()) {
+            
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'A target for this month already exists!'
+                ], 422);
+            }
+
             return redirect()->back()->with('error', 'A target for this month already exists!');
         }
 
@@ -87,6 +95,12 @@ class MonthlyTargetController extends Controller
             $newTargetBoostBudget = $validated['target_boost_budget'];
 
             if ($actualPosts < $newTargetPosts || $actualReels < $newTargetReels || $actualBoostAmount < $newTargetBoostBudget) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot mark as completed. Actual content counts must meet the targets.'
+                    ], 422);
+                }
                 return redirect()->back()->withErrors(['status' => 'Cannot mark as completed. Actual content counts must meet the targets.']);
             }
         }

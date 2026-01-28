@@ -38,5 +38,54 @@
         <div class="min-h-screen flex flex-col items-center justify-center p-6">
             {{ $slot }}
         </div>
+
+        <!-- Toast Notification (Root Level) -->
+        <div x-data="{ 
+                show: false, 
+                message: '', 
+                type: 'success',
+                init() {
+                    // Expose to window for direct access
+                    window.showToast = (msg, type = 'success') => {
+                        this.message = msg;
+                        this.type = type;
+                        this.show = true;
+                        setTimeout(() => { this.show = false; }, 4000);
+                    };
+
+                    @if(session('success'))
+                        window.showToast('{{ session('success') }}', 'success');
+                    @endif
+                    @if(session('error'))
+                        window.showToast('{{ session('error') }}', 'error');
+                    @endif
+                    @if($errors->any())
+                        window.showToast('{{ $errors->first() }}', 'error');
+                    @endif
+                    @if(session('status'))
+                        window.showToast('{{ session('status') }}', 'success');
+                    @endif
+                }
+             }" 
+             class="fixed top-20 right-4 z-[1000] pointer-events-none">
+            <div x-show="show" x-cloak
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="transform opacity-0 translate-y-[-20px]"
+                 x-transition:enter-end="transform opacity-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-300"
+                 x-transition:leave-start="transform opacity-100 translate-y-0"
+                 x-transition:leave-end="transform opacity-0 translate-y-[-20px]"
+                 :class="{
+                    'bg-emerald-600': type === 'success',
+                    'bg-red-600': type === 'error'
+                 }"
+                 class="pointer-events-auto flex items-center text-white px-6 py-4 rounded-2xl shadow-2xl border border-white/20 backdrop-blur-md">
+                <i :class="{
+                    'fas fa-check-circle': type === 'success',
+                    'fas fa-exclamation-circle': type === 'error'
+                }" class="mr-3 text-2xl"></i>
+                <span x-text="message" class="font-bold text-sm tracking-wide"></span>
+            </div>
+        </div>
     </body>
 </html>

@@ -111,7 +111,8 @@ class ClientController extends Controller
         if (request()->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Client deleted successfully.'
+                'message' => 'Client deleted successfully.',
+                'redirect' => route('clients.overview')
             ]);
         }
 
