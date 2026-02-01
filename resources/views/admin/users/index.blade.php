@@ -2,10 +2,26 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
         <div>
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white">User Management</h1>
             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">View and manage system users, their access status, and fine-grained permissions.</p>
+        </div>
+        
+        <div class="relative w-full md:w-80">
+            <form action="{{ route('admin.users.index') }}" method="GET">
+                <div class="relative">
+                    <input type="text" 
+                           name="search" 
+                           id="user-search-input"
+                           value="{{ request('search') }}"
+                           placeholder="Search users..." 
+                           class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all outline-none dark:text-white">
+                    <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary-500 transition-colors">
+                        <i class="fas fa-search text-sm"></i>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -21,8 +37,8 @@
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                    @foreach($users as $user)
+                <tbody id="users-table-body" class="divide-y divide-gray-100 dark:divide-gray-700">
+                    @forelse($users as $user)
                     <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-700/50 transition-colors group">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
@@ -72,10 +88,64 @@
                             </div>
                         </td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="w-12 h-12 bg-gray-50 dark:bg-gray-700/50 rounded-full flex items-center justify-center mb-4 transition-colors">
+                                    <i class="fas fa-search text-gray-400 dark:text-gray-500 text-xl"></i>
+                                </div>
+                                <h3 class="text-sm font-bold text-gray-900 dark:text-white">No users found</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">We couldn't find any users matching "{{ request('search') }}".</p>
+                                <a href="{{ route('admin.users.index') }}" class="mt-4 text-xs font-bold text-primary-600 dark:text-primary-400 hover:underline">Clear search</a>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('user-search-input');
+    const tableBody = document.getElementById('users-table-body');
+    let debounceTimer;
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            const query = this.value;
+            
+            debounceTimer = setTimeout(() => {
+                const url = new URL(window.location.href);
+                url.searchParams.set('search', query);
+                
+                // Update URL without reloading
+                window.history.pushState({ path: url.href }, '', url.href);
+
+                // Fetch data
+                fetch(url.href, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newTableBody = doc.getElementById('users-table-body');
+                    if (newTableBody) {
+                        tableBody.innerHTML = newTableBody.innerHTML;
+                    }
+                })
+                .catch(error => console.error('Error fetching search results:', error));
+            }, 300); // 300ms debounce
+        });
+    }
+});
+</script>
+@endpush
 @endsection
