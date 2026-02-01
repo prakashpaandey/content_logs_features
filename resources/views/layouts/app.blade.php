@@ -51,9 +51,10 @@
                         }
                     },
                     animation: {
-                        'fade-in': 'fadeIn 0.5s ease-in-out',
-                        'slide-in': 'slideIn 0.3s ease-out',
-                        'slide-up': 'slideUp 0.3s ease-out',
+                        'fade-in': 'fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'slide-in': 'slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'modal-pop': 'modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
                     },
                     keyframes: {
                         fadeIn: {
@@ -65,9 +66,13 @@
                             '100%': { transform: 'translateX(0)' },
                         },
                         slideUp: {
-                            '0%': { transform: 'translateY(100%)' },
-                            '100%': { transform: 'translateY(0)' },
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
                         },
+                        modalPop: {
+                            '0%': { transform: 'scale(0.95) translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'scale(1) translateY(0)', opacity: '1' },
+                        }
                     }
                 }
             }
@@ -536,6 +541,25 @@
         // Global Variables
         let lineChart, barChart, pieChart;
         
+        // Keyboard Shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Check if 'N' or 'n' is pressed
+            if (e.key.toLowerCase() === 'n') {
+                // Prevent trigger if the user is typing in an input/textarea
+                const activeElement = document.activeElement;
+                const isTyping = activeElement.tagName === 'INPUT' || 
+                                activeElement.tagName === 'TEXTAREA' || 
+                                activeElement.isContentEditable;
+                
+                if (!isTyping) {
+                    e.preventDefault();
+                    if (typeof openModal === 'function') {
+                        openModal('create-client-modal');
+                    }
+                }
+            }
+        });
+
         // Wait for DOM to be fully loaded
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM Loaded - Initializing Dashboard');

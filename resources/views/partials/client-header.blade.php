@@ -121,7 +121,7 @@
 <div id="edit-client-modal" class="modal hidden fixed inset-0 z-50 overflow-y-auto">
     <div class="modal-overlay absolute inset-0 bg-gray-950/40 backdrop-blur-sm transition-opacity" onclick="closeModal('edit-client-modal')"></div>
     <div class="relative min-h-screen flex items-center justify-center p-4">
-        <div class="relative bg-white dark:bg-gray-900 rounded-[32px] shadow-2xl max-w-md w-full mx-auto overflow-hidden transform transition-all animate-slide-up border border-gray-100 dark:border-gray-800">
+        <div class="relative bg-white dark:bg-gray-900 rounded-[32px] shadow-2xl max-w-md w-full mx-auto overflow-hidden transform transition-all animate-modal-pop border border-gray-100 dark:border-gray-800">
             <!-- Modal Header -->
             <div class="relative px-8 py-6 bg-gradient-to-br from-indigo-600 to-purple-700">
                 <div class="absolute top-0 right-0 p-4">
