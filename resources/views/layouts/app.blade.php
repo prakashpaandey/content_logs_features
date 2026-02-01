@@ -478,10 +478,17 @@
          x-show="open" x-cloak
          class="fixed inset-0 z-50 overflow-y-auto" 
          style="display: none;">
-        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            <div x-show="open" x-cloak x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 transition-opacity" aria-hidden="true">
-                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div x-show="open" 
+                 x-transition:enter="ease-out duration-300" 
+                 x-transition:enter-start="opacity-0" 
+                 x-transition:enter-end="opacity-100" 
+                 x-transition:leave="ease-in duration-200" 
+                 x-transition:leave-start="opacity-100" 
+                 x-transition:leave-end="opacity-0" 
+                 class="fixed inset-0 bg-gray-950/40 backdrop-blur-sm transition-opacity" 
+                 @click="open = false" 
+                 aria-hidden="true"></div>
 
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
@@ -492,34 +499,33 @@
                  x-transition:leave="ease-in duration-200" 
                  x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
                  x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
-                 class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-start">
-                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                            <i class="fas fa-exclamation-triangle text-red-600"></i>
-                        </div>
-                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white" id="modal-title">
-                                Delete Item
-                            </h3>
-                            <div class="mt-2">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">
-                                    Are you sure you want to delete this? This action cannot be undone.
-                                </p>
-                            </div>
-                        </div>
+                 class="relative inline-block align-bottom bg-white dark:bg-gray-900 rounded-[32px] overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border border-gray-100 dark:border-gray-800">
+                
+                <!-- Header with Alert Icon -->
+                <div class="px-8 pt-8 pb-4 text-center">
+                    <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-3xl bg-rose-50 dark:bg-rose-900/20 mb-6 text-rose-600 dark:text-rose-400 shadow-sm">
+                        <i class="fas fa-trash-alt text-3xl"></i>
                     </div>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2" id="modal-title">
+                        Quick Caution!
+                    </h3>
+                    <p class="text-gray-500 dark:text-gray-400 leading-relaxed px-4">
+                        Are you sure you want to delete <span class="font-bold text-gray-700 dark:text-gray-300" x-text="itemName"></span>? This action <span class="text-rose-600 dark:text-rose-400 font-bold">cannot</span> be undone.
+                    </p>
                 </div>
-                <div class="bg-gray-50 dark:bg-gray-700/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <form id="delete-item-form" :action="actionUrl" method="POST" class="inline-block" @submit.prevent="submitFormAjax('delete-item-form', null).then(success => { if (success) open = false; })">
+
+                <!-- Footer with Actions -->
+                <div class="px-8 py-8 flex flex-col sm:flex-row-reverse gap-3">
+                    <form id="delete-item-form" :action="actionUrl" method="POST" class="w-full sm:w-auto" @submit.prevent="submitFormAjax('delete-item-form', null).then(success => { if (success) open = false; })">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
-                            Yes, Delete
+                        <button type="submit" class="w-full inline-flex justify-center items-center px-8 py-4 bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold rounded-2xl shadow-lg shadow-rose-500/25 transition-all active:scale-[0.98] outline-none">
+                            <i class="fas fa-trash-alt mr-2"></i>
+                            Yes, Delete It
                         </button>
                     </form>
-                    <button @click="open = false" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                        Cancel
+                    <button @click="open = false" type="button" class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-bold rounded-2xl transition-all border border-transparent dark:border-gray-700">
+                        No, Cancel
                     </button>
                 </div>
             </div>

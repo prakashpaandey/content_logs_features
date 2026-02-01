@@ -119,63 +119,102 @@
 
 <!-- Edit Client Modal -->
 <div id="edit-client-modal" class="modal hidden fixed inset-0 z-50 overflow-y-auto">
-    <div class="modal-overlay absolute inset-0 bg-black opacity-50"></div>
+    <div class="modal-overlay absolute inset-0 bg-gray-950/40 backdrop-blur-sm transition-opacity" onclick="closeModal('edit-client-modal')"></div>
     <div class="relative min-h-screen flex items-center justify-center p-4">
-        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-auto">
+        <div class="relative bg-white dark:bg-gray-900 rounded-[32px] shadow-2xl max-w-md w-full mx-auto overflow-hidden transform transition-all animate-slide-up border border-gray-100 dark:border-gray-800">
             <!-- Modal Header -->
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Edit Client</h3>
-                    <button onclick="closeModal('edit-client-modal')" class="text-gray-400 hover:text-gray-500">
-                        <i class="fas fa-times"></i>
+            <div class="relative px-8 py-6 bg-gradient-to-br from-indigo-600 to-purple-700">
+                <div class="absolute top-0 right-0 p-4">
+                    <button onclick="closeModal('edit-client-modal')" class="text-white/70 hover:text-white transition-colors">
+                        <i class="fas fa-times text-xl"></i>
                     </button>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white shadow-inner">
+                        <i class="fas fa-edit text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white">Edit Client</h3>
+                        <p class="text-white/70 text-sm">Update profile for {{ $selectedClient->name }}</p>
+                    </div>
                 </div>
             </div>
             
-            <!-- Modal Body -->
-            <div class="px-6 py-4">
-                <form id="edit-client-form" action="{{ route('clients.update', $selectedClient->id) }}" method="POST" onsubmit="event.preventDefault(); submitFormAjax('edit-client-form', 'edit-client-modal')">
+            <div class="px-8 py-8">
+                <form id="edit-client-form" action="{{ route('clients.update', $selectedClient->id) }}" method="POST" onsubmit="event.preventDefault(); submitFormAjax('edit-client-form', 'edit-client-modal')" class="space-y-6">
                     @csrf
                     @method('PUT')
                     
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Client Name *
-                            </label>
+                    <!-- Client Name -->
+                    <div class="space-y-2 group">
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">
+                            Client Name <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                                <i class="fas fa-user text-sm"></i>
+                            </div>
                             <input type="text" name="name" value="{{ $selectedClient->name }}" required
-                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                   class="block w-full pl-11 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent dark:border-gray-700 rounded-2xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white dark:focus:bg-gray-800 focus:border-indigo-500/30 transition-all font-sans"
+                                   >
                         </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Business Name *
-                            </label>
+                    </div>
+                    
+                    <!-- Business Name -->
+                    <div class="space-y-2 group">
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">
+                            Business Name <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                                <i class="fas fa-briefcase text-sm"></i>
+                            </div>
                             <input type="text" name="business_name" value="{{ $selectedClient->business_name }}" required
-                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                   class="block w-full pl-11 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent dark:border-gray-700 rounded-2xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white dark:focus:bg-gray-800 focus:border-indigo-500/30 transition-all font-sans"
+                                  >
                         </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Status
+                    </div>
+                    
+                    <!-- Status Selection -->
+                    <div class="space-y-3">
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">Account Status</label>
+                        <div class="grid grid-cols-2 gap-4" x-data="{ selected: '{{ $selectedClient->status }}' }">
+                            <label class="relative flex items-center p-4 cursor-pointer rounded-2xl border transition-all"
+                                   :class="selected === 'active' ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500 shadow-sm' : 'bg-gray-50 dark:bg-gray-800/50 border-transparent hover:border-gray-200 dark:hover:border-gray-700'">
+                                <input type="radio" name="status" value="active" class="hidden" @change="selected = 'active'" {{ $selectedClient->status == 'active' ? 'checked' : '' }}>
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center"
+                                         :class="selected === 'active' ? 'bg-emerald-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-500'">
+                                        <i class="fas fa-check text-xs"></i>
+                                    </div>
+                                    <span class="text-sm font-bold" :class="selected === 'active' ? 'text-emerald-700 dark:text-emerald-400' : 'text-gray-500'">Active</span>
+                                </div>
                             </label>
-                            <select name="status" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                                <option value="active" {{ $selectedClient->status == 'active' ? 'selected' : '' }}>Active</option>
-                                <option value="inactive" {{ $selectedClient->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                            </select>
+
+                            <label class="relative flex items-center p-4 cursor-pointer rounded-2xl border transition-all"
+                                   :class="selected === 'inactive' ? 'bg-gray-100 dark:bg-gray-700 border-gray-400 dark:border-gray-500' : 'bg-gray-50 dark:bg-gray-800/50 border-transparent hover:border-gray-200 dark:hover:border-gray-700'">
+                                <input type="radio" name="status" value="inactive" class="hidden" @change="selected = 'inactive'" {{ $selectedClient->status == 'inactive' ? 'checked' : '' }}>
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center"
+                                         :class="selected === 'inactive' ? 'bg-gray-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-500'">
+                                        <i class="fas fa-pause text-xs"></i>
+                                    </div>
+                                    <span class="text-sm font-bold" :class="selected === 'inactive' ? 'text-gray-900 dark:text-white' : 'text-gray-500'">Inactive</span>
+                                </div>
+                            </label>
                         </div>
                     </div>
                 </form>
             </div>
             
             <!-- Modal Footer -->
-            <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+            <div class="px-8 py-6 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end space-x-4">
                 <button type="button" onclick="closeModal('edit-client-modal')"
-                        class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        class="px-6 py-3 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                     Cancel
                 </button>
                 <button type="submit" form="edit-client-form"
-                        class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
+                        class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-bold rounded-2xl shadow-lg shadow-indigo-500/25 transform transition-all active:scale-[0.98] outline-none">
                     Update Client
                 </button>
             </div>
