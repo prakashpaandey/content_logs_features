@@ -96,6 +96,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if user is pending approval.
+     */
+    public function isPending()
+    {
+        return $this->status === 'pending';
+    }
+
+    /**
+     * Check if user is deactivated.
+     */
+    public function isDeactivated()
+    {
+        return $this->status === 'deactivated';
+    }
+
+    /**
      * Check if the user has a specific permission.
      */
     public function hasPermission($permissionSlug)

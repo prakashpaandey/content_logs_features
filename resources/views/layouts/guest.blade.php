@@ -34,9 +34,15 @@
         <!-- Alpine.js -->
         <script src="https://unpkg.com/alpinejs@3.12.0/dist/cdn.min.js" defer></script>
     </head>
-    <body class="font-sans text-gray-900 antialiased overflow-x-hidden bg-[#F8FAFC]">
-        <div class="min-h-screen flex flex-col items-center justify-center p-6">
-            {{ $slot }}
+    <body class="font-sans text-gray-900 antialiased overflow-x-hidden bg-[#F8FAFC] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50 via-white to-white">
+        <div class="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
+            <!-- Decorative Elements -->
+            <div class="absolute top-0 right-0 -translate-y-12 translate-x-12 w-64 h-64 bg-blue-100/50 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 left-0 translate-y-12 -translate-x-12 w-64 h-64 bg-indigo-100/50 rounded-full blur-3xl"></div>
+            
+            <div class="relative z-10 w-full flex flex-col items-center justify-center">
+                {{ $slot }}
+            </div>
         </div>
 
         <!-- Toast Notification (Root Level) -->

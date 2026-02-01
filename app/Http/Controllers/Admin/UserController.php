@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 
 use App\Models\User;
 use App\Models\Permission;
+use App\Mail\AccountActivated;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -16,6 +18,15 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $query = User::query();
+        $tab = $request->get('tab', 'active');
+
+        if ($tab === 'pending') {
+            $query->where('status', 'pending');
+        } elseif ($tab === 'deactivated') {
+            $query->where('status', 'deactivated');
+        } else {
+            $query->where('status', 'active');
+        }
 
         if ($request->filled('search')) {
             $searchTerm = $request->search;
@@ -25,12 +36,18 @@ class UserController extends Controller
             });
         }
 
-        $users = $query->orderBy('name')->get();
-        return view('admin.users.index', compact('users'));
+        $users = $query->orderBy('created_at', 'desc')->get();
+        
+        // Counts for tabs
+        $activeCount = User::where('status', 'active')->count();
+        $pendingCount = User::where('status', 'pending')->count();
+        $deactivatedCount = User::where('status', 'deactivated')->count();
+
+        return view('admin.users.index', compact('users', 'activeCount', 'pendingCount', 'deactivatedCount', 'tab'));
     }
 
     /**
-     * Toggle the status of a user.
+     * Toggle the status of a user (Active/Deactivated).
      */
     public function toggleStatus(User $user)
     {
@@ -38,7 +55,7 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'You cannot deactivate your own account.');
         }
 
-        $user->status = $user->status === 'active' ? 'inactive' : 'active';
+        $user->status = $user->status === 'active' ? 'deactivated' : 'active';
         $user->save();
 
         return redirect()->back()->with('success', 'User status updated successfully.');
@@ -61,5 +78,23 @@ class UserController extends Controller
         $user->permissions()->sync($request->permissions ?? []);
 
         return redirect()->route('admin.users.index')->with('success', 'User permissions updated successfully.');
+    }
+
+    /**
+     * Activate a pending user.
+     */
+    public function activate(User $user)
+    {
+        $user->status = 'active';
+        $user->save();
+
+        try {
+            Mail::to($user->email)->send(new AccountActivated($user));
+        } catch (\Exception $e) {
+            // Silently fail if mail is not configured or fails
+            \Illuminate\Support\Facades\Log::error('Activation email failed: ' . $e->getMessage());
+        }
+
+        return redirect()->back()->with('success', 'User account has been activated and notification email sent.');
     }
 }

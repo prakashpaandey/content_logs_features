@@ -12,26 +12,36 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Route::middleware(['auth', 'check.status'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
-    Route::get('/clients-overview', [DashboardController::class, 'overview'])->name('clients.overview');
-    Route::resource('clients', ClientController::class);
-    Route::resource('contents', ContentController::class);
-    Route::resource('boosts', BoostController::class);
-    Route::post('monthly-targets/bulk', [MonthlyTargetController::class, 'bulkStore'])->name('monthly-targets.bulk');
-    Route::resource('monthly-targets', MonthlyTargetController::class);
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/verification-pending', function () {
+        if (auth()->user()->isActive()) {
+            return redirect()->route('dashboard.index');
+        }
+        return view('auth.verification-pending');
+    })->name('verification.pending');
 
-    // Admin Only Routes
-    Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
-        // Status toggle
-        Route::patch('/users/{user}/toggle-status', [\App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('users.toggle-status');
-        // Permissions
-        Route::get('/users/{user}/permissions', [\App\Http\Controllers\Admin\UserController::class, 'permissions'])->name('users.permissions');
-        Route::post('/users/{user}/permissions', [\App\Http\Controllers\Admin\UserController::class, 'updatePermissions'])->name('users.update-permissions');
+    Route::middleware(['check.status'])->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+        Route::get('/clients-overview', [DashboardController::class, 'overview'])->name('clients.overview');
+        Route::resource('clients', ClientController::class);
+        Route::resource('contents', ContentController::class);
+        Route::resource('boosts', BoostController::class);
+        Route::post('monthly-targets/bulk', [MonthlyTargetController::class, 'bulkStore'])->name('monthly-targets.bulk');
+        Route::resource('monthly-targets', MonthlyTargetController::class);
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+        // Admin Only Routes
+        Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+            Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+            // Status toggle
+            Route::patch('/users/{user}/toggle-status', [\App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('users.toggle-status');
+            // Permissions
+            Route::get('/users/{user}/permissions', [\App\Http\Controllers\Admin\UserController::class, 'permissions'])->name('users.permissions');
+            Route::post('/users/{user}/permissions', [\App\Http\Controllers\Admin\UserController::class, 'updatePermissions'])->name('users.update-permissions');
+            Route::post('/users/{user}/activate', [\App\Http\Controllers\Admin\UserController::class, 'activate'])->name('users.activate');
+        });
     });
 });
 

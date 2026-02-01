@@ -10,6 +10,7 @@
         
         <div class="relative w-full md:w-80">
             <form action="{{ route('admin.users.index') }}" method="GET">
+                <input type="hidden" name="tab" value="{{ $tab }}">
                 <div class="relative">
                     <input type="text" 
                            name="search" 
@@ -23,6 +24,36 @@
                 </div>
             </form>
         </div>
+    </div>
+    
+    <!-- Tab Navigation -->
+    <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+        <nav class="flex space-x-8" aria-label="Tabs">
+            <a href="{{ route('admin.users.index', ['tab' => 'active']) }}" 
+               class="py-4 px-1 border-b-2 font-bold text-sm transition-all {{ $tab === 'active' ? 'border-primary-600 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200' }}">
+                <i class="fas fa-user-check mr-2"></i>
+                Active Users
+                <span class="ml-2 py-0.5 px-2 rounded-full text-[10px] {{ $tab === 'active' ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-500' }}">
+                    {{ $activeCount }}
+                </span>
+            </a>
+            <a href="{{ route('admin.users.index', ['tab' => 'pending']) }}" 
+               class="py-4 px-1 border-b-2 font-bold text-sm transition-all {{ $tab === 'pending' ? 'border-amber-600 text-amber-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200' }}">
+                <i class="fas fa-user-clock mr-2"></i>
+                Pending Activations
+                <span class="ml-2 py-0.5 px-2 rounded-full text-[10px] {{ $tab === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-500' }}">
+                    {{ $pendingCount }}
+                </span>
+            </a>
+            <a href="{{ route('admin.users.index', ['tab' => 'deactivated']) }}" 
+               class="py-4 px-1 border-b-2 font-bold text-sm transition-all {{ $tab === 'deactivated' ? 'border-rose-600 text-rose-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200' }}">
+                <i class="fas fa-user-slash mr-2"></i>
+                Deactivated
+                <span class="ml-2 py-0.5 px-2 rounded-full text-[10px] {{ $tab === 'deactivated' ? 'bg-rose-100 text-rose-700' : 'bg-gray-100 text-gray-500' }}">
+                    {{ $deactivatedCount }}
+                </span>
+            </a>
+        </nav>
     </div>
 
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
@@ -57,8 +88,14 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold {{ $user->isActive() ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' }}">
-                                <span class="w-1.5 h-1.5 rounded-full mr-1.5 {{ $user->isActive() ? 'bg-emerald-500' : 'bg-rose-500' }}"></span>
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold 
+                                {{ $user->status === 'active' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : '' }}
+                                {{ $user->status === 'pending' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : '' }}
+                                {{ $user->status === 'deactivated' ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' : '' }}">
+                                <span class="w-1.5 h-1.5 rounded-full mr-1.5 
+                                    {{ $user->status === 'active' ? 'bg-emerald-500' : '' }}
+                                    {{ $user->status === 'pending' ? 'bg-amber-500' : '' }}
+                                    {{ $user->status === 'deactivated' ? 'bg-rose-500' : '' }}"></span>
                                 {{ ucfirst($user->status) }}
                             </span>
                         </td>
@@ -67,23 +104,34 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
                             <div class="flex items-center justify-end space-x-3">
-                                @if(!$user->isAdmin())
-                                <a href="{{ route('admin.users.permissions', $user) }}" title="Manage Permissions"
-                                   class="p-2 text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30 rounded-lg transition-all">
-                                    <i class="fas fa-key"></i>
-                                </a>
-                                @endif
-                                
-                                @if($user->id !== auth()->id())
-                                <form action="{{ route('admin.users.toggle-status', $user) }}" method="POST" class="inline">
+                                @if($tab === 'pending')
+                                <form action="{{ route('admin.users.activate', $user) }}" method="POST" class="inline">
                                     @csrf
-                                    @method('PATCH')
                                     <button type="submit" 
-                                            title="{{ $user->isActive() ? 'Deactivate User' : 'Activate User' }}"
-                                            class="p-2 {{ $user->isActive() ? 'text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-900/30' : 'text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/30' }} rounded-lg transition-all">
-                                        <i class="fas {{ $user->isActive() ? 'fa-user-slash' : 'fa-user-check' }}"></i>
+                                            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all active:scale-95 flex items-center shadow-lg shadow-emerald-500/30">
+                                        <i class="fas fa-check-circle mr-1.5"></i>
+                                        Approve
                                     </button>
                                 </form>
+                                @else
+                                    @if(!$user->isAdmin())
+                                    <a href="{{ route('admin.users.permissions', $user) }}" title="Manage Permissions"
+                                       class="p-2 text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30 rounded-lg transition-all">
+                                        <i class="fas fa-key"></i>
+                                    </a>
+                                    @endif
+                                    
+                                    @if($user->id !== auth()->id())
+                                    <form action="{{ route('admin.users.toggle-status', $user) }}" method="POST" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" 
+                                                title="{{ $user->status === 'active' ? 'Deactivate User' : 'Reactivate User' }}"
+                                                class="p-2 {{ $user->status === 'active' ? 'text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-900/30' : 'text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/30' }} rounded-lg transition-all">
+                                            <i class="fas {{ $user->status === 'active' ? 'fa-user-slash' : 'fa-user-check' }}"></i>
+                                        </button>
+                                    </form>
+                                    @endif
                                 @endif
                             </div>
                         </td>

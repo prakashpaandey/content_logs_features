@@ -15,12 +15,23 @@ class CheckUserStatus
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->check() && !auth()->user()->isActive()) {
-            auth()->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-            
-            return redirect()->route('login')->with('error', 'Your account has been deactivated. Please contact the administrator.');
+        if (auth()->check()) {
+            $user = auth()->user();
+
+            if ($user->isPending()) {
+                // Allow access to the pending page and logout
+                if ($request->routeIs('verification.pending') || $request->routeIs('logout')) {
+                    return $next($request);
+                }
+                return redirect()->route('verification.pending');
+            }
+
+            if ($user->isDeactivated()) {
+                auth()->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return redirect()->route('login')->with('error', 'Your account has been deactivated. Please contact the administrator.');
+            }
         }
 
         return $next($request);
