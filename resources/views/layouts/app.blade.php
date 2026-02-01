@@ -770,6 +770,12 @@
             if (modal) {
                 modal.classList.remove('hidden');
                 document.body.classList.add('overflow-hidden');
+                
+                // Auto-focus first input
+                setTimeout(() => {
+                    const firstInput = modal.querySelector('input:not([type="hidden"]), select, textarea');
+                    if (firstInput) firstInput.focus();
+                }, 100);
             }
         }
         
