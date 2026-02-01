@@ -2,6 +2,15 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
+        <script>
+            // Immediate Theme Detection to prevent FOUC
+            if (localStorage.getItem('dark-mode') === 'true' || 
+                (!('dark-mode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        </script>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -34,16 +43,44 @@
         <!-- Alpine.js -->
         <script src="https://unpkg.com/alpinejs@3.12.0/dist/cdn.min.js" defer></script>
     </head>
-    <body class="font-sans text-gray-900 antialiased overflow-x-hidden bg-[#F8FAFC] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50 via-white to-white">
+    <body class="font-sans text-gray-900 antialiased overflow-x-hidden bg-[#F8FAFC] dark:bg-gray-950 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50 via-white to-white dark:from-blue-900/20 dark:via-gray-950 dark:to-gray-950 transition-colors duration-300">
+        <!-- Theme Toggle -->
+        <div class="fixed top-6 right-6 z-50">
+            <button id="theme-toggle" class="p-3 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-100 dark:border-gray-700 shadow-lg text-gray-600 dark:text-gray-300 hover:scale-110 transition-all active:scale-95">
+                <i id="theme-icon" class="fas fa-moon text-xl"></i>
+            </button>
+        </div>
+
         <div class="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
             <!-- Decorative Elements -->
-            <div class="absolute top-0 right-0 -translate-y-12 translate-x-12 w-64 h-64 bg-blue-100/50 rounded-full blur-3xl"></div>
-            <div class="absolute bottom-0 left-0 translate-y-12 -translate-x-12 w-64 h-64 bg-indigo-100/50 rounded-full blur-3xl"></div>
+            <div class="absolute top-0 right-0 -translate-y-12 translate-x-12 w-96 h-96 bg-blue-100/40 dark:bg-blue-600/10 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 left-0 translate-y-12 -translate-x-12 w-96 h-96 bg-indigo-100/40 dark:bg-indigo-600/10 rounded-full blur-3xl"></div>
             
             <div class="relative z-10 w-full flex flex-col items-center justify-center">
                 {{ $slot }}
             </div>
         </div>
+
+        <script>
+            // Theme Initialization & Management
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = document.getElementById('theme-icon');
+            
+            function updateThemeUI() {
+                const isDark = document.documentElement.classList.contains('dark');
+                themeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+            }
+
+            themeToggle.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                const isDark = document.documentElement.classList.contains('dark');
+                localStorage.setItem('dark-mode', isDark);
+                updateThemeUI();
+            });
+
+            // Initial UI sync
+            updateThemeUI();
+        </script>
 
         <!-- Toast Notification (Root Level) -->
         <div x-data="{ 
