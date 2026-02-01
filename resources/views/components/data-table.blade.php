@@ -61,9 +61,17 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right space-x-2">
                             @php $bsDateStr = $bsDate['year'] . '-' . sprintf('%02d', $bsDate['month']) . '-' . sprintf('%02d', $bsDate['day']); @endphp
-                            @if($content->user_id === auth()->id())
+                            
+                            @php $isOwnerOrAdmin = auth()->user()->isAdmin() || $content->user_id === auth()->id(); @endphp
+
+                            @if($isOwnerOrAdmin)
+                                @can('contents.update')
                                 <button onclick='openEditContentModal(@json($content), "{{ $bsDateStr }}")' class="text-primary-600 hover:text-primary-900 dark:text-primary-400"><i class="fas fa-edit"></i></button>
+                                @endcan
+
+                                @can('contents.delete')
                                 <button onclick="openDeleteModal('{{ route('contents.destroy', $content->id) }}')" class="text-red-600 hover:text-red-900 dark:text-red-400"><i class="fas fa-trash"></i></button>
+                                @endcan
                             @else
                                 <span class="text-gray-400 italic text-xs">ReadOnly</span>
                             @endif
@@ -110,9 +118,16 @@
                     </div>
                     <div class="flex items-center gap-3">
                         @php $bsDateStr = $bsDate['year'] . '-' . sprintf('%02d', $bsDate['month']) . '-' . sprintf('%02d', $bsDate['day']); @endphp
-                        @if($content->user_id === auth()->id())
+                        @php $isOwnerOrAdmin = auth()->user()->isAdmin() || $content->user_id === auth()->id(); @endphp
+
+                        @if($isOwnerOrAdmin)
+                            @can('contents.update')
                             <button onclick='openEditContentModal(@json($content), "{{ $bsDateStr }}")' class="p-2 text-primary-600 dark:text-primary-400"><i class="fas fa-edit"></i></button>
+                            @endcan
+
+                            @can('contents.delete')
                             <button onclick="openDeleteModal('{{ route('contents.destroy', $content->id) }}')" class="p-2 text-red-500"><i class="fas fa-trash"></i></button>
+                            @endcan
                         @endif
                     </div>
                 </div>

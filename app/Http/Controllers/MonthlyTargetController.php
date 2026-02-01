@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 use App\Models\MonthlyTarget;
 
@@ -11,6 +12,8 @@ class MonthlyTargetController extends Controller
 
     public function store(Request $request)
     {
+        Gate::authorize('targets.manage');
+
         $validated = $request->validate([
             'client_id' => 'required|exists:clients,id',
             'month' => 'required|date_format:Y-m',
@@ -72,6 +75,8 @@ class MonthlyTargetController extends Controller
      */
     public function update(Request $request, MonthlyTarget $monthlyTarget)
     {
+        Gate::authorize('targets.manage');
+
         $validated = $request->validate([
             'month' => 'required|date_format:Y-m',
             'bs_month' => 'nullable|integer',
@@ -125,6 +130,8 @@ class MonthlyTargetController extends Controller
      */
     public function destroy(MonthlyTarget $monthlyTarget)
     {
+        Gate::authorize('targets.manage');
+
         $monthlyTarget->delete();
         if (request()->ajax()) {
             return response()->json([
@@ -137,6 +144,8 @@ class MonthlyTargetController extends Controller
     }
     public function bulkStore(Request $request)
     {
+        Gate::authorize('targets.manage');
+
         $validated = $request->validate([
             'month' => 'required|date_format:Y-m',
             'bs_month' => 'nullable|integer',

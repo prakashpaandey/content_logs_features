@@ -12,8 +12,9 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
+        $hasPermission = \Illuminate\Support\Facades\Gate::allows('clients.view');
+        $clients = $hasPermission ? Client::orderBy('updated_at', 'desc')->get() : collect();
         $user = auth()->user();
-        $clients = Client::orderBy('updated_at', 'desc')->get();
         
         $selectedClientId = $request->query('client_id');
         $selectedClient = $clients->where('id', $selectedClientId)->first() ?? $clients->first();
@@ -359,8 +360,9 @@ class DashboardController extends Controller
     }
     public function overview(Request $request)
     {
+        $hasPermission = \Illuminate\Support\Facades\Gate::allows('clients.view');
+        $clients = $hasPermission ? Client::orderBy('updated_at', 'desc')->get() : collect();
         $user = auth()->user();
-        $clients = Client::orderBy('updated_at', 'desc')->get();
         
         $bsMonth = (int)$request->query('month');
         $bsYear = (int)$request->query('year');

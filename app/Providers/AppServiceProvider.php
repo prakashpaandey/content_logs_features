@@ -6,6 +6,9 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Client;
+use Illuminate\Support\Facades\Gate;
+use App\Models\Permission;
+use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Share clients with the sidebar component globally
         View::composer('components.sidebar', function ($view) {
-            if (Auth::check()) {
+            if (Auth::check() && Gate::allows('clients.view')) {
                 $view->with('clients', Client::orderBy('name')->get());
             } else {
                 $view->with('clients', collect());
@@ -68,6 +71,27 @@ class AppServiceProvider extends ServiceProvider
 
             public function bsToAd($bsMonth, $bsYear) {
                 return \App\Helpers\NepaliDateHelper::bsToAd($bsMonth, $bsYear);
+            }
+        });
+
+        // Dynamic Permissions Mapping
+        if (Schema::hasTable('permissions')) {
+            try {
+                $permissions = Permission::all();
+                foreach ($permissions as $permission) {
+                    Gate::define($permission->slug, function ($user) use ($permission) {
+                        return $user->hasPermission($permission->slug);
+                    });
+                }
+            } catch (\Exception $e) {
+                // Fail silently if DB is not ready
+            }
+        }
+
+        // Grant full access to Admin
+        Gate::before(function ($user, $ability) {
+            if ($user->isAdmin()) {
+                return true;
             }
         });
     }

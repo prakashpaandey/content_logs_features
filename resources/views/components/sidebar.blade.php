@@ -18,11 +18,13 @@
         <div class="px-4 py-5 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Clients</h2>
+                @can('clients.create')
                 <button onclick="openModal('create-client-modal')" 
                         class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
                     <i class="fas fa-plus mr-1.5"></i>
                     Add Client
                 </button>
+                @endcan
             </div>
             
             <!-- Search -->
@@ -49,6 +51,18 @@
                 @endif
             </a>
         </div>
+
+        @if(auth()->user()->isAdmin())
+        <!-- Admin Section -->
+        <div class="px-3 py-4 border-b border-gray-100 dark:border-gray-700/50">
+            <p class="px-4 mb-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Admin Panel</p>
+            <a href="{{ route('admin.users.index') }}" 
+               class="flex items-center px-4 py-3 rounded-2xl {{ request()->routeIs('admin.users.*') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20' }} transition-all group">
+                <i class="fas fa-users-cog mr-3 {{ request()->routeIs('admin.users.*') ? 'text-white' : 'text-indigo-500' }}"></i>
+                <span class="text-sm font-bold truncate">Manage Users</span>
+            </a>
+        </div>
+        @endif
         
         <!-- Client List -->
         <div class="flex-1 overflow-y-auto custom-scrollbar py-2">
@@ -116,6 +130,7 @@
     </div>
 </aside>
 
+@can('clients.create')
 <!-- Create Client Modal -->
 <div id="create-client-modal" class="modal hidden fixed inset-0 z-50 overflow-y-auto">
     <div class="modal-overlay absolute inset-0 bg-black opacity-50"></div>
@@ -179,3 +194,4 @@
         </div>
     </div>
 </div>
+@endcan

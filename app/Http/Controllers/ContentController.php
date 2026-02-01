@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 use App\Models\Content;
 
@@ -29,6 +30,8 @@ class ContentController extends Controller
      */
     public function store(Request $request)
     {
+        Gate::authorize('contents.create');
+
         $validated = $request->validate([
             'client_id' => 'required|exists:clients,id',
             'title' => 'required|string|max:255',
@@ -156,6 +159,8 @@ class ContentController extends Controller
      */
     public function update(Request $request, Content $content)
     {
+        Gate::authorize('contents.update');
+
         if ($content->user_id !== auth()->id()) {
             if ($request->ajax()) {
                 return response()->json([
@@ -239,6 +244,8 @@ class ContentController extends Controller
 
     public function destroy(Content $content)
     {
+        Gate::authorize('contents.delete');
+
         if ($content->user_id !== auth()->id()) {
             if (request()->ajax()) {
                 return response()->json([

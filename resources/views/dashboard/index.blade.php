@@ -2,6 +2,20 @@
 
 @section('content')
 <div id="dashboard-content" class="animate-fade-in">
+    @cannot('clients.view')
+    <div class="flex flex-col items-center justify-center min-h-[60vh] text-center p-6 bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
+        <div class="w-20 h-20 bg-primary-50 dark:bg-primary-900/20 rounded-full flex items-center justify-center mb-6">
+            <i class="fas fa-lock text-3xl text-primary-600 dark:text-primary-400"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Access Restricted</h2>
+        <p class="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-8">
+            You don't have permission to view clients or dashboard analytics. Please contact your administrator to request access.
+        </p>
+        <a href="{{ route('profile.edit') }}" class="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all">
+            Go to Profile
+        </a>
+    </div>
+    @else
     <!-- Client Header -->
     @include('partials.client-header')
     
@@ -134,14 +148,19 @@
             </div>
             
             <div class="flex items-center space-x-3 w-full lg:w-auto">
+                @can('contents.create')
                 <button x-show="activeTab === 'content'" @click="openModal('add-content-modal')" class="flex-1 lg:flex-none px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-primary-600/20 transition-all active:scale-95 flex items-center justify-center">
                     <i class="fas fa-plus mr-2"></i>
                     Add Content
                 </button>
+                @endcan
+
+                @can('boosts.create')
                 <button x-show="activeTab === 'boosts'" @click="openModal('add-boost-modal')" class="flex-1 lg:flex-none px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-600/20 transition-all active:scale-95 flex items-center justify-center">
                     <i class="fas fa-rocket mr-2"></i>
                     Add Boost Record
                 </button>
+                @endcan
             </div>
         </div>
         
@@ -153,6 +172,7 @@
             @include('components.boosts-table', ['boostData' => $boostData, 'bsMonth' => $bsMonth, 'bsYear' => $bsYear])
         </div>
     </div>
+    @endcan
 </div>
 
 <script>

@@ -2,6 +2,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4 sm:gap-0">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Monthly Targets</h2>
         <div class="flex items-center space-x-2 w-full sm:w-auto">
+            @can('targets.manage')
             @if(!isset($selectedClient))
             <button onclick="openModal('bulk-target-modal')" 
                     class="flex-1 sm:flex-none justify-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
@@ -9,16 +10,21 @@
                 Set for All Clients
             </button>
             @endif
+            @endcan
+
             <button onclick="openModal('history-modal')" 
                     class="flex-1 sm:flex-none justify-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
                 <i class="fas fa-history mr-2"></i>
                 View History
             </button>
+
+            @can('targets.manage')
             <button onclick="openModal('create-target-modal')" 
                     class="flex-1 sm:flex-none justify-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center">
                 <i class="fas fa-plus mr-2"></i>
                 Create Monthly Target
             </button>
+            @endcan
         </div>
     </div>
     
@@ -78,9 +84,11 @@
                                 <button type="button" class="btn-view-target text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300" data-target='@json($target)'>
                                     <i class="fas fa-eye"></i>
                                 </button>
+                                @can('targets.manage')
                                 <button type="button" class="btn-edit-target text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300" data-target='@json($target)'>
                                     <i class="fas fa-edit"></i>
                                 </button>
+                                @endcan
                             </td>
                         </tr>
                     @empty
@@ -132,9 +140,11 @@
                             <button type="button" class="btn-view-target p-2 text-primary-600 dark:text-primary-400" data-target='@json($target)'>
                                 <i class="fas fa-eye text-sm"></i>
                             </button>
+                            @can('targets.manage')
                             <button type="button" class="btn-edit-target p-2 text-yellow-500" data-target='@json($target)'>
                                 <i class="fas fa-edit text-sm"></i>
                             </button>
+                            @endcan
                         </div>
                     </div>
                 </div>
@@ -555,6 +565,7 @@
                                             {{ $nepaliTranslate($updatedBs['month'], 'month') }} {{ $updatedBs['year'] }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            @can('targets.manage')
                                             @if($target->status === 'archived')
                                                 <form id="restore-target-form-{{ $target->id }}" action="{{ route('monthly-targets.update', $target->id) }}" method="POST" class="inline-block" onsubmit="event.preventDefault(); submitFormAjax('restore-target-form-{{ $target->id }}', 'history-modal')">
                                                     @csrf
@@ -571,6 +582,7 @@
                                                     </button>
                                                 </form>
                                             @endif
+                                            @endcan
                                         </td>
                                     </tr>
                                 @endforeach

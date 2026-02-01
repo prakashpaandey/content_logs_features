@@ -2,6 +2,20 @@
 
 @section('content')
 <div class="animate-fade-in" x-data="{ searchQuery: '' }">
+    @cannot('clients.view')
+    <div class="flex flex-col items-center justify-center min-h-[60vh] text-center p-6 bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
+        <div class="w-20 h-20 bg-primary-50 dark:bg-primary-900/20 rounded-full flex items-center justify-center mb-6">
+            <i class="fas fa-lock text-3xl text-primary-600 dark:text-primary-400"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Access Restricted</h2>
+        <p class="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-8">
+            You don't have permission to view the global client overview. Please contact your administrator to request access.
+        </p>
+        <a href="{{ route('profile.edit') }}" class="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all">
+            Go to Profile
+        </a>
+    </div>
+    @else
     <!-- Agency Summary Header -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/50 p-6 mb-8">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -274,6 +288,7 @@
             </div>
         @endforeach
     </div>
+    @endcan
 </div>
 
 <script>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Client;
+use Illuminate\Support\Facades\Gate;
 
 class ClientController extends Controller
 {
@@ -12,7 +13,7 @@ class ClientController extends Controller
      */
     public function index()
     {
-        //
+        Gate::authorize('clients.view');
     }
 
     /**
@@ -28,6 +29,8 @@ class ClientController extends Controller
      */
     public function store(Request $request)
     {
+        Gate::authorize('clients.create');
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'business_name' => 'required|string|max:255',
@@ -70,6 +73,8 @@ class ClientController extends Controller
     
     public function update(Request $request, Client $client)
     {
+        Gate::authorize('clients.update');
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'business_name' => 'required|string|max:255',
@@ -101,6 +106,8 @@ class ClientController extends Controller
      */
     public function destroy(Client $client)
     {
+        Gate::authorize('clients.delete');
+
         $client->delete();
         if (request()->ajax()) {
             return response()->json([

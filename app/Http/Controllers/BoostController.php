@@ -7,11 +7,14 @@ use App\Models\Client;
 use App\Models\MonthlyTarget;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class BoostController extends Controller
 {
     public function store(Request $request)
     {
+        Gate::authorize('boosts.create');
+
         $validated = $request->validate([
             'client_id' => 'required|exists:clients,id',
             'title' => 'required|string|max:255',
@@ -126,6 +129,8 @@ class BoostController extends Controller
 
     public function update(Request $request, Boost $boost)
     {
+        Gate::authorize('boosts.update');
+
         if ($boost->user_id !== Auth::id()) {
             if ($request->ajax()) {
                 return response()->json([
@@ -207,6 +212,8 @@ class BoostController extends Controller
 
     public function destroy(Boost $boost)
     {
+        Gate::authorize('boosts.delete');
+
         if ($boost->user_id !== Auth::id()) {
             if (request()->ajax()) {
                 return response()->json([

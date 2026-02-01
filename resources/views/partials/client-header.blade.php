@@ -26,6 +26,7 @@
         
         <div class="grid grid-cols-2 md:flex md:items-center gap-2 w-full md:w-auto">
             <div class="col-span-1 flex gap-2">
+                @can('clients.delete')
                 @if(isset($selectedClient))
                 <button onclick="openSecureDeleteModal('{{ route('clients.destroy', $selectedClient->id) }}', '{{ $selectedClient->name }}')" 
                         class="px-3 py-2 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-colors flex items-center justify-center shrink-0"
@@ -33,15 +34,22 @@
                     <i class="fas fa-trash-alt"></i>
                 </button>
                 @endif
+                @endcan
+
+                @can('clients.update')
                 <button onclick="openModal('edit-client-modal')" class="flex-1 md:flex-none px-3 md:px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center text-xs md:text-sm font-medium">
                     <i class="fas fa-edit mr-1.5 md:mr-2"></i>
                     <span class="whitespace-nowrap">Edit</span>
                 </button>
+                @endcan
             </div>
+
+            @can('contents.create')
             <button onclick="openModal('add-content-modal')" class="col-span-1 md:flex-none px-3 md:px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-all shadow-md active:scale-95 flex items-center justify-center text-xs md:text-sm font-medium">
                 <i class="fas fa-plus mr-1.5 md:mr-2"></i>
                 <span class="whitespace-nowrap">Add Content</span>
             </button>
+            @endcan
         </div>
     </div>
     

@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'status',
     ];
 
     /**
@@ -67,5 +69,41 @@ class User extends Authenticatable
     public function monthlyTargets()
     {
         return $this->hasMany(MonthlyTarget::class);
+    }
+
+    /**
+     * Get the permissions for the user.
+     */
+    public function permissions()
+    {
+        return $this->belongsToMany(Permission::class);
+    }
+
+    /**
+     * Check if the user is an admin.
+     */
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Check if user is active.
+     */
+    public function isActive()
+    {
+        return $this->status === 'active';
+    }
+
+    /**
+     * Check if the user has a specific permission.
+     */
+    public function hasPermission($permissionSlug)
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        return $this->permissions()->where('slug', $permissionSlug)->exists();
     }
 }
