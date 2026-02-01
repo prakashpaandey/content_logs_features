@@ -2,15 +2,16 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="mb-8 flex items-center justify-between">
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Manage Permissions</h1>
-            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                Granting access for <span class="font-bold text-gray-900 dark:text-white">{{ $user->name }}</span> ({{ $user->email }})
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-4 sm:mt-0">Manage Permissions</h1>
+            <p class="mt-1 sm:mt-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                Granting access for <span class="font-bold text-gray-900 dark:text-white">{{ $user->name }}</span>
             </p>
         </div>
-        <a href="{{ route('admin.users.index') }}" class="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700">
-            Back to User List
+        <a href="{{ route('admin.users.index') }}" class="inline-flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-2 text-sm font-bold text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700 shadow-sm">
+            <i class="fas fa-arrow-left sm:mr-2"></i>
+            <span class="hidden sm:inline">Back to User List</span>
         </a>
     </div>
 
@@ -29,7 +30,7 @@
                                 class="text-xs font-bold text-rose-600 hover:text-rose-700 uppercase">Clear All</button>
                     </div>
                 </div>
-                <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                     @foreach($modulePermissions as $permission)
                     <label class="relative flex items-center p-3 rounded-xl border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all group">
                         <div class="flex items-center h-5">
@@ -49,7 +50,7 @@
         </div>
 
         <div class="mt-8 flex justify-end">
-            <button type="submit" class="px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg shadow-primary-500/20 transition-all active:scale-[0.98]">
+            <button type="submit" class="w-full sm:w-auto px-8 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-extrabold rounded-2xl shadow-lg shadow-primary-500/25 transition-all active:scale-[0.98]">
                 Save Changes
             </button>
         </div>
