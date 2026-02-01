@@ -169,7 +169,7 @@
                             </div>
                             <input type="text" name="name" required
                                    class="block w-full pl-11 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent dark:border-gray-700 rounded-2xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:bg-white dark:focus:bg-gray-800 focus:border-primary-500/30 transition-all font-sans"
-                                   >
+                                   placeholder="Ram Shrestha">
                         </div>
                     </div>
                     
@@ -184,7 +184,7 @@
                             </div>
                             <input type="text" name="business_name" required
                                    class="block w-full pl-11 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent dark:border-gray-700 rounded-2xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:bg-white dark:focus:bg-gray-800 focus:border-primary-500/30 transition-all font-sans"
-                                  >
+                                   placeholder="Bhatbhateni">
                         </div>
                     </div>
                     
