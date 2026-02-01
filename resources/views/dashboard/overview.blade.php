@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="animate-fade-in" x-data="{ searchQuery: '' }">
+<div id="dashboard-content" class="animate-fade-in" x-data="{ searchQuery: '' }">
     @cannot('clients.view')
     <div class="flex flex-col items-center justify-center min-h-[60vh] text-center p-6 bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
         <div class="w-20 h-20 bg-primary-50 dark:bg-primary-900/20 rounded-full flex items-center justify-center mb-6">
