@@ -852,49 +852,8 @@
         // --- DASHBOARD AJAX HELPERS ---
         async function refreshDashboard() {
             try {
-                console.log('Refreshing Dashboard Data...');
-                const response = await fetch(window.location.href);
-                const html = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                
-                // 1. Refresh Main Content
-                const newContent = doc.querySelector('#dashboard-content');
-                const oldContent = document.querySelector('#dashboard-content');
-                if (newContent && oldContent) {
-                    oldContent.innerHTML = newContent.innerHTML;
-                }
-
-                // 2. Refresh Sidebar Client List (if it exists)
-                const newClientList = doc.querySelector('#client-list');
-                const oldClientList = document.querySelector('#client-list');
-                if (newClientList && oldClientList) {
-                    oldClientList.innerHTML = newClientList.innerHTML;
-                }
-
-                // 2.1 Refresh Sidebar Footer (Client Count)
-                const newSidebarFooter = doc.querySelector('#sidebar-footer');
-                const oldSidebarFooter = document.querySelector('#sidebar-footer');
-                if (newSidebarFooter && oldSidebarFooter) {
-                    oldSidebarFooter.innerHTML = newSidebarFooter.innerHTML;
-                }
-                
-                // 3. Extract and update Chart Data script
-                const scripts = doc.querySelectorAll('script');
-                scripts.forEach(script => {
-                    if (script.textContent.includes('window.dashboardChartData')) {
-                        eval(script.textContent);
-                    }
-                });
-
-                // 4. Re-initialize components
-                setTimeout(() => {
-                    if (typeof initializeCharts === 'function') initializeCharts();
-                    if (typeof initializeProgressBars === 'function') initializeProgressBars();
-                    if (typeof initializeNepaliDatePicker === 'function') initializeNepaliDatePicker();
-                    if (typeof initializeNepaliMonthPicker === 'function') initializeNepaliMonthPicker();
-                }, 50);
-                
+                console.log('Manual Refresh Requested...');
+                await updatePartialUI();
                 console.log('Dashboard Refreshed Successfully');
             } catch (e) {
                 console.error('Error refreshing dashboard:', e);
@@ -1123,6 +1082,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             let currentPermissionHash = null;
             let currentClientsHash = null;
+            let currentContentHash = null;
 
             // 1. Get the initial state
             async function initializeStateSync() {
@@ -1133,11 +1093,12 @@
                     const data = await response.json();
                     currentPermissionHash = data.permissions_hash;
                     currentClientsHash = data.clients_hash;
+                    currentContentHash = data.content_hash;
                     
                     console.log('State sync initialized');
                     
                     // Start polling after initialization
-                    setInterval(checkState, 15000); 
+                    setInterval(checkState, 10000); 
                 } catch (error) {
                     console.error('State sync initialization failed:', error);
                 }
@@ -1153,14 +1114,16 @@
                     
                     let permissionChanged = currentPermissionHash && data.permissions_hash !== currentPermissionHash;
                     let clientsChanged = currentClientsHash && data.clients_hash !== currentClientsHash;
+                    let contentChanged = currentContentHash && data.content_hash !== currentContentHash;
 
-                    if (permissionChanged || clientsChanged) {
-                        console.log('Update detected. Performing partial UI refresh...');
+                    if (permissionChanged || clientsChanged || contentChanged) {
+                        console.log('Update detected (Permission/Client/Content). Balancing UI...');
                         await updatePartialUI();
                         
                         // Update local hashes to prevent repeated updates
                         currentPermissionHash = data.permissions_hash;
                         currentClientsHash = data.clients_hash;
+                        currentContentHash = data.content_hash;
                     }
                 } catch (error) {
                     console.log('Checking application state...');
@@ -1177,18 +1140,15 @@
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
 
-                    // 1. Update entire Sidebar Content (Handles Clients + Permissions)
-                    // We target the inner container to keep the 'aside' tag and its Alpine state intact
+                    // 1. Update Sidebar Content
                     const newSidebarInner = doc.querySelector('aside > div');
                     const currentSidebarInner = document.querySelector('aside > div');
                     if (newSidebarInner && currentSidebarInner) {
                         currentSidebarInner.innerHTML = newSidebarInner.innerHTML;
-                        console.log('Sidebar synced (partial).');
                     }
 
-                    // 2. If we are on the clients-overview or dashboard, update main content
-                    // This ensures that if a client is added, it shows up in the main grid/table too
-                    const mainSelectors = ['main', '#users-table-body', '#content-grid'];
+                    // 2. Update Main Content Areas
+                    const mainSelectors = ['main', '#dashboard-content', '#users-table-body', '#content-grid'];
                     mainSelectors.forEach(selector => {
                         const newElement = doc.querySelector(selector);
                         const currentElement = document.querySelector(selector);
@@ -1197,7 +1157,23 @@
                         }
                     });
 
-                    console.log('Partial UI sync complete.');
+                    // 3. Update Chart Data & Re-initialize
+                    const scripts = doc.querySelectorAll('script');
+                    scripts.forEach(script => {
+                        if (script.textContent.includes('window.dashboardChartData')) {
+                            eval(script.textContent);
+                        }
+                    });
+
+                    // Re-init components
+                    setTimeout(() => {
+                        if (typeof initializeCharts === 'function') initializeCharts();
+                        if (typeof initializeProgressBars === 'function') initializeProgressBars();
+                        if (typeof initializeNepaliDatePicker === 'function') initializeNepaliDatePicker();
+                        if (typeof initializeNepaliMonthPicker === 'function') initializeNepaliMonthPicker();
+                    }, 50);
+
+                    console.log('Partial UI sync complete (Permission/Client/Content).');
 
                 } catch (error) {
                     console.error('Partial update failed:', error);
