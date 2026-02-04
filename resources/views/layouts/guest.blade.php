@@ -130,5 +130,6 @@
                 <span x-text="message" class="font-bold text-sm tracking-wide"></span>
             </div>
         </div>
+        @stack('scripts')
     </body>
 </html>

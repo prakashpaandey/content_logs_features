@@ -348,12 +348,15 @@
                     
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Month & Year *</label>
-                            <x-nepali-month-picker id="edit-target-picker" 
-                                adInputId="edit-target-ad-month" 
-                                bsMonthInputId="edit-target-bs-month" 
-                                bsYearInputId="edit-target-bs-year" 
-                                placeholder="Select Month" />
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Month & Year</label>
+                            <div class="relative">
+                                <input type="text" id="edit-target-display" readonly 
+                                       class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 cursor-not-allowed font-medium shadow-sm transition-all"
+                                       value="Loading...">
+                                <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                    <i class="fas fa-lock text-xs"></i>
+                                </div>
+                            </div>
                             <input type="hidden" name="month" id="edit-target-ad-month">
                             <input type="hidden" name="bs_month" id="edit-target-bs-month">
                             <input type="hidden" name="bs_year" id="edit-target-bs-year">
@@ -675,14 +678,13 @@
                 bsYear = adObj.year + 56;
             }
             
-            // Dispatch event to the custom Alpine picker
-            window.dispatchEvent(new CustomEvent('set-month', { 
-                detail: { 
-                    targetId: 'edit-target-picker', 
-                    year: bsYear, 
-                    month: bsMonth 
-                } 
-            }));
+            // Set display value
+            const monthNames = [
+                'Baisakh', 'Jestha', 'Ashadh', 'Shravan', 'Bhadra', 'Ashwin',
+                'Kartik', 'Mangsir', 'Poush', 'Magh', 'Falgun', 'Chaitra'
+            ];
+            const displayMonth = monthNames[bsMonth - 1] || 'Unknown';
+            document.getElementById('edit-target-display').value = `${displayMonth} ${bsYear}`;
 
             document.getElementById('edit-target-posts').value = target.target_posts;
             document.getElementById('edit-target-reels').value = target.target_reels;
