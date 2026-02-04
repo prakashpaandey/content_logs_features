@@ -1151,25 +1151,56 @@
                     });
                     const data = await response.json();
                     
-                    let needsReload = false;
+                    let permissionChanged = currentPermissionHash && data.permissions_hash !== currentPermissionHash;
+                    let clientsChanged = currentClientsHash && data.clients_hash !== currentClientsHash;
 
-                    // Detect Permission changes
-                    if (currentPermissionHash && data.permissions_hash !== currentPermissionHash) {
-                        console.warn('Permissions updated by administrator.');
-                        needsReload = true;
-                    }
-
-                    // Detect Client List changes (additions/deletions)
-                    if (currentClientsHash && data.clients_hash !== currentClientsHash) {
-                        console.warn('Client list updated by another user.');
-                        needsReload = true;
-                    }
-
-                    if (needsReload) {
-                        window.location.reload();
+                    if (permissionChanged || clientsChanged) {
+                        console.log('Update detected. Performing partial UI refresh...');
+                        await updatePartialUI();
+                        
+                        // Update local hashes to prevent repeated updates
+                        currentPermissionHash = data.permissions_hash;
+                        currentClientsHash = data.clients_hash;
                     }
                 } catch (error) {
                     console.log('Checking application state...');
+                }
+            }
+
+            // 3. Smart Partial Update
+            async function updatePartialUI() {
+                try {
+                    const response = await fetch(window.location.href, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+
+                    // 1. Update entire Sidebar Content (Handles Clients + Permissions)
+                    // We target the inner container to keep the 'aside' tag and its Alpine state intact
+                    const newSidebarInner = doc.querySelector('aside > div');
+                    const currentSidebarInner = document.querySelector('aside > div');
+                    if (newSidebarInner && currentSidebarInner) {
+                        currentSidebarInner.innerHTML = newSidebarInner.innerHTML;
+                        console.log('Sidebar synced (partial).');
+                    }
+
+                    // 2. If we are on the clients-overview or dashboard, update main content
+                    // This ensures that if a client is added, it shows up in the main grid/table too
+                    const mainSelectors = ['main', '#users-table-body', '#content-grid'];
+                    mainSelectors.forEach(selector => {
+                        const newElement = doc.querySelector(selector);
+                        const currentElement = document.querySelector(selector);
+                        if (newElement && currentElement) {
+                            currentElement.innerHTML = newElement.innerHTML;
+                        }
+                    });
+
+                    console.log('Partial UI sync complete.');
+
+                } catch (error) {
+                    console.error('Partial update failed:', error);
                 }
             }
 
