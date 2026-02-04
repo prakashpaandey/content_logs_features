@@ -1118,48 +1118,66 @@
     </script>
     @stack('scripts')
 
-    <!-- Real-time Permission Synchronization -->
+    <!-- Real-time Application State Synchronization -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             let currentPermissionHash = null;
+            let currentClientsHash = null;
 
-            // 1. Get the initial hash
-            async function initializePermissionSync() {
+            // 1. Get the initial state
+            async function initializeStateSync() {
                 try {
-                    const response = await fetch("{{ route('api.check-permissions') }}", {
+                    const response = await fetch("{{ route('api.check-state') }}", {
                         headers: { 'X-Requested-With': 'XMLHttpRequest' }
                     });
                     const data = await response.json();
-                    currentPermissionHash = data.hash;
+                    currentPermissionHash = data.permissions_hash;
+                    currentClientsHash = data.clients_hash;
+                    
+                    console.log('State sync initialized');
                     
                     // Start polling after initialization
-                    setInterval(checkPermissions, 15000); 
+                    setInterval(checkState, 15000); 
                 } catch (error) {
-                    console.error('Permission sync initialization failed:', error);
+                    console.error('State sync initialization failed:', error);
                 }
             }
 
             // 2. Poll for changes
-            async function checkPermissions() {
+            async function checkState() {
                 try {
-                    const response = await fetch("{{ route('api.check-permissions') }}", {
+                    const response = await fetch("{{ route('api.check-state') }}", {
                         headers: { 'X-Requested-With': 'XMLHttpRequest' }
                     });
                     const data = await response.json();
                     
-                    // If hash changed, an admin modified permissions - refresh to update UI
-                    if (currentPermissionHash && data.hash !== currentPermissionHash) {
-                        console.warn('Permissions updated by administrator. Refreshing UI...');
+                    let needsReload = false;
+
+                    // Detect Permission changes
+                    if (currentPermissionHash && data.permissions_hash !== currentPermissionHash) {
+                        console.warn('Permissions updated by administrator.');
+                        needsReload = true;
+                    }
+
+                    // Detect Client List changes (additions/deletions)
+                    if (currentClientsHash && data.clients_hash !== currentClientsHash) {
+                        console.warn('Client list updated by another user.');
+                        needsReload = true;
+                    }
+
+                    if (needsReload) {
                         window.location.reload();
                     }
                 } catch (error) {
-                    console.log('Permission check status...');
+                    console.log('Checking application state...');
                 }
             }
 
-            // Skip initialization if we're on the permissions management page itself
-            if (!window.location.pathname.includes('/admin/users/') || !window.location.pathname.includes('/permissions')) {
-                initializePermissionSync();
+            // Skip initialization if we're on the permissions management page itself or other sensitive admin pages
+            const isEditingPermissions = window.location.pathname.includes('/admin/users/') && window.location.pathname.includes('/permissions');
+            
+            if (!isEditingPermissions) {
+                initializeStateSync();
             }
         });
     </script>

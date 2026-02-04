@@ -42,16 +42,21 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/users/{user}/permissions', [\App\Http\Controllers\Admin\UserController::class, 'updatePermissions'])->name('users.update-permissions');
             Route::post('/users/{user}/activate', [\App\Http\Controllers\Admin\UserController::class, 'activate'])->name('users.activate');
         });
-        // Check Permissions Hash for Real-time Sync
-        Route::get('/api/check-permissions', function() {
+        // Check Permissions & Client List Hash for Real-time Sync
+        Route::get('/api/check-state', function() {
             $user = auth()->user();
             if (!$user->permissions_hash) {
                 $user->updatePermissionsHash();
             }
+
+            // Generate a hash of all active client IDs to detect additions/deletions
+            $clientsHash = md5(\App\Models\Client::where('status', 'active')->pluck('id')->sort()->join(','));
+
             return response()->json([
-                'hash' => $user->permissions_hash
+                'permissions_hash' => $user->permissions_hash,
+                'clients_hash' => $clientsHash
             ]);
-        })->name('api.check-permissions');
+        })->name('api.check-state');
     });
 });
 
