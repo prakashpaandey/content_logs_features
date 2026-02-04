@@ -42,6 +42,16 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/users/{user}/permissions', [\App\Http\Controllers\Admin\UserController::class, 'updatePermissions'])->name('users.update-permissions');
             Route::post('/users/{user}/activate', [\App\Http\Controllers\Admin\UserController::class, 'activate'])->name('users.activate');
         });
+        // Check Permissions Hash for Real-time Sync
+        Route::get('/api/check-permissions', function() {
+            $user = auth()->user();
+            if (!$user->permissions_hash) {
+                $user->updatePermissionsHash();
+            }
+            return response()->json([
+                'hash' => $user->permissions_hash
+            ]);
+        })->name('api.check-permissions');
     });
 });
 

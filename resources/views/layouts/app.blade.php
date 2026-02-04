@@ -1117,5 +1117,51 @@
         });
     </script>
     @stack('scripts')
+
+    <!-- Real-time Permission Synchronization -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentPermissionHash = null;
+
+            // 1. Get the initial hash
+            async function initializePermissionSync() {
+                try {
+                    const response = await fetch("{{ route('api.check-permissions') }}", {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const data = await response.json();
+                    currentPermissionHash = data.hash;
+                    
+                    // Start polling after initialization
+                    setInterval(checkPermissions, 15000); 
+                } catch (error) {
+                    console.error('Permission sync initialization failed:', error);
+                }
+            }
+
+            // 2. Poll for changes
+            async function checkPermissions() {
+                try {
+                    const response = await fetch("{{ route('api.check-permissions') }}", {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const data = await response.json();
+                    
+                    // If hash changed, an admin modified permissions - refresh to update UI
+                    if (currentPermissionHash && data.hash !== currentPermissionHash) {
+                        console.warn('Permissions updated by administrator. Refreshing UI...');
+                        window.location.reload();
+                    }
+                } catch (error) {
+                    console.log('Permission check status...');
+                }
+            }
+
+            // Skip initialization if we're on the permissions management page itself
+            if (!window.location.pathname.includes('/admin/users/') || !window.location.pathname.includes('/permissions')) {
+                initializePermissionSync();
+            }
+        });
+    </script>
 </body>
 </html>
