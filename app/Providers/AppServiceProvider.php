@@ -84,7 +84,7 @@ class AppServiceProvider extends ServiceProvider
                     });
                 }
             } catch (\Exception $e) {
-                // Fail silently if DB is not ready
+                
             }
         }
 
