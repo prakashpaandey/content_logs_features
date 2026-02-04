@@ -7,9 +7,6 @@ use Illuminate\Database\Seeder;
 
 class PermissionSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $permissions = [
@@ -40,7 +37,7 @@ class PermissionSeeder extends Seeder
             \App\Models\Permission::updateOrCreate(['slug' => $permission['slug']], $permission);
         }
 
-        // Set the first user as admin if exists
+        // first user admin always
         $adminUser = \App\Models\User::first();
         if ($adminUser) {
             $adminUser->update(['role' => 'admin', 'status' => 'active']);
