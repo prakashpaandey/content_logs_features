@@ -34,4 +34,29 @@
 
         
     </div>
+
+    @push('scripts')
+    <script>
+        function checkStatus() {
+            fetch("{{ route('dashboard.index') }}", {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                // If the final response URL is no longer the pending page, approval has granted
+                if (response.ok && !response.url.includes('verification-pending')) {
+                    window.location.href = "{{ route('dashboard.index') }}";
+                }
+            })
+            .catch(error => console.log('Checking approval status...'));
+        }
+
+        // Check every 5 seconds for a seamless transition
+        const statusInterval = setInterval(checkStatus, 5000);
+        
+        // Clean up on page hide
+        window.onpagehide = () => clearInterval(statusInterval);
+    </script>
+    @endpush
 </x-guest-layout>
