@@ -17,8 +17,8 @@
             <!-- Right side: User menu and theme toggle -->
             <div class="flex items-center space-x-4">
                 <!-- Theme Toggle -->
-                <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                    <i id="theme-icon" class="fas fa-moon"></i>
+                <button id="theme-toggle" class="w-11 h-11 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-white dark:hover:bg-gray-700 hover:shadow-lg hover:shadow-primary-500/5 transition-all duration-300 group">
+                    <i id="theme-icon" class="fas fa-moon text-sm group-hover:scale-110 transition-transform"></i>
                 </button>
                 
                 <!-- User Menu -->

@@ -79,7 +79,7 @@
                     </a>
                     
                     <div class="flex-1 sm:flex-none min-w-0">
-                        <div class="w-full sm:w-[200px]">
+                        <div class="w-full sm:w-[220px]">
                             <x-nepali-month-picker 
                                 id="dashboard-month-nav" 
                                 value="{{ $bsYear . '-' . str_pad($bsMonth, 2, '0', STR_PAD_LEFT) }}"

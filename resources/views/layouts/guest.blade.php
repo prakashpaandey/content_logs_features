@@ -46,8 +46,8 @@
     <body class="font-sans text-gray-900 antialiased overflow-x-hidden bg-[#F8FAFC] dark:bg-gray-950 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50 via-white to-white dark:from-blue-900/20 dark:via-gray-950 dark:to-gray-950 transition-colors duration-300">
         <!-- Theme Toggle -->
         <div class="fixed top-6 right-6 z-50">
-            <button id="theme-toggle" class="p-3 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-100 dark:border-gray-700 shadow-lg text-gray-600 dark:text-gray-300 hover:scale-110 transition-all active:scale-95">
-                <i id="theme-icon" class="fas fa-moon text-xl"></i>
+            <button id="theme-toggle" class="w-12 h-12 flex items-center justify-center rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-100 dark:border-gray-700 shadow-xl text-gray-600 dark:text-gray-300 hover:scale-110 hover:shadow-primary-500/10 transition-all active:scale-95 group">
+                <i id="theme-icon" class="fas fa-moon text-xl group-hover:rotate-12 transition-transform"></i>
             </button>
         </div>
 
@@ -130,5 +130,6 @@
                 <span x-text="message" class="font-bold text-sm tracking-wide"></span>
             </div>
         </div>
+        @stack('scripts')
     </body>
 </html>

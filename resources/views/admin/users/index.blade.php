@@ -161,7 +161,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('user-search-input');
     const tableBody = document.getElementById('users-table-body');
     let debounceTimer;
+    let pollInterval;
 
+    // Search functionality
     if (searchInput) {
         searchInput.addEventListener('input', function() {
             clearTimeout(debounceTimer);
@@ -175,24 +177,69 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.history.pushState({ path: url.href }, '', url.href);
 
                 // Fetch data
-                fetch(url.href, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const newTableBody = doc.getElementById('users-table-body');
-                    if (newTableBody) {
-                        tableBody.innerHTML = newTableBody.innerHTML;
-                    }
-                })
-                .catch(error => console.error('Error fetching search results:', error));
+                fetchData(url.href);
             }, 300); // 300ms debounce
         });
     }
+
+    // Polling functionality logic
+    function startPolling() {
+        if (pollInterval) clearInterval(pollInterval);
+        pollInterval = setInterval(() => {
+            // Don't poll if searching
+            if (searchInput && searchInput.value.trim().length > 0) return;
+            
+            fetchData(window.location.href, true);
+        }, 15000); // Poll every 15 seconds
+    }
+
+    function fetchData(url, isPolling = false) {
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // 1. Always update count badges regardless of table changes
+            updateCounts(doc);
+
+            // 2. Update Table Body conditionally
+            const newTableBody = doc.getElementById('users-table-body');
+            if (newTableBody && tableBody) {
+                // If polling and the content hasn't changed, don't flash the UI
+                if (isPolling && tableBody.innerHTML.trim() === newTableBody.innerHTML.trim()) return;
+                tableBody.innerHTML = newTableBody.innerHTML;
+            }
+        })
+        .catch(error => console.error('Error fetching data:', error));
+    }
+
+    function updateCounts(doc) {
+        const counts = [
+            { id: 'count-active', selector: 'a[href*="tab=active"] span' },
+            { id: 'count-pending', selector: 'a[href*="tab=pending"] span' },
+            { id: 'count-deactivated', selector: 'a[href*="tab=deactivated"] span' }
+        ];
+
+        counts.forEach(item => {
+            const oldBadge = document.querySelector(item.selector);
+            const newBadge = doc.querySelector(item.selector);
+            
+            if (oldBadge && newBadge && oldBadge.textContent.trim() !== newBadge.textContent.trim()) {
+                oldBadge.textContent = newBadge.textContent;
+                // Add a subtle bounce animation for new counts
+                oldBadge.classList.add('scale-110');
+                setTimeout(() => oldBadge.classList.remove('scale-110'), 300);
+            }
+        });
+    }
+
+    // Initial start
+    startPolling();
 });
 </script>
 @endpush

@@ -852,49 +852,8 @@
         // --- DASHBOARD AJAX HELPERS ---
         async function refreshDashboard() {
             try {
-                console.log('Refreshing Dashboard Data...');
-                const response = await fetch(window.location.href);
-                const html = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                
-                // 1. Refresh Main Content
-                const newContent = doc.querySelector('#dashboard-content');
-                const oldContent = document.querySelector('#dashboard-content');
-                if (newContent && oldContent) {
-                    oldContent.innerHTML = newContent.innerHTML;
-                }
-
-                // 2. Refresh Sidebar Client List (if it exists)
-                const newClientList = doc.querySelector('#client-list');
-                const oldClientList = document.querySelector('#client-list');
-                if (newClientList && oldClientList) {
-                    oldClientList.innerHTML = newClientList.innerHTML;
-                }
-
-                // 2.1 Refresh Sidebar Footer (Client Count)
-                const newSidebarFooter = doc.querySelector('#sidebar-footer');
-                const oldSidebarFooter = document.querySelector('#sidebar-footer');
-                if (newSidebarFooter && oldSidebarFooter) {
-                    oldSidebarFooter.innerHTML = newSidebarFooter.innerHTML;
-                }
-                
-                // 3. Extract and update Chart Data script
-                const scripts = doc.querySelectorAll('script');
-                scripts.forEach(script => {
-                    if (script.textContent.includes('window.dashboardChartData')) {
-                        eval(script.textContent);
-                    }
-                });
-
-                // 4. Re-initialize components
-                setTimeout(() => {
-                    if (typeof initializeCharts === 'function') initializeCharts();
-                    if (typeof initializeProgressBars === 'function') initializeProgressBars();
-                    if (typeof initializeNepaliDatePicker === 'function') initializeNepaliDatePicker();
-                    if (typeof initializeNepaliMonthPicker === 'function') initializeNepaliMonthPicker();
-                }, 50);
-                
+                console.log('Manual Refresh Requested...');
+                await updatePartialUI();
                 console.log('Dashboard Refreshed Successfully');
             } catch (e) {
                 console.error('Error refreshing dashboard:', e);
@@ -1117,5 +1076,117 @@
         });
     </script>
     @stack('scripts')
+
+    <!-- Real-time Application State Synchronization -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentPermissionHash = null;
+            let currentClientsHash = null;
+            let currentContentHash = null;
+
+            // 1. Get the initial state
+            async function initializeStateSync() {
+                try {
+                    const response = await fetch("{{ route('api.check-state') }}", {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const data = await response.json();
+                    currentPermissionHash = data.permissions_hash;
+                    currentClientsHash = data.clients_hash;
+                    currentContentHash = data.content_hash;
+                    
+                    console.log('State sync initialized');
+                    
+                    // Start polling after initialization
+                    setInterval(checkState, 10000); 
+                } catch (error) {
+                    console.error('State sync initialization failed:', error);
+                }
+            }
+
+            // 2. Poll for changes
+            async function checkState() {
+                try {
+                    const response = await fetch("{{ route('api.check-state') }}", {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const data = await response.json();
+                    
+                    let permissionChanged = currentPermissionHash && data.permissions_hash !== currentPermissionHash;
+                    let clientsChanged = currentClientsHash && data.clients_hash !== currentClientsHash;
+                    let contentChanged = currentContentHash && data.content_hash !== currentContentHash;
+
+                    if (permissionChanged || clientsChanged || contentChanged) {
+                        console.log('Update detected (Permission/Client/Content). Balancing UI...');
+                        await updatePartialUI();
+                        
+                        // Update local hashes to prevent repeated updates
+                        currentPermissionHash = data.permissions_hash;
+                        currentClientsHash = data.clients_hash;
+                        currentContentHash = data.content_hash;
+                    }
+                } catch (error) {
+                    console.log('Checking application state...');
+                }
+            }
+
+            // 3. Smart Partial Update
+            async function updatePartialUI() {
+                try {
+                    const response = await fetch(window.location.href, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+
+                    // 1. Update Sidebar Content
+                    const newSidebarInner = doc.querySelector('aside > div');
+                    const currentSidebarInner = document.querySelector('aside > div');
+                    if (newSidebarInner && currentSidebarInner) {
+                        currentSidebarInner.innerHTML = newSidebarInner.innerHTML;
+                    }
+
+                    // 2. Update Main Content Areas
+                    const mainSelectors = ['main', '#dashboard-content', '#users-table-body', '#content-grid'];
+                    mainSelectors.forEach(selector => {
+                        const newElement = doc.querySelector(selector);
+                        const currentElement = document.querySelector(selector);
+                        if (newElement && currentElement) {
+                            currentElement.innerHTML = newElement.innerHTML;
+                        }
+                    });
+
+                    // 3. Update Chart Data & Re-initialize
+                    const scripts = doc.querySelectorAll('script');
+                    scripts.forEach(script => {
+                        if (script.textContent.includes('window.dashboardChartData')) {
+                            eval(script.textContent);
+                        }
+                    });
+
+                    // Re-init components
+                    setTimeout(() => {
+                        if (typeof initializeCharts === 'function') initializeCharts();
+                        if (typeof initializeProgressBars === 'function') initializeProgressBars();
+                        if (typeof initializeNepaliDatePicker === 'function') initializeNepaliDatePicker();
+                        if (typeof initializeNepaliMonthPicker === 'function') initializeNepaliMonthPicker();
+                    }, 50);
+
+                    console.log('Partial UI sync complete (Permission/Client/Content).');
+
+                } catch (error) {
+                    console.error('Partial update failed:', error);
+                }
+            }
+
+            // Skip initialization if we're on the permissions management page itself or other sensitive admin pages
+            const isEditingPermissions = window.location.pathname.includes('/admin/users/') && window.location.pathname.includes('/permissions');
+            
+            if (!isEditingPermissions) {
+                initializeStateSync();
+            }
+        });
+    </script>
 </body>
 </html>

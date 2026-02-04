@@ -42,6 +42,32 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/users/{user}/permissions', [\App\Http\Controllers\Admin\UserController::class, 'updatePermissions'])->name('users.update-permissions');
             Route::post('/users/{user}/activate', [\App\Http\Controllers\Admin\UserController::class, 'activate'])->name('users.activate');
         });
+        // Check Permissions & Client List Hash for Real-time Sync
+        Route::get('/api/check-state', function() {
+            $user = auth()->user();
+            if (!$user->permissions_hash) {
+                $user->updatePermissionsHash();
+            }
+
+            // Generate a hash of all active client IDs to detect additions/deletions
+            $clientsHash = md5(\App\Models\Client::where('status', 'active')->pluck('id')->sort()->join(','));
+
+            // Content Sync Hash: Detects ANY change to contents, boosts, or targets
+            $contentSyncHash = md5(
+                \App\Models\Content::max('updated_at') . 
+                \App\Models\Content::count() . 
+                \App\Models\Boost::max('updated_at') . 
+                \App\Models\Boost::count() . 
+                \App\Models\MonthlyTarget::max('updated_at') .
+                \App\Models\MonthlyTarget::count()
+            );
+
+            return response()->json([
+                'permissions_hash' => $user->permissions_hash,
+                'clients_hash' => $clientsHash,
+                'content_hash' => $contentSyncHash
+            ]);
+        })->name('api.check-state');
     });
 });
 

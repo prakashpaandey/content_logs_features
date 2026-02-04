@@ -78,17 +78,13 @@ class MonthlyTargetController extends Controller
         Gate::authorize('targets.manage');
 
         $validated = $request->validate([
-            'month' => 'required|date_format:Y-m',
-            'bs_month' => 'nullable|integer',
-            'bs_year' => 'nullable|integer',
+            
             'target_posts' => 'required|integer|min:0',
             'target_reels' => 'required|integer|min:0',
             'target_boost_budget' => 'required|numeric|min:0',
             'status' => 'required|in:active,completed,archived',
             'notes' => 'nullable|string',
         ]);
-
-        $validated['month'] = $validated['month'] . '-01';
 
         if ($request->input('status') === 'completed') {
             $actualPosts = $monthlyTarget->getActualPosts();

@@ -76,6 +76,9 @@ class UserController extends Controller
     public function updatePermissions(Request $request, User $user)
     {
         $user->permissions()->sync($request->permissions ?? []);
+        
+        // Update the permissions fingerprint for real-time sync
+        $user->updatePermissionsHash();
 
         return redirect()->route('admin.users.index')->with('success', 'User permissions updated successfully.');
     }

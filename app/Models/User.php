@@ -23,6 +23,7 @@ class User extends Authenticatable
         'password',
         'role',
         'status',
+        'permissions_hash',
     ];
 
     /**
@@ -121,5 +122,14 @@ class User extends Authenticatable
         }
 
         return $this->permissions()->where('slug', $permissionSlug)->exists();
+    }
+    /**
+     * Update the permissions hash for the user.
+     */
+    public function updatePermissionsHash()
+    {
+        $permissionIds = $this->permissions()->pluck('id')->sort()->join(',');
+        $this->permissions_hash = md5($permissionIds ?: 'none');
+        $this->save();
     }
 }
