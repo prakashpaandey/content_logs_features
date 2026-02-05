@@ -50,23 +50,23 @@ class="relative w-full" id="{{ $id }}">
         x-transition:leave="transition ease-in duration-100"
         x-transition:leave-start="transform opacity-100 scale-100 translate-y-0"
         x-transition:leave-end="transform opacity-0 scale-95 translate-y-2"
-        class="fixed left-4 right-4 top-[15vh] z-[100] max-h-[85vh] overflow-hidden sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-3 w-auto sm:w-[320px] bg-white/90 dark:bg-gray-800/95 backdrop-blur-xl rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-white/20 dark:border-gray-700/50">
+        class="fixed left-4 right-4 top-[15vh] z-[100] max-h-[85vh] overflow-hidden md:absolute md:left-1/2 md:-translate-x-1/2 md:right-auto md:top-full md:mt-3 w-auto md:w-[320px] bg-white/90 dark:bg-gray-800/95 backdrop-blur-xl rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-white/20 dark:border-gray-700/50">
         
         <!-- Premium Header -->
-        <div class="relative overflow-hidden bg-gradient-to-br from-primary-600 to-indigo-700 dark:from-primary-500 dark:to-indigo-600 px-5 py-4 text-white">
+        <div class="relative overflow-hidden bg-gradient-to-br from-primary-600 to-indigo-700 dark:from-primary-500 dark:to-indigo-600 px-6 py-5 text-white">
             <!-- Background Decorative Elements -->
             <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
             <div class="absolute -left-4 -bottom-4 w-20 h-20 bg-indigo-400/20 rounded-full blur-xl"></div>
             
             <div class="relative flex items-center justify-between">
-                <button type="button" @click="changeYear(-1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 active:scale-90 transition-all">
+                <button type="button" @click="changeYear(-1)" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 active:scale-90 transition-all shadow-inner">
                     <i class="fas fa-chevron-left text-xs"></i>
                 </button>
                 <div class="flex flex-col items-center">
-                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] opacity-80 mb-0.5">Year</span>
+                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] opacity-80 mb-0.5">Select Year</span>
                     <div class="text-xl font-black tracking-tight" x-text="viewYear + ' BS'"></div>
                 </div>
-                <button type="button" @click="changeYear(1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 active:scale-90 transition-all">
+                <button type="button" @click="changeYear(1)" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 active:scale-90 transition-all shadow-inner">
                     <i class="fas fa-chevron-right text-xs"></i>
                 </button>
             </div>

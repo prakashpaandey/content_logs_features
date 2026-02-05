@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
             'name' => 'Prakash Pandey',
             'email' => 'prakashpandey@gmail.com',
             'password' => bcrypt('prakashpandey'),
+            'role' => 'admin',
+            'status' => 'active',
         ]);
     }
 }

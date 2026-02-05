@@ -24,29 +24,29 @@
             </div>
         </div>
         
-        <div class="grid grid-cols-2 md:flex md:items-center gap-2 w-full md:w-auto">
+        <div class="grid grid-cols-2 lg:flex lg:items-center gap-2 w-full lg:w-auto mt-2 lg:mt-0">
             <div class="col-span-1 flex gap-2">
                 @can('clients.delete')
                 @if(isset($selectedClient))
                 <button onclick="openSecureDeleteModal('{{ route('clients.destroy', $selectedClient->id) }}', '{{ $selectedClient->name }}')" 
-                        class="px-3 py-2 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-colors flex items-center justify-center shrink-0"
+                        class="px-3 py-2.5 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-xl transition-all flex items-center justify-center shrink-0 shadow-sm active:scale-95"
                         title="Delete Client">
-                    <i class="fas fa-trash-alt"></i>
+                    <i class="fas fa-trash-alt text-sm"></i>
                 </button>
                 @endif
                 @endcan
 
                 @can('clients.update')
-                <button onclick="openModal('edit-client-modal')" class="flex-1 md:flex-none px-3 md:px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center text-xs md:text-sm font-medium">
-                    <i class="fas fa-edit mr-1.5 md:mr-2"></i>
-                    <span class="whitespace-nowrap">Edit</span>
+                <button onclick="openModal('edit-client-modal')" class="flex-1 lg:flex-none px-4 py-2.5 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-primary-400 transition-all flex items-center justify-center text-xs font-bold shadow-sm active:scale-95">
+                    <i class="fas fa-edit mr-2 text-primary-500"></i>
+                    <span class="whitespace-nowrap uppercase tracking-wider">Edit</span>
                 </button>
                 @endcan
             </div>
 
             @can('contents.create')
-            <button onclick="openModal('add-content-modal')" class="col-span-1 md:flex-none px-3 md:px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-all shadow-md active:scale-95 flex items-center justify-center text-xs md:text-sm font-medium">
-                <i class="fas fa-plus mr-1.5 md:mr-2"></i>
+            <button onclick="openModal('add-content-modal')" class="col-span-1 lg:flex-none px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-500 hover:to-primary-600 text-white rounded-xl transition-all shadow-md active:scale-95 items-center justify-center text-xs font-black uppercase tracking-widest flex group">
+                <i class="fas fa-plus mr-2 group-hover:rotate-90 transition-transform duration-300"></i>
                 <span class="whitespace-nowrap">Add Content</span>
             </button>
             @endcan
@@ -67,19 +67,19 @@
         $nextBsYear = $bsYear;
         if ($nextBsMonth > 12) { $nextBsMonth = 1; $nextBsYear++; }
     @endphp
-    <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700/50">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div class="flex items-center w-full sm:w-auto">
-                <div class="flex items-center flex-1 sm:flex-none bg-gray-50 dark:bg-gray-700/30 rounded-xl p-1 gap-1">
+    <div class="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700/50">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-5">
+            <div class="flex items-center w-full md:w-auto">
+                <div class="flex items-center flex-1 md:flex-none bg-gray-100/80 dark:bg-gray-700/40 rounded-2xl p-1.5 gap-1.5 shadow-inner">
                     <a href="{{ route('dashboard.index', ['client_id' => $selectedClient->id, 'month' => $prevBsMonth, 'year' => $prevBsYear]) }}" 
                        @click.stop
-                       class="p-2 rounded-lg hover:bg-white dark:hover:bg-gray-600 text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all active:scale-95"
+                       class="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 shadow-sm hover:shadow-md transition-all active:scale-90"
                        title="Previous Month">
                         <i class="fas fa-chevron-left text-[10px]"></i>
                     </a>
                     
-                    <div class="flex-1 sm:flex-none min-w-0">
-                        <div class="w-full sm:w-[220px]">
+                    <div class="flex-1 md:flex-none min-w-0">
+                        <div class="w-full sm:w-[240px]">
                             <x-nepali-month-picker 
                                 id="dashboard-month-nav" 
                                 value="{{ $bsYear . '-' . str_pad($bsMonth, 2, '0', STR_PAD_LEFT) }}"
@@ -91,7 +91,7 @@
 
                     <a href="{{ route('dashboard.index', ['client_id' => $selectedClient->id, 'month' => $nextBsMonth, 'year' => $nextBsYear]) }}" 
                        @click.stop
-                       class="p-2 rounded-lg hover:bg-white dark:hover:bg-gray-600 text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all active:scale-95"
+                       class="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 shadow-sm hover:shadow-md transition-all active:scale-90"
                        title="Next Month">
                         <i class="fas fa-chevron-right text-[10px]"></i>
                     </a>
@@ -104,8 +104,8 @@
                 
                 @if(!$isCurrentMonth)
                     <a href="{{ route('dashboard.index', ['client_id' => $selectedClient->id]) }}" 
-                       class="ml-3 px-3 py-1.5 text-primary-600 dark:text-primary-400 font-bold text-[10px] uppercase tracking-wider hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">
-                        Reset
+                       class="ml-4 px-4 py-2 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400 font-black text-[10px] uppercase tracking-widest hover:bg-primary-100 dark:hover:bg-primary-900/40 rounded-xl transition-all shadow-sm active:scale-95">
+                        Current
                     </a>
                 @endif
             </div>

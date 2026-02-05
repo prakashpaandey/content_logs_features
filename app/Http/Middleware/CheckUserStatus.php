@@ -18,7 +18,7 @@ class CheckUserStatus
         if (auth()->check()) {
             $user = auth()->user();
 
-            if ($user->isPending()) {
+            if ($user->isPending() && !$user->isAdmin()) {
                 // Allow access to the pending page and logout
                 if ($request->routeIs('verification.pending') || $request->routeIs('logout')) {
                     return $next($request);

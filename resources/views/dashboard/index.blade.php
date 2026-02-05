@@ -132,7 +132,9 @@
     @include('partials.monthly-targets')
     
     <!-- Content & Boosts Section -->
-    <div class="mt-8" x-data="{ activeTab: '{{ session('active_tab', 'content') }}' }">
+    <div class="mt-8" x-data="{ 
+        activeTab: localStorage.getItem('dashboard_active_tab') || '{{ session('active_tab', 'content') }}' 
+    }" x-init="$watch('activeTab', val => localStorage.setItem('dashboard_active_tab', val))">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4">
             <div class="flex items-center space-x-1 p-1 bg-gray-100 dark:bg-gray-700/50 rounded-xl w-full lg:w-auto">
                 <button @click="activeTab = 'content'" 

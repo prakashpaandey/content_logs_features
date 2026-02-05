@@ -472,9 +472,11 @@
     <div x-data="{ 
             open: false, 
             actionUrl: '', 
+            itemName: '',
             init() {
-                window.openDeleteModal = (url) => {
+                window.openDeleteModal = (url, name = 'this item') => {
                     this.actionUrl = url;
+                    this.itemName = name;
                     this.open = true;
                 }
             }
