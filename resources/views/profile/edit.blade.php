@@ -1,7 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="animate-fade-in" x-data="{ activeTab: 'profile' }">
+<div class="animate-fade-in" x-data="{ 
+    activeTab: '{{ session('status') === 'password-updated' || $errors->updatePassword->isNotEmpty() ? 'security' : ($errors->userDeletion->isNotEmpty() ? 'danger' : 'profile') }}' 
+}">
     <div class="p-6 lg:p-10 pt-4 min-h-screen">
         <div class="max-w-7xl mx-auto">
             <!-- Header -->

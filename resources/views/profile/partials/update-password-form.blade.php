@@ -1,5 +1,5 @@
 <section>
-    <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-8">
+    <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-8" x-data="{}">
         @csrf
         @method('put')
 
@@ -15,7 +15,8 @@
                             type="password" 
                             class="block w-full rounded-2xl border-gray-200 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-800/20 focus:ring-primary-500 focus:border-primary-500 transition-all py-4 px-5 text-gray-900 dark:text-white placeholder-gray-400" 
                             autocomplete="current-password" 
-                            placeholder="Enter your current password" />
+                            placeholder="Enter your current password"
+                            @keydown.enter.prevent="$refs.new_password.focus()" />
             </div>
             <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2 text-rose-500 font-medium text-sm" />
         </div>
@@ -30,9 +31,11 @@
                 <x-text-input id="update_password_password" 
                             name="password" 
                             type="password" 
+                            x-ref="new_password"
                             class="block w-full rounded-2xl border-gray-200 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-800/20 focus:ring-primary-500 focus:border-primary-500 transition-all py-4 px-5 text-gray-900 dark:text-white placeholder-gray-400" 
                             autocomplete="new-password" 
-                            placeholder="Create new password" />
+                            placeholder="Create new password"
+                            @keydown.enter.prevent="$refs.confirm_password.focus()" />
                 <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2 text-rose-500 font-medium text-sm" />
             </div>
 
@@ -45,9 +48,11 @@
                 <x-text-input id="update_password_password_confirmation" 
                             name="password_confirmation" 
                             type="password" 
+                            x-ref="confirm_password"
                             class="block w-full rounded-2xl border-gray-200 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-800/20 focus:ring-primary-500 focus:border-primary-500 transition-all py-4 px-5 text-gray-900 dark:text-white placeholder-gray-400" 
                             autocomplete="new-password" 
-                            placeholder="Confirm your password" />
+                            placeholder="Confirm your password"
+                            @keydown.enter.prevent="$el.closest('form').submit()" />
                 <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2 text-rose-500 font-medium text-sm" />
             </div>
         </div>
