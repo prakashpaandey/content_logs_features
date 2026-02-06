@@ -161,7 +161,7 @@ class ContentController extends Controller
     {
         Gate::authorize('contents.update');
 
-        if ($content->user_id !== auth()->id()) {
+        if (!auth()->user()->isAdmin() && $content->user_id !== auth()->id()) {
             if ($request->ajax()) {
                 return response()->json([
                     'success' => false,
@@ -246,7 +246,7 @@ class ContentController extends Controller
     {
         Gate::authorize('contents.delete');
 
-        if ($content->user_id !== auth()->id()) {
+        if (!auth()->user()->isAdmin() && $content->user_id !== auth()->id()) {
             if (request()->ajax()) {
                 return response()->json([
                     'success' => false,

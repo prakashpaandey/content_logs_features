@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends(request()->header('X-Partial-Content') ? 'layouts.ajax' : 'layouts.app')
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -196,7 +196,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function fetchData(url, isPolling = false) {
         fetch(url, {
             headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-Partial-Content': 'true'
             }
         })
         .then(response => response.text())

@@ -49,8 +49,11 @@ Route::middleware(['auth'])->group(function () {
                 $user->updatePermissionsHash();
             }
 
-            // Generate a hash of all active client IDs to detect additions/deletions
-            $clientsHash = md5(\App\Models\Client::where('status', 'active')->pluck('id')->sort()->join(','));
+            // Enhanced Client Sync Hash: Detects additions, deletions, AND updates (name, status, etc.)
+            $clientsHash = md5(
+                \App\Models\Client::max('updated_at') . 
+                \App\Models\Client::count()
+            );
 
             // Content Sync Hash: Detects ANY change to contents, boosts, or targets
             $contentSyncHash = md5(

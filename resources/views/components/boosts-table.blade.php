@@ -73,7 +73,7 @@
                                 @endcan
 
                                 @can('boosts.delete')
-                                <button onclick="openDeleteModal('{{ route('boosts.destroy', $boost->id) }}')" class="text-red-600 hover:text-red-900 dark:text-red-400"><i class="fas fa-trash"></i></button>
+                                <button onclick="openDeleteModal('{{ route('boosts.destroy', $boost->id) }}', '{{ addslashes($boost->title) }}')" class="text-red-600 hover:text-red-900 dark:text-red-400"><i class="fas fa-trash"></i></button>
                                 @endcan
                             @else
                                 <span class="text-gray-400 italic text-xs">ReadOnly</span>
@@ -134,7 +134,7 @@
                             @endcan
 
                             @can('boosts.delete')
-                            <button onclick="openDeleteModal('{{ route('boosts.destroy', $boost->id) }}')" class="p-2 text-red-500"><i class="fas fa-trash"></i></button>
+                            <button onclick="openDeleteModal('{{ route('boosts.destroy', $boost->id) }}', '{{ addslashes($boost->title) }}')" class="p-2 text-red-500"><i class="fas fa-trash"></i></button>
                             @endcan
                         @endif
                     </div>

@@ -70,7 +70,7 @@
                                 @endcan
 
                                 @can('contents.delete')
-                                <button onclick="openDeleteModal('{{ route('contents.destroy', $content->id) }}')" class="text-red-600 hover:text-red-900 dark:text-red-400"><i class="fas fa-trash"></i></button>
+                                <button onclick="openDeleteModal('{{ route('contents.destroy', $content->id) }}', '{{ addslashes($content->title) }}')" class="text-red-600 hover:text-red-900 dark:text-red-400"><i class="fas fa-trash"></i></button>
                                 @endcan
                             @else
                                 <span class="text-gray-400 italic text-xs">ReadOnly</span>
@@ -126,7 +126,7 @@
                             @endcan
 
                             @can('contents.delete')
-                            <button onclick="openDeleteModal('{{ route('contents.destroy', $content->id) }}')" class="p-2 text-red-500"><i class="fas fa-trash"></i></button>
+                            <button onclick="openDeleteModal('{{ route('contents.destroy', $content->id) }}', '{{ addslashes($content->title) }}')" class="p-2 text-red-500"><i class="fas fa-trash"></i></button>
                             @endcan
                         @endif
                     </div>

@@ -131,7 +131,7 @@ class BoostController extends Controller
     {
         Gate::authorize('boosts.update');
 
-        if ($boost->user_id !== Auth::id()) {
+        if (!auth()->user()->isAdmin() && $boost->user_id !== Auth::id()) {
             if ($request->ajax()) {
                 return response()->json([
                     'success' => false,
@@ -214,7 +214,7 @@ class BoostController extends Controller
     {
         Gate::authorize('boosts.delete');
 
-        if ($boost->user_id !== Auth::id()) {
+        if (!auth()->user()->isAdmin() && $boost->user_id !== Auth::id()) {
             if (request()->ajax()) {
                 return response()->json([
                     'success' => false,

@@ -37,30 +37,7 @@ class DashboardController extends Controller
         $contentData = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
         $boostData = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
         $targets = collect([]);
-        $charts = [
-            'totalBoostAmount' => 0,
-            'boostAmountGrowth' => 0,
-            'contentDistribution' => [
-                'labels' => ['Posts', 'Reels', 'Boosts'],
-                'series' => [0, 0, 0]
-            ],
-            'monthlyProgression' => [
-                'categories' => [],
-                'posts' => [],
-                'reels' => [],
-                'boosts' => []
-            ],
-            'targetVsActual' => [
-                'categories' => [],
-                'targetPosts' => [],
-                'actualPosts' => [],
-                'targetReels' => [],
-                'actualReels' => [],
-                'targetBoosts' => [],
-                'actualBoosts' => [],
-                'target_month_name' => ''
-            ]
-        ];
+        $charts = [];
 
         $currentTarget = null;
 
@@ -243,126 +220,23 @@ class DashboardController extends Controller
                 ->orderBy('month', 'desc')
                 ->get();
             
-            // Charts Data
-            // 1. Content Type Distribution (Scope to view context)
-             $charts['totalBoostAmount'] = $metrics['total_boost_amount'];
-             $charts['boostAmountGrowth'] = $metrics['boost_amount_growth'];
-
-            $charts['contentDistribution'] = [
-                'labels' => ['Posts', 'Reels', 'Boosts'],
-                'series' => [
-                    $metrics['total_posts'],
-                    $metrics['total_reels'],
-                    $metrics['total_boosts']
+            // Charts Data - Minimal array as frontend only uses progress bars
+             $charts = [
+                'totalBoostAmount' => $metrics['total_boost_amount'],
+                'boostAmountGrowth' => $metrics['boost_amount_growth'],
+                'contentDistribution' => [
+                    'labels' => ['Posts', 'Reels', 'Boosts'],
+                    'series' => [$metrics['total_posts'], $metrics['total_reels'], $metrics['total_boosts']]
                 ]
-            ];
-            
-            // 2. Monthly Progression (Last 12 BS Months for Year View)
-            $months = [];
-            $postsData = [];
-            $reelsData = [];
-            $boostsData = [];
-            
-            for ($i = 11; $i >= 0; $i--) {
-                $m = $bsMonth - $i;
-                $y = $bsYear;
-                while ($m < 1) { 
-                    $m += 12; 
-                    $y--; 
-                }
-                
-                [$s, $e] = \App\Helpers\NepaliDateHelper::getBsMonthRange($m, $y);
-                
-                $months[] = $this->nepaliMonthName($m);
-                $postsData[] = $selectedClient->contents()->whereBetween('date', [$s, $e])->where('type', 'Post')->count();
-                $reelsData[] = $selectedClient->contents()->whereBetween('date', [$s, $e])->where('type', 'Reel')->count();
-                $boostsData[] = $selectedClient->boosts()->whereBetween('date', [$s, $e])->count();
-            }
-            
-            $charts['monthlyProgression'] = [
-                'categories' => $months,
-                'posts' => $postsData,
-                'reels' => $reelsData,
-                'boosts' => $boostsData,
-            ];
-            
-            // 3. Target vs Actual (Weekly breakdown for current BS month)
-            $weeklyTargetPosts = [];
-            $weeklyActualPosts = [];
-            $weeklyTargetReels = [];
-            $weeklyActualReels = [];
-            $weeklyTargetBoostBudget = [];
-            $weeklyActualBoostAmount = [];
-            
-            $totalTargetPosts = $currentTarget ? $currentTarget->target_posts : 0;
-            $totalTargetReels = $currentTarget ? $currentTarget->target_reels : 0;
-            $totalTargetBoostBudget = $currentTarget ? $currentTarget->target_boost_budget : 0;
-            $weeksCount = 4;
-            
-            $distributeTarget = function($total, $parts) {
-                $base = floor($total / $parts);
-                $remainder = $total % $parts;
-                $distribution = [];
-                for ($i = 0; $i < $parts; $i++) {
-                    $distribution[] = $i < $remainder ? $base + 1 : $base;
-                }
-                return $distribution;
-            };
-            
-            $distributedPosts = $distributeTarget($totalTargetPosts, $weeksCount);
-            $distributedReels = $distributeTarget($totalTargetReels, $weeksCount);
-            $distributedBoostBudget = $distributeTarget($totalTargetBoostBudget, $weeksCount);
-            
-            // Divide BS month into 4 weeks
-            $totalDays = $startDate->diffInDays($endDate) + 1;
-            $daysPerWeek = floor($totalDays / 4);
-            
-            for ($i = 0; $i < 4; $i++) {
-                $wStart = $startDate->copy()->addDays($i * $daysPerWeek);
-                if ($i == 3) {
-                    $wEnd = $endDate->copy();
-                } else {
-                    $wEnd = $wStart->copy()->addDays($daysPerWeek - 1)->endOfDay();
-                }
-                
-                $weeklyActualPosts[] = $selectedClient->contents()
-                    ->whereBetween('date', [$wStart, $wEnd])
-                    ->where('type', 'Post')
-                    ->count();
-                    
-                $weeklyActualReels[] = $selectedClient->contents()
-                    ->whereBetween('date', [$wStart, $wEnd])
-                    ->where('type', 'Reel')
-                    ->count();
-
-                $weeklyActualBoostAmount[] = $selectedClient->boosts()
-                    ->whereBetween('date', [$wStart, $wEnd])
-                    ->sum('amount');
-                
-                $weeklyTargetPosts[] = $distributedPosts[$i];
-                $weeklyTargetReels[] = $distributedReels[$i];
-                $weeklyTargetBoostBudget[] = $distributedBoostBudget[$i];
-            }
-            
-            $charts['targetVsActual'] = [
-                'categories' => ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                'targetPosts' => $weeklyTargetPosts,
-                'actualPosts' => $weeklyActualPosts,
-                'targetReels' => $weeklyTargetReels,
-                'actualReels' => $weeklyActualReels,
-                'targetBoostBudget' => $weeklyTargetBoostBudget,
-                'actualBoostAmount' => $weeklyActualBoostAmount,
-                'target_month_name' => $now->format('F Y')
             ];
         }
 
         return view('dashboard.index', compact('clients', 'selectedClient', 'metrics', 'contentData', 'boostData', 'displayedTargets', 'allTargets', 'charts', 'currentTarget', 'previousMonth', 'hasPreviousData', 'dateContext', 'bsMonth', 'bsYear'));
     }
+
     public function overview(Request $request)
     {
         $hasPermission = \Illuminate\Support\Facades\Gate::allows('clients.view');
-        $clients = $hasPermission ? Client::orderBy('updated_at', 'desc')->get() : collect();
-        $user = auth()->user();
         
         $bsMonth = (int)$request->query('month');
         $bsYear = (int)$request->query('year');
@@ -382,6 +256,20 @@ class DashboardController extends Controller
         $dateContext = Carbon::createFromDate($repAd['year'], $repAd['month'], 1);
         $now = $dateContext;
 
+        $clients = $hasPermission ? Client::orderBy('updated_at', 'desc')
+            ->with(['monthlyTargets' => function($query) use ($now) {
+                $query->whereYear('month', $now->year)
+                    ->whereMonth('month', $now->month);
+            }])
+            ->with(['contents' => function($query) use ($startDate, $endDate) {
+                $query->with('user')->whereBetween('date', [$startDate, $endDate]);
+            }])
+            ->with(['boosts' => function($query) use ($startDate, $endDate) {
+                $query->with('user')->whereBetween('date', [$startDate, $endDate]);
+            }])
+            ->get() : collect();
+
+        $user = auth()->user();
         $clientsData = [];
         $totalAgencyMetrics = [
             'posts' => 0,
@@ -394,10 +282,7 @@ class DashboardController extends Controller
         ];
 
         foreach ($clients as $client) {
-            $target = $client->monthlyTargets()
-                ->whereYear('month', $now->year)
-                ->whereMonth('month', $now->month)
-                ->first();
+            $target = $client->monthlyTargets->first();
 
             // Status Filtering Logic
             if ($statusFilter !== 'all') {
@@ -412,20 +297,12 @@ class DashboardController extends Controller
                 }
             }
 
-            $contentRecords = $client->contents()
-                ->with('user')
-                ->whereBetween('date', [$startDate, $endDate])
-                ->orderBy('date', 'desc')
-                ->get();
+            $contentRecords = $client->contents;
 
             $actualPosts = $contentRecords->where('type', 'Post')->count();
             $actualReels = $contentRecords->where('type', 'Reel')->count();
 
-            $boostRecords = $client->boosts()
-                ->with('user')
-                ->whereBetween('date', [$startDate, $endDate])
-                ->orderBy('date', 'desc')
-                ->get();
+            $boostRecords = $client->boosts;
 
             $actualBoosts = $boostRecords->count();
             $boostAmount = $boostRecords->sum('amount');
