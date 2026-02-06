@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends(request()->header('X-Partial-Content') ? 'layouts.ajax' : 'layouts.app')
 
 @section('content')
 <div id="dashboard-content" class="animate-fade-in">

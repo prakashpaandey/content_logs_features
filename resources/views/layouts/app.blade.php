@@ -1136,7 +1136,10 @@
             async function updatePartialUI() {
                 try {
                     const response = await fetch(window.location.href, {
-                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        headers: { 
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-Partial-Content': 'true'
+                        }
                     });
                     const html = await response.text();
                     const parser = new DOMParser();

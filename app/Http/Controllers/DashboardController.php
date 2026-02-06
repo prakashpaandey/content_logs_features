@@ -361,8 +361,6 @@ class DashboardController extends Controller
     public function overview(Request $request)
     {
         $hasPermission = \Illuminate\Support\Facades\Gate::allows('clients.view');
-        $clients = $hasPermission ? Client::orderBy('updated_at', 'desc')->get() : collect();
-        $user = auth()->user();
         
         $bsMonth = (int)$request->query('month');
         $bsYear = (int)$request->query('year');
@@ -382,6 +380,20 @@ class DashboardController extends Controller
         $dateContext = Carbon::createFromDate($repAd['year'], $repAd['month'], 1);
         $now = $dateContext;
 
+        $clients = $hasPermission ? Client::orderBy('updated_at', 'desc')
+            ->with(['monthlyTargets' => function($query) use ($now) {
+                $query->whereYear('month', $now->year)
+                    ->whereMonth('month', $now->month);
+            }])
+            ->with(['contents' => function($query) use ($startDate, $endDate) {
+                $query->with('user')->whereBetween('date', [$startDate, $endDate]);
+            }])
+            ->with(['boosts' => function($query) use ($startDate, $endDate) {
+                $query->with('user')->whereBetween('date', [$startDate, $endDate]);
+            }])
+            ->get() : collect();
+
+        $user = auth()->user();
         $clientsData = [];
         $totalAgencyMetrics = [
             'posts' => 0,
@@ -394,10 +406,7 @@ class DashboardController extends Controller
         ];
 
         foreach ($clients as $client) {
-            $target = $client->monthlyTargets()
-                ->whereYear('month', $now->year)
-                ->whereMonth('month', $now->month)
-                ->first();
+            $target = $client->monthlyTargets->first();
 
             // Status Filtering Logic
             if ($statusFilter !== 'all') {
@@ -412,20 +421,12 @@ class DashboardController extends Controller
                 }
             }
 
-            $contentRecords = $client->contents()
-                ->with('user')
-                ->whereBetween('date', [$startDate, $endDate])
-                ->orderBy('date', 'desc')
-                ->get();
+            $contentRecords = $client->contents;
 
             $actualPosts = $contentRecords->where('type', 'Post')->count();
             $actualReels = $contentRecords->where('type', 'Reel')->count();
 
-            $boostRecords = $client->boosts()
-                ->with('user')
-                ->whereBetween('date', [$startDate, $endDate])
-                ->orderBy('date', 'desc')
-                ->get();
+            $boostRecords = $client->boosts;
 
             $actualBoosts = $boostRecords->count();
             $boostAmount = $boostRecords->sum('amount');
