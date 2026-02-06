@@ -1,13 +1,7 @@
-<div id="ajax-partial-wrapper">
-    <aside>
-        <div>
-            @include('components.sidebar')
-        </div>
-    </aside>
+@include('components.sidebar')
 
-    <main>
-        @yield('content')
-    </main>
+<main id="dashboard-main-content">
+    @yield('content')
+</main>
 
-    @stack('scripts')
-</div>
+@stack('scripts')

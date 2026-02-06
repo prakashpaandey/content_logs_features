@@ -1145,11 +1145,12 @@
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
 
-                    // 1. Update Sidebar Content
-                    const newSidebarInner = doc.querySelector('aside > div');
-                    const currentSidebarInner = document.querySelector('aside > div');
+                    // 1. Update Sidebar Client List & Totals
+                    const newSidebarInner = doc.querySelector('aside .flex.flex-col.h-full');
+                    const currentSidebarInner = document.querySelector('aside .flex.flex-col.h-full');
                     if (newSidebarInner && currentSidebarInner) {
                         currentSidebarInner.innerHTML = newSidebarInner.innerHTML;
+                        console.log('Sidebar partial updated');
                     }
 
                     // 2. Update Main Content Areas
