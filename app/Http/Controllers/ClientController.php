@@ -8,12 +8,20 @@ use Illuminate\Support\Facades\Gate;
 
 class ClientController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:clients.view')->only(['index']);
+        $this->middleware('can:clients.create')->only(['store']);
+        $this->middleware('can:clients.update')->only(['update']);
+        $this->middleware('can:clients.delete')->only(['destroy']);
+    }
+
     /**
      * Display a listing of the resource
      */
     public function index()
     {
-        Gate::authorize('clients.view');
+        // Permission handled by middleware
     }
 
     /**
@@ -29,7 +37,6 @@ class ClientController extends Controller
      */
     public function store(Request $request)
     {
-        Gate::authorize('clients.create');
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -73,7 +80,6 @@ class ClientController extends Controller
     
     public function update(Request $request, Client $client)
     {
-        Gate::authorize('clients.update');
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -106,7 +112,6 @@ class ClientController extends Controller
      */
     public function destroy(Client $client)
     {
-        Gate::authorize('clients.delete');
 
         $client->delete();
         if (request()->ajax()) {

@@ -9,10 +9,13 @@ use App\Models\MonthlyTarget;
 
 class MonthlyTargetController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:targets.manage');
+    }
 
     public function store(Request $request)
     {
-        Gate::authorize('targets.manage');
 
         $validated = $request->validate([
             'client_id' => 'required|exists:clients,id',
@@ -75,7 +78,6 @@ class MonthlyTargetController extends Controller
      */
     public function update(Request $request, MonthlyTarget $monthlyTarget)
     {
-        Gate::authorize('targets.manage');
 
         $validated = $request->validate([
             
@@ -126,7 +128,6 @@ class MonthlyTargetController extends Controller
      */
     public function destroy(MonthlyTarget $monthlyTarget)
     {
-        Gate::authorize('targets.manage');
 
         $monthlyTarget->delete();
         if (request()->ajax()) {
@@ -140,7 +141,6 @@ class MonthlyTargetController extends Controller
     }
     public function bulkStore(Request $request)
     {
-        Gate::authorize('targets.manage');
 
         $validated = $request->validate([
             'month' => 'required|date_format:Y-m',

@@ -9,6 +9,13 @@ use App\Models\Content;
 
 class ContentController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:contents.create')->only(['store']);
+        $this->middleware('can:contents.update')->only(['update']);
+        $this->middleware('can:contents.delete')->only(['destroy']);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -30,7 +37,6 @@ class ContentController extends Controller
      */
     public function store(Request $request)
     {
-        Gate::authorize('contents.create');
 
         $validated = $request->validate([
             'client_id' => 'required|exists:clients,id',
@@ -159,7 +165,6 @@ class ContentController extends Controller
      */
     public function update(Request $request, Content $content)
     {
-        Gate::authorize('contents.update');
 
         if (!auth()->user()->isAdmin() && $content->user_id !== auth()->id()) {
             if ($request->ajax()) {
@@ -244,7 +249,6 @@ class ContentController extends Controller
 
     public function destroy(Content $content)
     {
-        Gate::authorize('contents.delete');
 
         if (!auth()->user()->isAdmin() && $content->user_id !== auth()->id()) {
             if (request()->ajax()) {

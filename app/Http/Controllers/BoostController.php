@@ -11,9 +11,15 @@ use Illuminate\Support\Facades\Gate;
 
 class BoostController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:boosts.create')->only(['store']);
+        $this->middleware('can:boosts.update')->only(['update']);
+        $this->middleware('can:boosts.delete')->only(['destroy']);
+    }
+
     public function store(Request $request)
     {
-        Gate::authorize('boosts.create');
 
         $validated = $request->validate([
             'client_id' => 'required|exists:clients,id',
@@ -129,7 +135,6 @@ class BoostController extends Controller
 
     public function update(Request $request, Boost $boost)
     {
-        Gate::authorize('boosts.update');
 
         if (!auth()->user()->isAdmin() && $boost->user_id !== Auth::id()) {
             if ($request->ajax()) {
@@ -212,7 +217,6 @@ class BoostController extends Controller
 
     public function destroy(Boost $boost)
     {
-        Gate::authorize('boosts.delete');
 
         if (!auth()->user()->isAdmin() && $boost->user_id !== Auth::id()) {
             if (request()->ajax()) {
