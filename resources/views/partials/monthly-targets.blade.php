@@ -88,6 +88,10 @@
                                 <button type="button" class="btn-edit-target text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300" data-target='@json($target)'>
                                     <i class="fas fa-edit"></i>
                                 </button>
+                                <button type="button" class="btn-delete-target text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" 
+                                        onclick="openDeleteTargetModal({{ $target->id }}, '{{ $nepaliTranslate($m, 'month') }} {{ $y }}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                                 @endcan
                             </td>
                         </tr>
@@ -143,6 +147,10 @@
                             @can('targets.manage')
                             <button type="button" class="btn-edit-target p-2 text-yellow-500" data-target='@json($target)'>
                                 <i class="fas fa-edit text-sm"></i>
+                            </button>
+                            <button type="button" class="p-2 text-red-500" 
+                                    onclick="openDeleteTargetModal({{ $target->id }}, '{{ $nepaliTranslate($m, 'month') }} {{ $y }}')">
+                                <i class="fas fa-trash text-sm"></i>
                             </button>
                             @endcan
                         </div>
@@ -612,7 +620,43 @@
     </div>
 </div>
 
+<!-- Delete Target Confirmation Modal -->
+<div id="delete-target-modal" class="modal hidden fixed inset-0 z-[60] overflow-y-auto">
+    <div class="modal-overlay absolute inset-0 bg-black opacity-50"></div>
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-auto p-6 text-center">
+            <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-exclamation-triangle text-2xl text-red-600 dark:text-red-400"></i>
+            </div>
+            
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Delete Target?</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-6">
+                Are you sure you want to delete the target for <span id="delete-target-name" class="font-bold text-gray-900 dark:text-white"></span>? This action cannot be undone.
+            </p>
+            
+            <form id="delete-target-form" method="POST" onsubmit="event.preventDefault(); submitFormAjax('delete-target-form', 'delete-target-modal')">
+                @csrf
+                @method('DELETE')
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button type="button" onclick="closeModal('delete-target-modal')" 
+                            class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-semibold">
+                        Yes, Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
+    function openDeleteTargetModal(id, name) {
+        document.getElementById('delete-target-name').textContent = name;
+        document.getElementById('delete-target-form').action = `/monthly-targets/${id}`;
+        openModal('delete-target-modal');
+    }
     const monthNames = [
         'Baisakh', 'Jestha', 'Asar', 'Shrawan', 'Bhadra', 'Ashwin',
         'Kartik', 'Mangsir', 'Poush', 'Magh', 'Falgun', 'Chaitra'
