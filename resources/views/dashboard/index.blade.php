@@ -177,7 +177,4 @@
     @endcan
 </div>
 
-<script>
-    window.dashboardChartData = @json($charts);
-</script>
 @endsection
