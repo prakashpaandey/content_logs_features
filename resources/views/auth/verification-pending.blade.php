@@ -44,7 +44,6 @@
                 }
             })
             .then(response => {
-                // If the final response URL is no longer the pending page, approval has granted
                 if (response.ok && !response.url.includes('verification-pending')) {
                     window.location.href = "{{ route('dashboard.index') }}";
                 }
