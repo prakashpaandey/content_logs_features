@@ -41,7 +41,8 @@ class ContentController extends Controller
         $validated = $request->validate([
             'client_id' => 'required|exists:clients,id',
             'title' => 'required|string|max:255',
-            'platform' => 'required|in:Instagram,TikTok,Facebook',
+            'platform' => 'required|array|min:1',
+            'platform.*' => 'required|in:Instagram,TikTok,Facebook',
             'type' => 'required|in:Post,Reel',
             'date' => 'required|date',
             'url' => 'nullable|url',
@@ -178,7 +179,8 @@ class ContentController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'platform' => 'required|in:Instagram,TikTok,Facebook',
+            'platform' => 'required|array|min:1',
+            'platform.*' => 'required|in:Instagram,TikTok,Facebook',
             'type' => 'required|in:Post,Reel',
             'date' => 'required|date',
             'url' => 'nullable|url',

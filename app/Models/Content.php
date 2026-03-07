@@ -17,6 +17,11 @@ class Content extends Model
         'remarks',
     ];
 
+    protected $casts = [
+        'platform' => 'array',
+        'date' => 'date',
+    ];
+
     public function client()
     {
         return $this->belongsTo(Client::class);
