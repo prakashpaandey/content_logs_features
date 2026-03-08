@@ -45,9 +45,21 @@ class ContentController extends Controller
             'platform.*' => 'required|in:Instagram,TikTok,Facebook',
             'type' => 'required|in:Post,Reel',
             'date' => 'required|date',
-            'url' => 'nullable|url',
+            'platform_urls' => 'nullable|array',
+            'platform_urls.*' => 'nullable|url',
             'remarks' => 'nullable|string',
         ]);
+
+        // Handle platform URLs - store as JSON
+        $platformUrls = [];
+        if ($request->has('platform_urls')) {
+            foreach ($request->platform_urls as $platform => $url) {
+                if (!empty($url)) {
+                    $platformUrls[$platform] = $url;
+                }
+            }
+        }
+        $validated['url'] = !empty($platformUrls) ? json_encode($platformUrls) : null;
 
         // Check if bs_date is provided (Server-side date conversion fallback)
         $bsDateInput = $request->bs_date ?? $request->manual_bs_date;
@@ -183,9 +195,21 @@ class ContentController extends Controller
             'platform.*' => 'required|in:Instagram,TikTok,Facebook',
             'type' => 'required|in:Post,Reel',
             'date' => 'required|date',
-            'url' => 'nullable|url',
+            'platform_urls' => 'nullable|array',
+            'platform_urls.*' => 'nullable|url',
             'remarks' => 'nullable|string',
         ]);
+
+        // Handle platform URLs - store as JSON
+        $platformUrls = [];
+        if ($request->has('platform_urls')) {
+            foreach ($request->platform_urls as $platform => $url) {
+                if (!empty($url)) {
+                    $platformUrls[$platform] = $url;
+                }
+            }
+        }
+        $validated['url'] = !empty($platformUrls) ? json_encode($platformUrls) : null;
 
         // Check if bs_date is provided (Server-side date conversion fallback)
         $bsDateInput = $request->bs_date ?? $request->manual_bs_date;

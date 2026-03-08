@@ -55,10 +55,48 @@
                             {{ $content->title }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            @if($content->url)
-                                <a href="{{ $content->url }}" target="_blank" class="text-primary-600 hover:text-primary-900 dark:text-primary-400 flex items-center">
-                                    <i class="fas fa-external-link-alt mr-1 text-xs"></i> View
-                                </a>
+                            @php
+                                $urls = [];
+                                $platformIcons = [
+                                    'Facebook' => 'fab fa-facebook-f',
+                                    'Instagram' => 'fab fa-instagram',
+                                    'TikTok' => 'fab fa-tiktok',
+                                ];
+                                $platformColors = [
+                                    'Facebook' => 'text-blue-600 hover:text-blue-800',
+                                    'Instagram' => 'text-pink-600 hover:text-pink-800',
+                                    'TikTok' => 'text-gray-900 hover:text-black dark:text-white dark:hover:text-gray-300',
+                                ];
+                                
+                                // Handle JSON format (new) and string format (legacy)
+                                if ($content->url) {
+                                    if (is_array($content->url)) {
+                                        $urls = $content->url;
+                                    } else {
+                                        // Try to decode if it's a JSON string
+                                        $decoded = json_decode($content->url, true);
+                                        if (is_array($decoded)) {
+                                            $urls = $decoded;
+                                        } else if (is_string($content->url)) {
+                                            // Legacy single URL format
+                                            $urls = ['Link' => $content->url];
+                                        }
+                                    }
+                                }
+                            @endphp
+                            
+                            @if(!empty($urls))
+                                <div class="flex items-center gap-3">
+                                    @foreach($urls as $platform => $url)
+                                        @if($url)
+                                            <a href="{{ $url }}" target="_blank" 
+                                               class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 {{ $platformColors[$platform] ?? 'text-gray-600 hover:text-gray-800' }} transition-colors"
+                                               title="{{ $platform }}">
+                                                <i class="{{ $platformIcons[$platform] ?? 'fas fa-link' }} text-sm"></i>
+                                            </a>
+                                        @endif
+                                    @endforeach
+                                </div>
                             @else
                                 <span class="text-gray-400">-</span>
                             @endif
@@ -117,11 +155,47 @@
                     {{ $content->title }}
                 </div>
                 <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700/50">
-                    <div class="flex items-center gap-2">
-                        @if($content->url)
-                            <a href="{{ $content->url }}" target="_blank" class="text-xs text-primary-600 dark:text-primary-400 font-bold flex items-center">
-                                <i class="fas fa-link mr-1"></i> LINK
-                            </a>
+                    <div class="flex items-center gap-3">
+                        @php
+                            $urls = [];
+                            $platformIcons = [
+                                'Facebook' => 'fab fa-facebook-f',
+                                'Instagram' => 'fab fa-instagram',
+                                'TikTok' => 'fab fa-tiktok',
+                            ];
+                            $platformColors = [
+                                'Facebook' => 'text-blue-600 hover:text-blue-800',
+                                'Instagram' => 'text-pink-600 hover:text-pink-800',
+                                'TikTok' => 'text-gray-900 hover:text-black dark:text-white dark:hover:text-gray-300',
+                            ];
+                            
+                            // Handle JSON format (new) and string format (legacy)
+                            if ($content->url) {
+                                if (is_array($content->url)) {
+                                    $urls = $content->url;
+                                } else {
+                                    // Try to decode if it's a JSON string
+                                    $decoded = json_decode($content->url, true);
+                                    if (is_array($decoded)) {
+                                        $urls = $decoded;
+                                    } else if (is_string($content->url)) {
+                                        // Legacy single URL format
+                                        $urls = ['Link' => $content->url];
+                                    }
+                                }
+                            }
+                        @endphp
+                        
+                        @if(!empty($urls))
+                            @foreach($urls as $platform => $url)
+                                @if($url)
+                                    <a href="{{ $url }}" target="_blank" 
+                                       class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-700 {{ $platformColors[$platform] ?? 'text-gray-600 hover:text-gray-800' }} transition-colors text-xs"
+                                       title="{{ $platform }}">
+                                        <i class="{{ $platformIcons[$platform] ?? 'fas fa-link' }}"></i>
+                                    </a>
+                                @endif
+                            @endforeach
                         @endif
                     </div>
                     <div class="flex items-center gap-3">
@@ -191,15 +265,15 @@
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Platforms *</label>
                                 <div class="flex flex-wrap gap-4 mt-2">
                                     <label class="flex items-center space-x-2 cursor-pointer group">
-                                        <input type="checkbox" name="platform[]" value="Facebook" class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 bg-white dark:bg-gray-700 dark:border-gray-600">
+                                        <input type="checkbox" name="platform[]" value="Facebook" class="add-platform-checkbox w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 bg-white dark:bg-gray-700 dark:border-gray-600" onchange="updateUrlFields('add-content')">
                                         <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-primary-600 transition-colors">Facebook</span>
                                     </label>
                                     <label class="flex items-center space-x-2 cursor-pointer group">
-                                        <input type="checkbox" name="platform[]" value="Instagram" class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 bg-white dark:bg-gray-700 dark:border-gray-600">
+                                        <input type="checkbox" name="platform[]" value="Instagram" class="add-platform-checkbox w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 bg-white dark:bg-gray-700 dark:border-gray-600" onchange="updateUrlFields('add-content')">
                                         <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-primary-600 transition-colors">Instagram</span>
                                     </label>
                                     <label class="flex items-center space-x-2 cursor-pointer group">
-                                        <input type="checkbox" name="platform[]" value="TikTok" class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 bg-white dark:bg-gray-700 dark:border-gray-600">
+                                        <input type="checkbox" name="platform[]" value="TikTok" class="add-platform-checkbox w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 bg-white dark:bg-gray-700 dark:border-gray-600" onchange="updateUrlFields('add-content')">
                                         <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-primary-600 transition-colors">TikTok</span>
                                     </label>
                                 </div>
@@ -237,9 +311,11 @@
                             <input type="hidden" name="date" id="add-content-ad-date" value="{{ $defaultAdDate }}">
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL</label>
-                            <input type="url" name="url" placeholder="https://..." class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        <div id="add-content-urls-container">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">URLs</label>
+                            <div id="add-content-url-fields" class="space-y-2">
+                                <!-- Dynamic URL fields will be inserted here -->
+                            </div>
                         </div>
                         
                         <div>
@@ -292,15 +368,15 @@
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Platforms *</label>
                                 <div class="flex flex-wrap gap-4 mt-2">
                                     <label class="flex items-center space-x-2 cursor-pointer group">
-                                        <input type="checkbox" name="platform[]" value="Facebook" class="edit-platform-checkbox w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 bg-white dark:bg-gray-700 dark:border-gray-600">
+                                        <input type="checkbox" name="platform[]" value="Facebook" class="edit-platform-checkbox w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 bg-white dark:bg-gray-700 dark:border-gray-600" onchange="updateUrlFields('edit-content')">
                                         <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-primary-600 transition-colors">Facebook</span>
                                     </label>
                                     <label class="flex items-center space-x-2 cursor-pointer group">
-                                        <input type="checkbox" name="platform[]" value="Instagram" class="edit-platform-checkbox w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 bg-white dark:bg-gray-700 dark:border-gray-600">
+                                        <input type="checkbox" name="platform[]" value="Instagram" class="edit-platform-checkbox w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 bg-white dark:bg-gray-700 dark:border-gray-600" onchange="updateUrlFields('edit-content')">
                                         <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-primary-600 transition-colors">Instagram</span>
                                     </label>
                                     <label class="flex items-center space-x-2 cursor-pointer group">
-                                        <input type="checkbox" name="platform[]" value="TikTok" class="edit-platform-checkbox w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 bg-white dark:bg-gray-700 dark:border-gray-600">
+                                        <input type="checkbox" name="platform[]" value="TikTok" class="edit-platform-checkbox w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 bg-white dark:bg-gray-700 dark:border-gray-600" onchange="updateUrlFields('edit-content')">
                                         <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-primary-600 transition-colors">TikTok</span>
                                     </label>
                                 </div>
@@ -324,9 +400,11 @@
                             <input type="hidden" name="date" id="edit-content-ad-date">
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL</label>
-                            <input type="url" id="edit-content-url" name="url" placeholder="https://..." class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        <div id="edit-content-urls-container">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">URLs</label>
+                            <div id="edit-content-url-fields" class="space-y-2">
+                                <!-- Dynamic URL fields will be inserted here -->
+                            </div>
                         </div>
                         
                         <div>
@@ -357,8 +435,37 @@
             document.querySelectorAll('.edit-platform-checkbox').forEach(cb => {
                 cb.checked = platforms.includes(cb.value);
             });
-
-            document.getElementById('edit-content-type').value = content.type;
+            
+            // Trigger URL field update for edit modal
+            updateUrlFields('edit-content');
+            
+            // Populate platform URLs after fields are created
+            setTimeout(() => {
+                let urlObj = null;
+                
+                // Handle different URL formats
+                if (content.url) {
+                    if (typeof content.url === 'object') {
+                        urlObj = content.url;
+                    } else if (typeof content.url === 'string') {
+                        try {
+                            urlObj = JSON.parse(content.url);
+                        } catch (e) {
+                            // If it's not JSON, skip parsing
+                            urlObj = null;
+                        }
+                    }
+                }
+                
+                if (urlObj && typeof urlObj === 'object') {
+                    Object.entries(urlObj).forEach(([platform, url]) => {
+                        const urlInput = document.querySelector(`#edit-content-url-fields input[name="platform_urls[${platform}]"]`);
+                        if (urlInput && url) {
+                            urlInput.value = url;
+                        }
+                    });
+                }
+            }, 50);
             
             // Handle Date Conversion for Display
             const adDateStr = content.date.split('T')[0];
@@ -367,7 +474,7 @@
             // Use provided BS Date string
             document.getElementById('edit-content-bs-date').value = bsDateStr;
             
-            document.getElementById('edit-content-url').value = content.url || '';
+            document.getElementById('edit-content-type').value = content.type;
             document.getElementById('edit-content-remarks').value = content.remarks || '';
             
             // Update form action
@@ -379,4 +486,53 @@
             console.error('Error opening content edit modal:', e);
         }
     }
+
+    // Dynamic URL Fields Handler
+    function updateUrlFields(formType) {
+        const containerSelector = `#${formType}-urls-container`;
+        const fieldsSelector = `#${formType}-url-fields`;
+        const container = document.querySelector(containerSelector);
+        const fieldsContainer = document.querySelector(fieldsSelector);
+        
+        if (!container || !fieldsContainer) {
+            console.error(`Container or fieldsContainer not found for ${formType}`);
+            return;
+        }
+
+        // Get selected platforms
+        const platformCheckboxes = document.querySelectorAll(`#${formType}-form input[name="platform[]"]`);
+        const selectedPlatforms = Array.from(platformCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+
+        console.log(`Selected platforms for ${formType}:`, selectedPlatforms);
+
+        // Clear existing URL fields
+        fieldsContainer.innerHTML = '';
+
+        if (selectedPlatforms.length === 0) {
+            container.style.display = 'none';
+            return;
+        }
+
+        container.style.display = 'block';
+
+        // Create URL field for each selected platform
+        selectedPlatforms.forEach(platform => {
+            const fieldName = `platform_urls[${platform}]`;
+            const urlField = document.createElement('div');
+            urlField.className = 'flex items-center gap-2';
+            urlField.innerHTML = `
+                <label class="text-xs font-medium text-gray-600 dark:text-gray-400 min-w-20">${platform}:</label>
+                <input 
+                    type="url" 
+                    name="${fieldName}" 
+                    placeholder="https://..." 
+                    class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                >
+            `;
+            fieldsContainer.appendChild(urlField);
+        });
+    }
+
 </script>

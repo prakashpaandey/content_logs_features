@@ -11,7 +11,7 @@ class Content extends Model
         'client_id',
         'title',
         'platform',
-        'type', // Post, Reel, Boost
+        'type', 
         'date',
         'url',
         'remarks',
@@ -19,6 +19,7 @@ class Content extends Model
 
     protected $casts = [
         'platform' => 'array',
+        'url' => 'array',
         'date' => 'date',
     ];
 
