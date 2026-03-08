@@ -6,7 +6,17 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ContentController;
 use App\Http\Controllers\MonthlyTargetController;
 use App\Http\Controllers\BoostController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/optimize', function () {
+    Artisan::call('migrate');
+    Artisan::call('db:seed');
+    Artisan::call('storage:link');
+    Artisan::call('optimize:clear');
+    Artisan::call('config:cache');
+    return 'Storage link created, migrate fresh, db:seedand optimize + cache clear.!';
+});
 
 Route::get('/', function () {
     return redirect()->route('login');
