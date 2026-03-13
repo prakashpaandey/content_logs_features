@@ -7,12 +7,13 @@ use App\Models\Content;
 use App\Models\MonthlyTarget;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Gate;
 
 class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $hasPermission = \Illuminate\Support\Facades\Gate::allows('clients.view');
+        $hasPermission = Gate::allows('clients.view');
         $clients = $hasPermission ? Client::orderBy('updated_at', 'desc')->get() : collect();
         $user = auth()->user();
         
@@ -81,146 +82,130 @@ class DashboardController extends Controller
             $lastMonth = Carbon::createFromDate($prevRepAd['year'], $prevRepAd['month'], 1);
             $previousMonth = $lastMonth;
             
-            // Check if previous month has any data (targets, content or boosts in range)
-            $hasPreviousData = $selectedClient->monthlyTargets()
-                ->whereYear('month', $lastMonth->year)
-                ->whereMonth('month', $lastMonth->month)
-                ->exists() 
-                || 
-                $selectedClient->contents()
-                ->whereBetween('date', [$prevStartDate, $prevEndDate])
-                ->exists()
-                ||
-                $selectedClient->boosts()
-                ->whereBetween('date', [$prevStartDate, $prevEndDate])
-                ->exists();
-            
-            $currentMonthContents = $selectedClient->contents()
-                ->with('user')
-                ->whereBetween('date', [$startDate, $endDate])
-                ->get();
+            // Permissions checks
+            $canViewContent = Gate::allows('contents.view');
+            $canViewBoosts = Gate::allows('boosts.view');
+            $canViewTargets = Gate::allows('targets.view');
 
-            $currentMonthBoosts = $selectedClient->boosts()
-                ->with('user')
-                ->whereBetween('date', [$startDate, $endDate])
-                ->get();
-                
-            $lastMonthContents = $selectedClient->contents()
-                ->whereBetween('date', [$prevStartDate, $prevEndDate])
-                ->get();
+            if ($canViewContent) {
+                $currentMonthContents = $selectedClient->contents()
+                    ->with('user')
+                    ->whereBetween('date', [$startDate, $endDate])
+                    ->get();
+                    
+                $lastMonthContents = $selectedClient->contents()
+                    ->whereBetween('date', [$prevStartDate, $prevEndDate])
+                    ->get();
 
-            $lastMonthBoosts = $selectedClient->boosts()
-                ->whereBetween('date', [$prevStartDate, $prevEndDate])
-                ->get();
-            
-            $metrics['total_posts'] = $currentMonthContents->where('type', 'Post')->count();
-            $metrics['total_reels'] = $currentMonthContents->where('type', 'Reel')->count();
-            $metrics['total_boosts'] = $currentMonthBoosts->count();
-            $metrics['total_boost_amount'] = $currentMonthBoosts->sum('amount');
-            
-            $lastPosts = $lastMonthContents->where('type', 'Post')->count();
-            $lastReels = $lastMonthContents->where('type', 'Reel')->count();
-            $lastBoosts = $lastMonthBoosts->count();
-            $lastBoostAmount = $lastMonthBoosts->sum('amount');
-            
-            $metrics['posts_growth'] = $lastPosts > 0 ? round((($metrics['total_posts'] - $lastPosts) / $lastPosts) * 100) : 0;
-            $metrics['reels_growth'] = $lastReels > 0 ? round((($metrics['total_reels'] - $lastReels) / $lastReels) * 100) : 0;
-            $metrics['boosts_growth'] = $lastBoosts > 0 ? round((($metrics['total_boosts'] - $lastBoosts) / $lastBoosts) * 100) : 0;
-            $metrics['boost_amount_growth'] = $lastBoostAmount > 0 ? round((($metrics['total_boost_amount'] - $lastBoostAmount) / $lastBoostAmount) * 100) : 0;
-            
-            // Monthly Target (Still keyed by representative AD month start)
-            $currentTarget = $selectedClient->monthlyTargets()
-                ->whereYear('month', $now->year)
-                ->whereMonth('month', $now->month)
-                ->first();
+                $metrics['total_posts'] = $currentMonthContents->where('type', 'Post')->count();
+                $metrics['total_reels'] = $currentMonthContents->where('type', 'Reel')->count();
                 
-            if ($currentTarget) {
-                // Calculate individual completion percentages
-                $postsCompletion = $currentTarget->target_posts > 0 
-                    ? min(100, round(($metrics['total_posts'] / $currentTarget->target_posts) * 100)) 
-                    : 0;
-                $reelsCompletion = $currentTarget->target_reels > 0 
-                    ? min(100, round(($metrics['total_reels'] / $currentTarget->target_reels) * 100)) 
-                    : 0;
-                $boostCompletion = $currentTarget->target_boost_budget > 0 
-                    ? min(100, round(($metrics['total_boost_amount'] / $currentTarget->target_boost_budget) * 100)) 
-                    : 0;
+                $lastPosts = $lastMonthContents->where('type', 'Post')->count();
+                $lastReels = $lastMonthContents->where('type', 'Reel')->count();
                 
-                // Overall completion = average of three percentages
-                $metrics['target_completion'] = round(($postsCompletion + $reelsCompletion + $boostCompletion) / 3);
-                
-                // Remaining counts/amounts
-                $leftPosts = max(0, $currentTarget->target_posts - $metrics['total_posts']);
-                $leftReels = max(0, $currentTarget->target_reels - $metrics['total_reels']);
-                $leftBoostBudget = max(0, $currentTarget->target_boost_budget - $metrics['total_boost_amount']);
-                
-                $metrics['total_left'] = $leftPosts + $leftReels;
-                $metrics['left_boost_budget'] = $leftBoostBudget;
-                $metrics['total_target'] = $currentTarget->target_posts + $currentTarget->target_reels;
-                $metrics['target_boost_budget'] = $currentTarget->target_boost_budget;
+                $metrics['posts_growth'] = $lastPosts > 0 ? round((($metrics['total_posts'] - $lastPosts) / $lastPosts) * 100) : 0;
+                $metrics['reels_growth'] = $lastReels > 0 ? round((($metrics['total_reels'] - $lastReels) / $lastReels) * 100) : 0;
 
-                // On-the-fly status sync fallback
-                if ($metrics['target_completion'] >= 100 && $currentTarget->status !== 'completed') {
-                    $currentTarget->update(['status' => 'completed']);
-                } elseif ($metrics['target_completion'] < 100 && $currentTarget->status === 'completed') {
-                    $currentTarget->update(['status' => 'active']);
+                $contentData = $selectedClient->contents()
+                    ->whereBetween('date', [$startDate, $endDate])
+                    ->orderBy('date', 'desc')
+                    ->orderBy('id', 'desc')
+                    ->paginate(10, ['*'], 'content_page')
+                    ->withQueryString();
+            }
+
+            if ($canViewBoosts) {
+                $currentMonthBoosts = $selectedClient->boosts()
+                    ->with('user')
+                    ->whereBetween('date', [$startDate, $endDate])
+                    ->get();
+
+                $lastMonthBoosts = $selectedClient->boosts()
+                    ->whereBetween('date', [$prevStartDate, $prevEndDate])
+                    ->get();
+
+                $metrics['total_boosts'] = $currentMonthBoosts->count();
+                $metrics['total_boost_amount'] = $currentMonthBoosts->sum('amount');
+                
+                $lastBoosts = $lastMonthBoosts->count();
+                $lastBoostAmount = $lastMonthBoosts->sum('amount');
+                
+                $metrics['boosts_growth'] = $lastBoosts > 0 ? round((($metrics['total_boosts'] - $lastBoosts) / $lastBoosts) * 100) : 0;
+                $metrics['boost_amount_growth'] = $lastBoostAmount > 0 ? round((($metrics['total_boost_amount'] - $lastBoostAmount) / $lastBoostAmount) * 100) : 0;
+
+                $boostData = $selectedClient->boosts()
+                    ->whereBetween('date', [$startDate, $endDate])
+                    ->orderBy('date', 'desc')
+                    ->orderBy('id', 'desc')
+                    ->paginate(10, ['*'], 'boost_page')
+                    ->withQueryString();
+            }
+
+            if ($canViewTargets) {
+                $currentTarget = $selectedClient->monthlyTargets()
+                    ->whereYear('month', $now->year)
+                    ->whereMonth('month', $now->month)
+                    ->first();
+                    
+                if ($currentTarget) {
+                    $postsCompletion = $currentTarget->target_posts > 0 
+                        ? min(100, round(($metrics['total_posts'] / $currentTarget->target_posts) * 100)) 
+                        : 0;
+                    $reelsCompletion = $currentTarget->target_reels > 0 
+                        ? min(100, round(($metrics['total_reels'] / $currentTarget->target_reels) * 100)) 
+                        : 0;
+                    $boostCompletion = $currentTarget->target_boost_budget > 0 
+                        ? min(100, round(($metrics['total_boost_amount'] / $currentTarget->target_boost_budget) * 100)) 
+                        : 0;
+                    
+                    $metrics['target_completion'] = round(($postsCompletion + $reelsCompletion + $boostCompletion) / 3);
+                    
+                    $leftPosts = max(0, $currentTarget->target_posts - $metrics['total_posts']);
+                    $leftReels = max(0, $currentTarget->target_reels - $metrics['total_reels']);
+                    $leftBoostBudget = max(0, $currentTarget->target_boost_budget - $metrics['total_boost_amount']);
+                    
+                    $metrics['total_left'] = $leftPosts + $leftReels;
+                    $metrics['left_boost_budget'] = $leftBoostBudget;
+                    $metrics['total_target'] = $currentTarget->target_posts + $currentTarget->target_reels;
+                    $metrics['target_boost_budget'] = $currentTarget->target_boost_budget;
+
+                    if ($metrics['target_completion'] >= 100 && $currentTarget->status !== 'completed') {
+                        $currentTarget->update(['status' => 'completed']);
+                    } elseif ($metrics['target_completion'] < 100 && $currentTarget->status === 'completed') {
+                        $currentTarget->update(['status' => 'active']);
+                    }
                 }
-            } else {
-                $metrics['target_completion'] = 0;
-                $metrics['total_left'] = 0;
-                $metrics['left_boost_budget'] = 0;
-                $metrics['total_target'] = 0;
-                $metrics['target_boost_budget'] = 0;
+
+                $lastTarget = $selectedClient->monthlyTargets()
+                    ->whereYear('month', $lastMonth->year)
+                    ->whereMonth('month', $lastMonth->month)
+                    ->first();
+
+                if ($lastTarget) {
+                    $lastPostsCompletion = $lastTarget->target_posts > 0 
+                        ? min(100, round(($lastPosts / $lastTarget->target_posts) * 100)) 
+                        : 0;
+                    $lastReelsCompletion = $lastTarget->target_reels > 0 
+                        ? min(100, round(($lastReels / $lastTarget->target_reels) * 100)) 
+                        : 0;
+                    $lastBoostCompletion = $lastTarget->target_boost_budget > 0 
+                        ? min(100, round(($lastBoostAmount / $lastTarget->target_boost_budget) * 100)) 
+                        : 0;
+                    
+                    $lastCompletion = round(($lastPostsCompletion + $lastReelsCompletion + $lastBoostCompletion) / 3);
+
+                    $metrics['target_growth'] = $lastCompletion > 0 ? round((($metrics['target_completion'] - $lastCompletion) / $lastCompletion) * 100) : 0;
+                }
+
+                $allTargets = $selectedClient->monthlyTargets()->orderBy('month', 'desc')->get();
+                $displayedTargets = $selectedClient->monthlyTargets()
+                    ->whereYear('month', $now->year)
+                    ->whereMonth('month', $now->month)
+                    ->orderBy('month', 'desc')
+                    ->get();
             }
 
-            // Previous Month Metrics for Growth Comp (Target & Variance)
-            $lastTarget = $selectedClient->monthlyTargets()
-                ->whereYear('month', $lastMonth->year)
-                ->whereMonth('month', $lastMonth->month)
-                ->first();
-
-            if ($lastTarget) {
-                // Calculate previous month completion using same percentage average method
-                $lastPostsCompletion = $lastTarget->target_posts > 0 
-                    ? min(100, round(($lastPosts / $lastTarget->target_posts) * 100)) 
-                    : 0;
-                $lastReelsCompletion = $lastTarget->target_reels > 0 
-                    ? min(100, round(($lastReels / $lastTarget->target_reels) * 100)) 
-                    : 0;
-                $lastBoostCompletion = $lastTarget->target_boost_budget > 0 
-                    ? min(100, round(($lastBoostAmount / $lastTarget->target_boost_budget) * 100)) 
-                    : 0;
-                
-                $lastCompletion = round(($lastPostsCompletion + $lastReelsCompletion + $lastBoostCompletion) / 3);
-
-                $metrics['target_growth'] = $lastCompletion > 0 ? round((($metrics['target_completion'] - $lastCompletion) / $lastCompletion) * 100) : 0;
-            }
-
-            // Tables Data (Strictly filtered by the active dashboard month context)
-            $contentData = $selectedClient->contents()
-                ->whereBetween('date', [$startDate, $endDate])
-                ->orderBy('date', 'desc')
-                ->orderBy('id', 'desc')
-                ->paginate(10, ['*'], 'content_page')
-                ->withQueryString();
-
-            $boostData = $selectedClient->boosts()
-                ->whereBetween('date', [$startDate, $endDate])
-                ->orderBy('date', 'desc')
-                ->orderBy('id', 'desc')
-                ->paginate(10, ['*'], 'boost_page')
-                ->withQueryString();
-
-            $allTargets = $selectedClient->monthlyTargets()->orderBy('month', 'desc')->get();
-            
-            // Filter targets for the main display (Current Month Context ONLY)
-            $displayedTargets = $selectedClient->monthlyTargets()
-                ->whereYear('month', $now->year)
-                ->whereMonth('month', $now->month)
-                ->orderBy('month', 'desc')
-                ->get();
-            
-            // Charts Data - Minimal array as frontend only uses progress bars
+            // Charts Data
              $charts = [
                 'totalBoostAmount' => $metrics['total_boost_amount'],
                 'boostAmountGrowth' => $metrics['boost_amount_growth'],
@@ -236,7 +221,7 @@ class DashboardController extends Controller
 
     public function overview(Request $request)
     {
-        $hasPermission = \Illuminate\Support\Facades\Gate::allows('clients.view');
+        $hasPermission = Gate::allows('clients.view');
         
         $bsMonth = (int)$request->query('month');
         $bsYear = (int)$request->query('year');
@@ -256,17 +241,27 @@ class DashboardController extends Controller
         $dateContext = Carbon::createFromDate($repAd['year'], $repAd['month'], 1);
         $now = $dateContext;
 
+        $canViewContent = Gate::allows('contents.view');
+        $canViewBoosts = Gate::allows('boosts.view');
+        $canViewTargets = Gate::allows('targets.view');
+
         $clients = $hasPermission ? Client::orderBy('updated_at', 'desc')
-            ->with(['monthlyTargets' => function($query) use ($now) {
-                $query->whereYear('month', $now->year)
-                    ->whereMonth('month', $now->month);
-            }])
-            ->with(['contents' => function($query) use ($startDate, $endDate) {
-                $query->with('user')->whereBetween('date', [$startDate, $endDate]);
-            }])
-            ->with(['boosts' => function($query) use ($startDate, $endDate) {
-                $query->with('user')->whereBetween('date', [$startDate, $endDate]);
-            }])
+            ->when($canViewTargets, function($query) use ($now) {
+                $query->with(['monthlyTargets' => function($q) use ($now) {
+                    $q->whereYear('month', $now->year)
+                        ->whereMonth('month', $now->month);
+                }]);
+            })
+            ->when($canViewContent, function($query) use ($startDate, $endDate) {
+                $query->with(['contents' => function($q) use ($startDate, $endDate) {
+                    $q->with('user')->whereBetween('date', [$startDate, $endDate]);
+                }]);
+            })
+            ->when($canViewBoosts, function($query) use ($startDate, $endDate) {
+                $query->with(['boosts' => function($q) use ($startDate, $endDate) {
+                    $q->with('user')->whereBetween('date', [$startDate, $endDate]);
+                }]);
+            })
             ->get() : collect();
 
         $user = auth()->user();
@@ -297,30 +292,24 @@ class DashboardController extends Controller
                 }
             }
 
-            $contentRecords = $client->contents;
+            $actualPosts = $canViewContent ? $client->contents->where('type', 'Post')->count() : 0;
+            $actualReels = $canViewContent ? $client->contents->where('type', 'Reel')->count() : 0;
 
-            $actualPosts = $contentRecords->where('type', 'Post')->count();
-            $actualReels = $contentRecords->where('type', 'Reel')->count();
+            $actualBoosts = $canViewBoosts ? $client->boosts->count() : 0;
+            $boostAmount = $canViewBoosts ? $client->boosts->sum('amount') : 0;
 
-            $boostRecords = $client->boosts;
-
-            $actualBoosts = $boostRecords->count();
-            $boostAmount = $boostRecords->sum('amount');
-
-            $targetPosts = $target ? $target->target_posts : 0;
-            $targetReels = $target ? $target->target_reels : 0;
-            $targetBoostBudget = $target ? $target->target_boost_budget : 0;
-
-            // Calculate individual completion percentages
+            $targetPosts = ($canViewTargets && $target) ? $target->target_posts : 0;
+            $targetReels = ($canViewTargets && $target) ? $target->target_reels : 0;
+            $targetBoostBudget = ($canViewTargets && $target) ? $target->target_boost_budget : 0;
+            
+            // Calculate individual completion percentages (only if targets are visible)
             $postsCompletion = $targetPosts > 0 ? min(100, round(($actualPosts / $targetPosts) * 100)) : 0;
             $reelsCompletion = $targetReels > 0 ? min(100, round(($actualReels / $targetReels) * 100)) : 0;
             $boostCompletion = $targetBoostBudget > 0 ? min(100, round(($boostAmount / $targetBoostBudget) * 100)) : 0;
             
-            // Overall completion = average of three percentages
             $completion = round(($postsCompletion + $reelsCompletion + $boostCompletion) / 3);
 
-            // On-the-fly status sync fallback for overview
-            if ($target) {
+            if ($canViewTargets && $target) {
                 if ($completion >= 100 && $target->status !== 'completed') {
                     $target->update(['status' => 'completed']);
                 } elseif ($completion < 100 && $target->status === 'completed') {
@@ -330,7 +319,7 @@ class DashboardController extends Controller
 
             $clientsData[] = [
                 'client' => $client,
-                'target' => $target,
+                'target' => $canViewTargets ? $target : null,
                 'actual_posts' => $actualPosts,
                 'actual_reels' => $actualReels,
                 'actual_boosts' => $actualBoosts,
@@ -345,8 +334,8 @@ class DashboardController extends Controller
                 'total_actual' => $actualPosts + $actualReels + $actualBoosts,
                 'total_target' => $targetPosts + $targetReels,
                 'total_left' => (max(0, $targetPosts - $actualPosts) + max(0, $targetReels - $actualReels)),
-                'contents' => $contentRecords,
-                'boosts' => $boostRecords,
+                'contents' => $canViewContent ? $client->contents : collect(),
+                'boosts' => $canViewBoosts ? $client->boosts : collect(),
             ];
 
             // Agency Totals

@@ -85,6 +85,7 @@
 
         <!-- Portfolio Stats -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-6">
+            @can('contents.view')
             <div class="bg-purple-50 dark:bg-purple-900/10 p-3 sm:p-4 rounded-xl border border-purple-100 dark:border-purple-900/20">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-[10px] sm:text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Posts</span>
@@ -92,7 +93,9 @@
                 </div>
                 <div class="flex items-baseline gap-1 sm:gap-2">
                     <span class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">{{ $totalAgencyMetrics['posts'] }}</span>
+                    @can('targets.view')
                     <span class="text-xs sm:text-sm text-gray-500">/ {{ $totalAgencyMetrics['target_posts'] }}</span>
+                    @endcan
                 </div>
             </div>
             
@@ -103,10 +106,14 @@
                 </div>
                 <div class="flex items-baseline gap-1 sm:gap-2">
                     <span class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">{{ $totalAgencyMetrics['reels'] }}</span>
+                    @can('targets.view')
                     <span class="text-xs sm:text-sm text-gray-500">/ {{ $totalAgencyMetrics['target_reels'] }}</span>
+                    @endcan
                 </div>
             </div>
+            @endcan
 
+            @can('boosts.view')
             <div class="bg-blue-50 dark:bg-blue-900/10 p-3 sm:p-4 rounded-xl border border-blue-100 dark:border-blue-900/20">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-[10px] sm:text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Boosts</span>
@@ -114,7 +121,9 @@
                 </div>
                 <div class="flex items-baseline gap-1 sm:gap-2">
                     <span class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">{{ $totalAgencyMetrics['boosts'] }}</span>
+                    @can('targets.view')
                     <span class="text-xs sm:text-sm text-gray-500 tracking-tighter">/ ${{number_format($totalAgencyMetrics['target_boost_budget'])}}</span>
+                    @endcan
                 </div>
             </div>
 
@@ -127,6 +136,7 @@
                     <span class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">$ {{ number_format($totalAgencyMetrics['boost_amount'], 0) }}</span>
                 </div>
             </div>
+            @endcan
         </div>
     </div>
 
@@ -186,9 +196,11 @@
 
                 <!-- Progress Section -->
                 <div class="p-4 sm:p-6">
+                    @if(Gate::allows('contents.view') || Gate::allows('boosts.view') || Gate::allows('targets.view'))
                     <h4 class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 sm:mb-4">Monthly Progress</h4>
                     
                     <!-- Overall Completion -->
+                    @can('targets.view')
                     <div class="mb-4 sm:mb-6">
                         <div class="flex items-center justify-between mb-1 sm:mb-2">
                             <span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Overall Completion</span>
@@ -199,8 +211,10 @@
                                  style="width: {{ $data['completion'] }}%"></div>
                         </div>
                     </div>
+                    @endcan
 
                     <!-- Posts Progress -->
+                    @can('contents.view')
                     <div class="mb-3 sm:mb-4">
                         <div class="flex items-center justify-between mb-1 sm:mb-2">
                             <div class="flex items-center">
@@ -211,7 +225,11 @@
                                 <span class="text-xs font-bold text-gray-900 dark:text-white cursor-pointer hover:text-primary-600 transition-colors" @click="$dispatch('open-contributors-modal', { clientId: {{ $data['client']->id }}, type: 'Post' })">
                                     {{ $postProgress }}%
                                 </span>
+                                @can('targets.view')
                                 <span class="text-[10px] text-gray-500">{{ $data['actual_posts'] }}/{{ $data['target_posts'] }} Posts</span>
+                                @else
+                                <span class="text-[10px] text-gray-500">{{ $data['actual_posts'] }} Posts</span>
+                                @endcan
                             </div>
                         </div>
                         <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 sm:h-2.5">
@@ -231,7 +249,11 @@
                                 <span class="text-xs font-bold text-gray-900 dark:text-white cursor-pointer hover:text-green-600 transition-colors" @click="$dispatch('open-contributors-modal', { clientId: {{ $data['client']->id }}, type: 'Reel' })">
                                     {{ $reelProgress }}%
                                 </span>
+                                @can('targets.view')
                                 <span class="text-[10px] text-gray-500">{{ $data['actual_reels'] }}/{{ $data['target_reels'] }} Reels</span>
+                                @else
+                                <span class="text-[10px] text-gray-500">{{ $data['actual_reels'] }} Reels</span>
+                                @endcan
                             </div>
                         </div>
                         <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 sm:h-2.5">
@@ -239,8 +261,10 @@
                                  style="width: {{ $reelProgress }}%"></div>
                         </div>
                     </div>
+                    @endcan
 
                     <!-- Boosts Progress -->
+                    @can('boosts.view')
                     <div class="mb-4 sm:mb-6">
                         <div class="flex items-center justify-between mb-1 sm:mb-2">
                             <div class="flex items-center">
@@ -251,7 +275,11 @@
                                 <span class="text-xs font-bold text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 transition-colors" @click="$dispatch('open-contributors-modal', { clientId: {{ $data['client']->id }}, type: 'Boost' })">
                                     {{ $boostProgress }}%
                                 </span>
+                                @can('targets.view')
                                 <span class="text-[10px] text-gray-500">${{ $data['boost_amount'] }}/${{ $data['target_boost_budget'] ?? 0 }}</span>
+                                @else
+                                <span class="text-[10px] text-gray-500">${{ $data['boost_amount'] }} spent</span>
+                                @endcan
                             </div>
                         </div>
                         <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 sm:h-2.5">
@@ -259,6 +287,7 @@
                                  style="width: {{ $boostProgress }}%"></div>
                         </div>
                     </div>
+                    @endcan
 
                     <!-- Stats Summary -->
                     <div class="grid grid-cols-3 gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -266,15 +295,25 @@
                             <div class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">{{ $data['total_actual'] }}</div>
                             <div class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Total Done</div>
                         </div>
+                        @can('targets.view')
                         <div class="text-center p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                             <div class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">{{ $data['total_left'] }}</div>
                             <div class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Total Left</div>
                         </div>
+                        @endcan
+                        @can('boosts.view')
                         <div class="text-center p-2 sm:p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                             <div class="text-lg sm:text-xl font-bold text-blue-600 dark:text-blue-400">$ {{ number_format($data['boost_amount'], 0) }}</div>
                             <div class="text-[10px] sm:text-xs text-blue-500 dark:text-blue-300">Boost Amount</div>
                         </div>
+                        @endcan
                     </div>
+                    @else
+                    <div class="flex flex-col items-center justify-center py-8 text-center bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+                        <i class="fas fa-eye-slash text-gray-400 mb-2"></i>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">No data visibility permissions.</p>
+                    </div>
+                    @endif
                 </div>
 
                 <!-- Card Footer -->

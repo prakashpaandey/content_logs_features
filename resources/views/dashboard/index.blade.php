@@ -26,6 +26,7 @@
         <div class="grid grid-cols-1 gap-6">
 
             <!-- Progress Visualization -->
+            @can('targets.view')
             <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Monthly Progress</h3>
@@ -58,6 +59,7 @@
                     </div>
                     
                     <!-- Posts Progress -->
+                    @can('contents.view')
                     <div class="group">
                         <div class="flex items-center justify-between mb-1.5">
                             <div class="flex items-center">
@@ -86,8 +88,10 @@
                             <div class="bg-green-500 h-full rounded-full transition-all duration-1000 ease-out" style="width: {{ $reelProgress }}%"></div>
                         </div>
                     </div>
+                    @endcan
 
                     <!-- Boosts Progress -->
+                    @can('boosts.view')
                     <div class="group">
                         <div class="flex items-center justify-between mb-1.5">
                             <div class="flex items-center">
@@ -101,6 +105,7 @@
                             <div class="bg-blue-500 h-full rounded-full transition-all duration-1000 ease-out" style="width: {{ $boostProgress }}%"></div>
                         </div>
                     </div>
+                    @endcan
                     
                     <!-- Stats Summary -->
                     <div class="grid grid-cols-3 gap-2 md:gap-4 pt-6 border-t border-gray-100 dark:border-gray-700/50">
@@ -125,28 +130,36 @@
                     </div>
                 </div>
             </div>
+            @endcan
         </div>
     </div>
     
     <!-- Monthly Targets -->
+    @can('targets.view')
     @include('partials.monthly-targets')
+    @endcan
     
     <!-- Content & Boosts Section -->
+    @if(Gate::allows('contents.view') || Gate::allows('boosts.view'))
     <div class="mt-8" x-data="{ 
         activeTab: localStorage.getItem('dashboard_active_tab') || '{{ session('active_tab', 'content') }}' 
     }" x-init="$watch('activeTab', val => localStorage.setItem('dashboard_active_tab', val))">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4">
             <div class="flex items-center space-x-1 p-1 bg-gray-100 dark:bg-gray-700/50 rounded-xl w-full lg:w-auto">
+                @can('contents.view')
                 <button @click="activeTab = 'content'" 
                         :class="activeTab === 'content' ? 'bg-white dark:bg-gray-800 shadow-md text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
                         class="flex-1 lg:flex-none px-6 py-2.5 text-sm font-bold rounded-lg transition-all duration-200 uppercase tracking-tight">
                     Social Content
                 </button>
+                @endcan
+                @can('boosts.view')
                 <button @click="activeTab = 'boosts'" 
                         :class="activeTab === 'boosts' ? 'bg-white dark:bg-gray-800 shadow-md text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
                         class="flex-1 lg:flex-none px-6 py-2.5 text-sm font-bold rounded-lg transition-all duration-200 uppercase tracking-tight">
                     Boost Tracking
                 </button>
+                @endcan
             </div>
             
             <div class="flex items-center space-x-3 w-full lg:w-auto">
@@ -166,14 +179,19 @@
             </div>
         </div>
         
+        @can('contents.view')
         <div x-show="activeTab === 'content'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
             @include('components.data-table', ['contentData' => $contentData, 'bsMonth' => $bsMonth, 'bsYear' => $bsYear])
         </div>
+        @endcan
 
+        @can('boosts.view')
         <div x-show="activeTab === 'boosts'" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
             @include('components.boosts-table', ['boostData' => $boostData, 'bsMonth' => $bsMonth, 'bsYear' => $bsYear])
         </div>
+        @endcan
     </div>
+    @endif
     @endcan
 </div>
 
