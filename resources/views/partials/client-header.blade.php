@@ -7,13 +7,13 @@
             </div>
             <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-2 flex-wrap">
-                    <h1 class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white truncate">{{ $selectedClient->name }}</h1>
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white truncate" title="{{ $selectedClient->business_name }}">{{ $selectedClient->business_name }}</h1>
                     <span class="px-2 py-0.5 {{ $selectedClient->status == 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-700' }} text-[10px] font-bold rounded-full uppercase tracking-wider">
                         {{ ucfirst($selectedClient->status) }}
                     </span>
                 </div>
                 <div class="flex items-center mt-0.5 text-xs md:text-sm text-gray-500 dark:text-gray-400 truncate">
-                    <p class="truncate max-w-[150px] md:max-w-md" title="{{ $selectedClient->business_name }}">{{ $selectedClient->business_name }}</p>
+                    <p class="truncate max-w-[150px] md:max-w-md">{{ $selectedClient->name }}</p>
                     <span class="mx-2 hidden md:inline">•</span>
                     <span class="hidden md:inline-block">
                         <i class="fas fa-calendar-alt mr-1"></i>

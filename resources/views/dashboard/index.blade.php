@@ -139,6 +139,10 @@
     @include('partials.monthly-targets')
     @endcan
     
+    @if(Gate::allows('contents.create') || Gate::allows('contents.update'))
+        @include('partials.content-modals')
+    @endif
+    
     <!-- Content & Boosts Section -->
     @if(Gate::allows('contents.view') || Gate::allows('boosts.view'))
     <div class="mt-8" x-data="{ 

@@ -8,10 +8,15 @@
                     <i class="fas fa-bars text-xl"></i>
                 </button>
                 
-                <div class="flex-shrink-0 flex items-center">
-                    <h1 class="text-xl font-bold text-gray-900 dark:text-white hidden sm:block">Social Media Management Dashboard</h1>
-                    <h1 class="text-xl font-bold text-gray-900 dark:text-white sm:hidden">SMMD</h1>
-                </div>
+                <a href="{{ route('dashboard.index') }}" class="flex-shrink-0 flex items-center group transition-all duration-300">
+                    
+                    <div>
+                        <h1 class="text-xl font-black tracking-tight bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent hidden sm:block">
+                            Social Media <span class="text-primary-600">Dashboard</span>
+                        </h1>
+                        <h1 class="text-xl font-black tracking-tight text-primary-600 sm:hidden">SMMD</h1>
+                    </div>
+                </a>
             </div>
             
             <!-- Right side: User menu and theme toggle -->

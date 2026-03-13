@@ -100,11 +100,11 @@
                                 </div>
                             </div>
                             <div class="ml-3 flex-1 min-w-0">
-                                <p class="client-name text-sm font-medium text-gray-900 dark:text-white truncate" title="{{ $client->name }}">
-                                    {{ $client->name }}
-                                </p>
-                                <p class="client-business text-xs text-gray-500 dark:text-gray-400 truncate" title="{{ $client->business_name }}">
+                                <p class="client-business text-sm font-bold text-gray-900 dark:text-white truncate" title="{{ $client->business_name }}">
                                     {{ $client->business_name }}
+                                </p>
+                                <p class="client-name text-xs text-gray-500 dark:text-gray-400 truncate" title="{{ $client->name }}">
+                                    {{ $client->name }}
                                 </p>
                             </div>
                             <div class="ml-2 flex-shrink-0">

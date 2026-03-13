@@ -175,8 +175,8 @@
                                 {{ $data['client']->initials ?? strtoupper(substr($data['client']->name, 0, 2)) }}
                             </div>
                             <div class="ml-3 sm:ml-4 min-w-0">
-                                <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">{{ $data['client']->name }}</h3>
-                                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate" title="{{ $data['client']->business_name ?? 'Client' }}">{{ $data['client']->business_name ?? 'Client' }}</p>
+                                <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate" title="{{ $data['client']->business_name ?? 'Client' }}">{{ $data['client']->business_name ?? 'Client' }}</h3>
+                                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">{{ $data['client']->name }}</p>
                             </div>
                         </div>
                         @if($data['target'])

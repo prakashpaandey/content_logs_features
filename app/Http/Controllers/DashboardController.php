@@ -18,8 +18,13 @@ class DashboardController extends Controller
         $user = auth()->user();
         
         $selectedClientId = $request->query('client_id');
-        $selectedClient = $clients->where('id', $selectedClientId)->first() ?? $clients->first();
+        $selectedClient = $selectedClientId ? $clients->where('id', $selectedClientId)->first() : null;
         
+        // If no client is selected, show the simplified Agency Home Dashboard
+        if (!$selectedClient) {
+            return view('dashboard.home', compact('clients'));
+        }
+
         $metrics = [
             'total_posts' => 0,
             'total_reels' => 0,
