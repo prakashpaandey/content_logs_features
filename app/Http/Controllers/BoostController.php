@@ -81,6 +81,7 @@ class BoostController extends Controller
         }
         */
 
+        /*
         //Context-based validation: Date must match the dashboard context
         if ($request->has('context_bs_month') && $request->has('context_bs_year')) {
             $contextBsMonth = (int) $request->context_bs_month;
@@ -96,6 +97,18 @@ class BoostController extends Controller
                 return redirect()->back()->withInput()->with('error', 'Selected date must match the dashboard month).');
             }
         }
+        */
+
+        $bsData = [];
+        if ($request->has('context_bs_month') && $request->has('context_bs_year')) {
+            $bsData['bs_month'] = (int) $request->context_bs_month;
+            $bsData['bs_year'] = (int) $request->context_bs_year;
+            $bsData['bs_day'] = $contentBs['day'];
+        } else {
+            $bsData['bs_month'] = $contentBs['month'];
+            $bsData['bs_year'] = $contentBs['year'];
+            $bsData['bs_day'] = $contentBs['day'];
+        }
 
         $boost = Boost::create([
             'user_id' => Auth::id(),
@@ -107,11 +120,13 @@ class BoostController extends Controller
             'url' => $validated['url'],
             'amount' => $validated['amount'],
             'remarks' => $validated['remarks'],
+            'bs_year' => $bsData['bs_year'],
+            'bs_month' => $bsData['bs_month'],
+            'bs_day' => $bsData['bs_day'],
         ]);
 
         // Check and update target status
-        $bsDate = \App\Helpers\NepaliDateHelper::adToBs($date);
-        $repAd = \App\Helpers\NepaliDateHelper::bsToAd($bsDate['month'], $bsDate['year']);
+        $repAd = \App\Helpers\NepaliDateHelper::bsToAd($bsData['bs_month'], $bsData['bs_year']);
         
         $target = MonthlyTarget::where('client_id', $validated['client_id'])
             ->whereYear('month', $repAd['year'])
@@ -189,11 +204,23 @@ class BoostController extends Controller
         }
         */
 
-        $boost->update($validated);
+        $bsData = [];
+        if ($request->has('context_bs_month') && $request->has('context_bs_year')) {
+            $bsData['bs_month'] = (int) $request->context_bs_month;
+            $bsData['bs_year'] = (int) $request->context_bs_year;
+        } else {
+            $bsData['bs_month'] = $contentBs['month'] ?? \App\Helpers\NepaliDateHelper::adToBs($date)['month'];
+            $bsData['bs_year'] = $contentBs['year'] ?? \App\Helpers\NepaliDateHelper::adToBs($date)['year'];
+        }
+        $bsData['bs_day'] = $contentBs['day'] ?? \App\Helpers\NepaliDateHelper::adToBs($date)['day'];
+
+        $boost->update([
+            ...$validated,
+            ...$bsData
+        ]);
 
         // Check and update target status
-        $bsDate = \App\Helpers\NepaliDateHelper::adToBs($date);
-        $repAd = \App\Helpers\NepaliDateHelper::bsToAd($bsDate['month'], $bsDate['year']);
+        $repAd = \App\Helpers\NepaliDateHelper::bsToAd($bsData['bs_month'], $bsData['bs_year']);
         
         $target = MonthlyTarget::where('client_id', $boost->client_id)
             ->whereYear('month', $repAd['year'])

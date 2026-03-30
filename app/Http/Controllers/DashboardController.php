@@ -95,11 +95,23 @@ class DashboardController extends Controller
             if ($canViewContent) {
                 $currentMonthContents = $selectedClient->contents()
                     ->with('user')
-                    ->whereBetween('date', [$startDate, $endDate])
+                    ->where(function($q) use ($startDate, $endDate, $bsMonth, $bsYear) {
+                        $q->where(function($q2) use ($bsMonth, $bsYear) {
+                            $q2->where('bs_month', $bsMonth)->where('bs_year', $bsYear);
+                        })->orWhere(function($q3) use ($startDate, $endDate) {
+                            $q3->whereNull('bs_month')->whereBetween('date', [$startDate, $endDate]);
+                        });
+                    })
                     ->get();
                     
                 $lastMonthContents = $selectedClient->contents()
-                    ->whereBetween('date', [$prevStartDate, $prevEndDate])
+                    ->where(function($q) use ($prevStartDate, $prevEndDate, $prevBsMonth, $prevBsYear) {
+                        $q->where(function($q2) use ($prevBsMonth, $prevBsYear) {
+                            $q2->where('bs_month', $prevBsMonth)->where('bs_year', $prevBsYear);
+                        })->orWhere(function($q3) use ($prevStartDate, $prevEndDate) {
+                            $q3->whereNull('bs_month')->whereBetween('date', [$prevStartDate, $prevEndDate]);
+                        });
+                    })
                     ->get();
 
                 $metrics['total_posts'] = $currentMonthContents->where('type', 'Post')->count();
@@ -112,7 +124,13 @@ class DashboardController extends Controller
                 $metrics['reels_growth'] = $lastReels > 0 ? round((($metrics['total_reels'] - $lastReels) / $lastReels) * 100) : 0;
 
                 $contentData = $selectedClient->contents()
-                    ->whereBetween('date', [$startDate, $endDate])
+                    ->where(function($q) use ($startDate, $endDate, $bsMonth, $bsYear) {
+                        $q->where(function($q2) use ($bsMonth, $bsYear) {
+                            $q2->where('bs_month', $bsMonth)->where('bs_year', $bsYear);
+                        })->orWhere(function($q3) use ($startDate, $endDate) {
+                            $q3->whereNull('bs_month')->whereBetween('date', [$startDate, $endDate]);
+                        });
+                    })
                     ->orderBy('date', 'desc')
                     ->orderBy('id', 'desc')
                     ->paginate(10, ['*'], 'content_page')
@@ -122,11 +140,23 @@ class DashboardController extends Controller
             if ($canViewBoosts) {
                 $currentMonthBoosts = $selectedClient->boosts()
                     ->with('user')
-                    ->whereBetween('date', [$startDate, $endDate])
+                    ->where(function($q) use ($startDate, $endDate, $bsMonth, $bsYear) {
+                        $q->where(function($q2) use ($bsMonth, $bsYear) {
+                            $q2->where('bs_month', $bsMonth)->where('bs_year', $bsYear);
+                        })->orWhere(function($q3) use ($startDate, $endDate) {
+                            $q3->whereNull('bs_month')->whereBetween('date', [$startDate, $endDate]);
+                        });
+                    })
                     ->get();
 
                 $lastMonthBoosts = $selectedClient->boosts()
-                    ->whereBetween('date', [$prevStartDate, $prevEndDate])
+                    ->where(function($q) use ($prevStartDate, $prevEndDate, $prevBsMonth, $prevBsYear) {
+                        $q->where(function($q2) use ($prevBsMonth, $prevBsYear) {
+                            $q2->where('bs_month', $prevBsMonth)->where('bs_year', $prevBsYear);
+                        })->orWhere(function($q3) use ($prevStartDate, $prevEndDate) {
+                            $q3->whereNull('bs_month')->whereBetween('date', [$prevStartDate, $prevEndDate]);
+                        });
+                    })
                     ->get();
 
                 $metrics['total_boosts'] = $currentMonthBoosts->count();
@@ -139,7 +169,13 @@ class DashboardController extends Controller
                 $metrics['boost_amount_growth'] = $lastBoostAmount > 0 ? round((($metrics['total_boost_amount'] - $lastBoostAmount) / $lastBoostAmount) * 100) : 0;
 
                 $boostData = $selectedClient->boosts()
-                    ->whereBetween('date', [$startDate, $endDate])
+                    ->where(function($q) use ($startDate, $endDate, $bsMonth, $bsYear) {
+                        $q->where(function($q2) use ($bsMonth, $bsYear) {
+                            $q2->where('bs_month', $bsMonth)->where('bs_year', $bsYear);
+                        })->orWhere(function($q3) use ($startDate, $endDate) {
+                            $q3->whereNull('bs_month')->whereBetween('date', [$startDate, $endDate]);
+                        });
+                    })
                     ->orderBy('date', 'desc')
                     ->orderBy('id', 'desc')
                     ->paginate(10, ['*'], 'boost_page')
@@ -257,14 +293,26 @@ class DashboardController extends Controller
                         ->whereMonth('month', $now->month);
                 }]);
             })
-            ->when($canViewContent, function($query) use ($startDate, $endDate) {
-                $query->with(['contents' => function($q) use ($startDate, $endDate) {
-                    $q->with('user')->whereBetween('date', [$startDate, $endDate]);
+            ->when($canViewContent, function($query) use ($startDate, $endDate, $bsMonth, $bsYear) {
+                $query->with(['contents' => function($q) use ($startDate, $endDate, $bsMonth, $bsYear) {
+                    $q->with('user')->where(function($q1) use ($startDate, $endDate, $bsMonth, $bsYear) {
+                        $q1->where(function($q2) use ($bsMonth, $bsYear) {
+                            $q2->where('bs_month', $bsMonth)->where('bs_year', $bsYear);
+                        })->orWhere(function($q3) use ($startDate, $endDate) {
+                            $q3->whereNull('bs_month')->whereBetween('date', [$startDate, $endDate]);
+                        });
+                    });
                 }]);
             })
-            ->when($canViewBoosts, function($query) use ($startDate, $endDate) {
-                $query->with(['boosts' => function($q) use ($startDate, $endDate) {
-                    $q->with('user')->whereBetween('date', [$startDate, $endDate]);
+            ->when($canViewBoosts, function($query) use ($startDate, $endDate, $bsMonth, $bsYear) {
+                $query->with(['boosts' => function($q) use ($startDate, $endDate, $bsMonth, $bsYear) {
+                    $q->with('user')->where(function($q1) use ($startDate, $endDate, $bsMonth, $bsYear) {
+                        $q1->where(function($q2) use ($bsMonth, $bsYear) {
+                            $q2->where('bs_month', $bsMonth)->where('bs_year', $bsYear);
+                        })->orWhere(function($q3) use ($startDate, $endDate) {
+                            $q3->whereNull('bs_month')->whereBetween('date', [$startDate, $endDate]);
+                        });
+                    });
                 }]);
             })
             ->get() : collect();

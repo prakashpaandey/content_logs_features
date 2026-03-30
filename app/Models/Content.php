@@ -15,6 +15,9 @@ class Content extends Model
         'date',
         'url',
         'remarks',
+        'bs_year',
+        'bs_month',
+        'bs_day',
     ];
 
     protected $casts = [

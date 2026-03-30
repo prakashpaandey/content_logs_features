@@ -111,6 +111,7 @@ class ContentController extends Controller
         }
         */
 
+        /*
         //Context-based validation: Date must match the dashboard context
         if ($request->has('context_bs_month') && $request->has('context_bs_year')) {
             $contextBsMonth = (int) $request->context_bs_month;
@@ -126,15 +127,28 @@ class ContentController extends Controller
                 return redirect()->back()->withInput()->with('error', 'Selected date must match the dashboard month');
             }
         }
+        */
+
+        $bsData = [];
+        if ($request->has('context_bs_month') && $request->has('context_bs_year')) {
+            $bsData['bs_month'] = (int) $request->context_bs_month;
+            $bsData['bs_year'] = (int) $request->context_bs_year;
+            $bsData['bs_day'] = $contentBs['day'];
+        } else {
+            $bsData['bs_month'] = $contentBs['month'];
+            $bsData['bs_year'] = $contentBs['year'];
+            $bsData['bs_day'] = $contentBs['day'];
+        }
 
         Content::create([
             ...$validated,
+            ...$bsData,
             'user_id' => auth()->id(),
         ]);
 
         //Check Monthly Target for completion
         try {
-            $repAd = \App\Helpers\NepaliDateHelper::bsToAd($contentBs['month'], $contentBs['year']);
+            $repAd = \App\Helpers\NepaliDateHelper::bsToAd($bsData['bs_month'], $bsData['bs_year']);
             $target = \App\Models\MonthlyTarget::where('client_id', $validated['client_id'])
                 ->whereYear('month', $repAd['year'])
                 ->whereMonth('month', $repAd['month'])
@@ -244,12 +258,24 @@ class ContentController extends Controller
         }
         */
 
-        $content->update($validated);
+        $bsData = [];
+        if ($request->has('context_bs_month') && $request->has('context_bs_year')) {
+            $bsData['bs_month'] = (int) $request->context_bs_month;
+            $bsData['bs_year'] = (int) $request->context_bs_year;
+        } else {
+            $bsData['bs_month'] = $contentBs['month'] ?? \App\Helpers\NepaliDateHelper::adToBs($date)['month'];
+            $bsData['bs_year'] = $contentBs['year'] ?? \App\Helpers\NepaliDateHelper::adToBs($date)['year'];
+        }
+        $bsData['bs_day'] = $contentBs['day'] ?? \App\Helpers\NepaliDateHelper::adToBs($date)['day'];
+
+        $content->update([
+            ...$validated,
+            ...$bsData
+        ]);
 
         // Check Monthly Target for completion
         try {
-            $contentBs = \App\Helpers\NepaliDateHelper::adToBs($date);
-            $repAd = \App\Helpers\NepaliDateHelper::bsToAd($contentBs['month'], $contentBs['year']);
+            $repAd = \App\Helpers\NepaliDateHelper::bsToAd($bsData['bs_month'], $bsData['bs_year']);
             
             $target = \App\Models\MonthlyTarget::where('client_id', $content->client_id)
                 ->whereYear('month', $repAd['year'])
